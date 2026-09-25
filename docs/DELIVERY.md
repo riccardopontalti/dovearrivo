@@ -1,5 +1,7 @@
 # Delivery plan
 
+> **Outcome (25/09/2026):** phases 1–3 were completed and deployed; phase 4 stopped at D11 preparation (drafts not verified) and D12 was not started, because the project was concluded as a v0.1 pilot. See [STATUS](STATUS.md).
+
 Four phases, about 6 weeks for one person with coding agents and human review. A phase ends when its acceptance criteria pass, not when a date expires. The order is chosen so that a working public demo exists by the end of phase 2.
 
 ## Phase 1 — Foundations (week 1)
@@ -29,9 +31,11 @@ Four phases, about 6 weeks for one person with coding agents and human review. A
 
 **D10 status (25/09/2026): done** — `GET /api/v1/reachability` wraps MOTIS one-to-all (limit raised to 240 min in the generated config) and returns reachable stops with arrival minutes, waiting included. `/reachability` shows them on the self-hosted map in five ordinal time bands (one-hue blue ramps validated for light and dark surfaces with the dataviz checks), with counts per band, hover tooltips, a table alternative and an explicit "preview, not a trip" note. A unit test documents why this semantics never filters proposals (the C01 bus is outside a 60-minute preview but valid as a trip). Real data: from Trento Autostaz. Dante at 09:00, 1,839 stops within 2 h, 40 ms.
 
-**D06b preparation (25/09/2026): ready, not deployed** — `deploy/`: pinned app and data images (MOTIS, pipeline, osmium, GTFS validator 8.0.1, pmtiles, all checksum-verified), Compose with Caddy (HTTPS, basemap served with byte ranges, no access log), a systemd timer every 6 hours that restarts MOTIS only after a promotion, and the runbook in [DEPLOY](DEPLOY.md). CI builds both images. The MobilityData validator now runs in the pipeline: ERROR notices block unless waived with scope and reason in `config/sources.yaml`; on 25/09 the TT feeds had 0 errors, 36 and 196 warnings. Waiting for: the VPS.
+**D06b status (25/09/2026): done** — deployed to an OVHcloud VPS-1 in preview mode; every push to `main` with green CI deploys through `.github/workflows/deploy.yml` and `deploy/bootstrap.sh`. Preparation notes: `deploy/`: pinned app and data images (MOTIS, pipeline, osmium, GTFS validator 8.0.1, pmtiles, all checksum-verified), Compose with Caddy (HTTPS, basemap served with byte ranges, no access log), a systemd timer every 6 hours that restarts MOTIS only after a promotion, and the runbook in [DEPLOY](DEPLOY.md). CI builds both images. The MobilityData validator now runs in the pipeline: ERROR notices block unless waived with scope and reason in `config/sources.yaml`; on 25/09 the TT feeds had 0 errors, 36 and 196 warnings.
 
-**D11 preparation (25/09/2026): drafts ready, verification pending** — 19 draft destinations with points from the local OSM extract and provenance (see [D11-candidates.md](../research/D11-candidates.md)); 12 have proposals from Trento with default filters on a weekday. Evaluating them exposed a crash: MOTIS sends close-delimited HTTP/1.1 bodies and Node's fetch (undici) can abort the process on them under load; the MOTIS client now uses `node:http`. After the fix, 5 concurrent cold searches over 19 destinations: p95 1.8 s; warm 3 ms. Waiting for: human verification of entrances.
+**D11 status (25/09/2026): not completed** — the project was concluded before verification; the drafts stay unpublished. Preparation notes: 19 draft destinations with points from the local OSM extract and provenance (see [D11-candidates.md](../research/D11-candidates.md)); 12 have proposals from Trento with default filters on a weekday. Evaluating them exposed a crash: MOTIS sends close-delimited HTTP/1.1 bodies and Node's fetch (undici) can abort the process on them under load; the MOTIS client now uses `node:http`. After the fix, 5 concurrent cold searches over 19 destinations: p95 1.8 s; warm 3 ms.
+
+**D12a status (25/09/2026): done** — "Tabellone" design (departures board, scroll-driven reach map, tickets, day ribbon, themes, brand), after a first "Alpenglow" version was rejected; see [DESIGN-BRIEF](DESIGN-BRIEF.md). **D12: not started.**
 
 D01 decides whether Trenitalia enters the pilot. If the feed is stale, its licence is unclear or memory exceeds the server, record the reason and apply the partial-rail rule in [PRODUCT](PRODUCT.md).
 

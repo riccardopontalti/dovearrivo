@@ -12,7 +12,7 @@ Configuration lives in [sources.yaml](../config/sources.yaml). Use fixed downloa
 | STA South Tyrol (GTFS) | Optional, D01 | CC0 per Open Data Hub; also publishes GTFS-RT |
 | OSM Italy Nord-Est (Geofabrik PBF) | Verified in D01 | 623,907,525 bytes; clipped to the region with complete ways: 198,562,800 bytes |
 | OSM Trentino-Alto Adige (openstreetmap.fr) | Rejected in D01 | 10,305 missing node references; MOTIS import fails |
-| Protomaps basemap (PMTiles) | Planned, D07 | Regional extract of the daily build |
+| Protomaps basemap (PMTiles) | In use since D07 | Regional extract of the daily build 20260924, maxzoom 14, 149 MB |
 
 Stop counts do not add up to unique places. Trips in the file are not trips per day.
 

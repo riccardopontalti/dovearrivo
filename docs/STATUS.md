@@ -1,6 +1,6 @@
-# Project status and handoff
+# Project status
 
-Last updated: 25/09/2026 (evening). Read this after README and AGENTS.md when picking up the work in a new session.
+**Concluded on 25/09/2026 as a v0.1 pilot. Not in active development.** The technical goals were met; after using the site the maintainer judged the demand too narrow to justify verifying content and launching. This file records the final state for anyone who reads or resumes the project.
 
 ## Done
 
@@ -12,27 +12,36 @@ Last updated: 25/09/2026 (evening). Read this after README and AGENTS.md when pi
 | D04 | MOTIS adapter, catalogue, manifest, cache, limits; engine contract tests in CI |
 | D05 | Search UI (URL-backed, works without JS), E2E and axe checks |
 | D06a | Data pipeline with checks, GTFS validator, promotion and rollback |
-| D06b prep | `deploy/` (Docker, Compose, Caddy, systemd timer) and [DEPLOY.md](DEPLOY.md); images built in CI |
 | D07 | Self-hosted basemap (Protomaps PMTiles), itinerary map, sharing |
 | D08 | Start from an address or place (MOTIS geocoding), coverage check |
 | D09 | Italian/English everywhere, including catalogue and data status |
 | D10 | Reachability preview map (`/reachability`) |
 | D11 prep | 19 draft destinations from OSM with provenance ([D11-candidates.md](../research/D11-candidates.md)) |
-| D06b | Server online in preview mode at https://dovearrivo.it; deploy from `main` after green CI |
+| D06b | `deploy/` (Docker, Compose, Caddy, systemd timer), images built in CI; server online in preview mode at https://dovearrivo.it, deployed from `main` after green CI ([DEPLOY.md](DEPLOY.md)) |
 | Routing fix | Destinations less than 3 km from the start are not proposed ("you are already there"), see ROUTING.md |
-| D12a v2 | "Tabellone" design (v1 "Alpenglow" rejected): departures board from `/board`, reach map scrubbed by scroll from `/bloom`, kinetic headline, tickets, theme switch, new brand; see [DESIGN-BRIEF.md](DESIGN-BRIEF.md) |
+| D12a | "Tabellone" design, final (a first "Alpenglow" version was rejected): departures board from `/board`, reach map scrubbed by scroll from `/bloom`, kinetic headline, tickets, theme switch, new brand; see [DESIGN-BRIEF.md](DESIGN-BRIEF.md) |
 
-## Waiting for the maintainer
+Final verification (25/09/2026, latest `main`): `npm run check` clean; 136 unit tests, 30 end-to-end tests (2 skipped by design) and 4 engine contract tests passing; CI and deploy green.
 
-- **Server**: OVHcloud VPS-1, Ubuntu 24.04, online. Every push to `main` with green CI deploys automatically ([DEPLOY.md](DEPLOY.md)) in preview mode (drafts visible, banner, noindex). Never ask for a private key in a chat or commit one.
-- **D12a feedback**: the maintainer tries each version on desktop and phone; iterate on what they report. They rejected a dark, gradient-heavy first version as generic: keep the design specific to the product.
-- **Destination verification**: entrances and access of the drafts (checklist in D11-candidates.md). Only then `status: published`.
+## Not done
 
-## Next
+- **D11** — the 19 destinations are drafts with OpenStreetMap points; none was verified or published ([D11-candidates.md](../research/D11-candidates.md)).
+- **D12** — beta with users and public launch.
+- Privacy page, operator contact and THIRD_PARTY_NOTICES (required before a real launch).
+- Written confirmation of Trenitalia's reuse terms (the National Access Point states no licence).
+- Load and memory measurements on the production VPS; walking hint; real-time data.
 
-1. **D12a — iterate** on the maintainer's feedback; measure Lighthouse on the live home page (target ≥ 90 on mobile).
-2. **Content phase** (maintainer's priority after design): many interesting destinations and points of interest with useful information, from open sources with licences; verification workflow; then D11 publication.
-3. **D12 — beta** with about 10 people, then launch (README GIF, live link, article).
+## Running service
+
+- https://dovearrivo.it runs on an OVHcloud VPS-1 in **preview mode** (draft destinations, banner, `noindex`), deployed from `main` after green CI ([DEPLOY.md](DEPLOY.md)). The data pipeline is scheduled every 6 hours by a systemd timer.
+- Left unattended, it keeps working while the sources publish valid files. The Trenitalia file in use is valid until 12/12/2026: if the National Access Point does not publish the next timetable, coverage shrinks and the data status turns `unavailable` after that date (TT feeds run to June 2027).
+- To stop the service: `sudo docker compose down` in `/srv/dovearrivo/deploy`, `sudo systemctl disable --now dovearrivo-update.timer`, and remove the `DEPLOY_HOST` / `DEPLOY_SSH_KEY` secrets so pushes no longer deploy.
+
+## If the project resumes
+
+1. Verify and publish a first set of destinations (checklist in D11-candidates.md), then switch `PREVIEW` to `false`.
+2. Add the privacy page and operator contact; compile THIRD_PARTY_NOTICES.
+3. Measure the production VPS; run a small beta.
 
 ## Things that bit us (keep them in mind)
 

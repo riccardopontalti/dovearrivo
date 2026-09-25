@@ -47,14 +47,15 @@ The fixture [synthetic-gtfs.zip](../research/synthetic-gtfs.zip) rebuilds the sy
 
 ## Still to verify
 
+Open when the project was concluded (25/09/2026); none of these blocks the preview, all would block a real launch.
+
 | Point | How it closes |
 | --- | --- |
 | Walk to a real, verified entrance | D11, on-site check |
 | Trenitalia reuse terms | Optional written confirmation from NAP or Trenitalia; the feed is used meanwhile (maintainer decision) |
 | Weekday and holiday dates; station shared by two feeds | Extend the D01 checks in D04 contract tests |
-| Map with local style and fonts | D07, no requests to demo servers |
 | Walking parameters and margin applied together | Transfer fixture + walking comparison |
-| Memory, import and latency on the VPS | D06; measured on a laptop in D01 |
+| Memory, import and latency on the VPS | Measured only on a laptop (D01, D11 preparation) |
 | Destination and entrance quality | D11, on-site review |
 | Operator contact and privacy page | Before public launch |
 

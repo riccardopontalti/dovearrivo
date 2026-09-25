@@ -2,7 +2,7 @@
 
 Contributions without code are valuable too: verify a destination entrance, report an ambiguous stop, compare a proposal with official timetables or test the site on a phone. Issues in Italian or English are welcome.
 
-The project is in early development. See [DELIVERY](docs/DELIVERY.md) and pick a well-scoped ticket; describe the problem and the completion criterion in an issue.
+The project was concluded as a v0.1 pilot in September 2026 and is not in active development ([STATUS](docs/STATUS.md)). Issues and forks are welcome, but replies may be slow. If you want to take it further, [DELIVERY](docs/DELIVERY.md) and the open points in STATUS are the place to start.
 
 ## Reporting a problem
 

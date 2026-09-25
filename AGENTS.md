@@ -1,5 +1,7 @@
 # Instructions for developing DoveArrivo
 
+> The project was concluded as a v0.1 pilot on 25/09/2026 ([docs/STATUS.md](docs/STATUS.md)). Do not start new work unless the maintainer resumes it.
+
 Read README, PRODUCT, ARCHITECTURE and ROUTING before writing code. Use DELIVERY to pick a ticket. The user's instructions take precedence.
 
 ## Language
