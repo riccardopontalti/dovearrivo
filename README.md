@@ -77,6 +77,12 @@ npm run gen:api    # regenerate types and schemas after editing spec/api.openapi
 
 The mock backend serves only the synthetic stops "Origine sintetica A" (`syn_A`) and "Destinazione sintetica B". It never returns real timetables.
 
+## How this project is built
+
+DoveArrivo is designed, reviewed and maintained by [Riccardo Pontalti](https://github.com/riccardopontalti) and developed together with AI coding agents (Claude Code). Product decisions, data checks and acceptance of every ticket are human; agent contributions appear as `Co-Authored-By` in the commits. The rules agents follow are in [AGENTS.md](AGENTS.md), and each ticket closes with what works, how it was verified and what is still missing.
+
+The running service uses no AI model: journeys come from open timetable data and an open source routing engine.
+
 ## License
 
 Original code and documentation: [MIT](LICENSE). External data and components keep their own licences: see [NOTICE](NOTICE.md).

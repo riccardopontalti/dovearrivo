@@ -22,6 +22,10 @@ Progetti affini: [Zuugle](https://www.zuugle.it), [Chronotrains](https://www.chr
 
 La documentazione tecnica è in inglese: partire da [README](README.md) e [docs/](docs/). Interfaccia del sito in italiano e inglese.
 
+## Come è costruito
+
+Progettato, verificato e mantenuto da Riccardo Pontalti con l'aiuto di agenti AI di sviluppo (Claude Code): decisioni di prodotto, controlli sui dati e accettazione di ogni ticket sono umani. Il servizio in esercizio non usa modelli AI.
+
 ## Contribuire
 
 Sono utili anche contributi senza codice: verificare l'ingresso di una meta, segnalare una fermata ambigua, confrontare una proposta con gli orari ufficiali. Vedi [CONTRIBUTING](CONTRIBUTING.md); issue in italiano benvenute.
