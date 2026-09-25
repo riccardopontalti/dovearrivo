@@ -22,7 +22,7 @@ First region: Trentino. Initial data: Trentino Trasporti urban and extra-urban f
 
 ## Essential flow
 
-1. Choose a starting point (stop in phase 2; stop, address or place in phase 3), date, "Leaving from" and "Back by".
+1. Choose a starting point (stop, address or place), date, "Leaving from" and "Back by".
 2. Set maximum duration per leg, minimum stay, walking and transfers.
 3. Browse a list of destinations first; the map is an additional view.
 4. Open a proposal and read both itineraries, with the backup return if any.

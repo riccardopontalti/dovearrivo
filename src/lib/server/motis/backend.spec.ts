@@ -4,7 +4,7 @@ import { request } from '$lib/domain/fixtures';
 import { parseCatalogue } from '../catalogue';
 import { ApiError } from '../errors';
 import type { Manifest } from '../manifest';
-import { createMotisBackend } from './backend';
+import { createMotisBackend, toPlaceMatch } from './backend';
 import { MotisError } from './client';
 import { busItinerary, fakeClient, type PlanHandler } from './fake-client';
 import { MAX_ITINERARIES } from './params';
@@ -146,6 +146,36 @@ describe('MOTIS backend search', () => {
 		await expect(none.search(request())).rejects.toBeInstanceOf(ApiError);
 		await expect(none.search(request())).rejects.toMatchObject({ code: 'DATA_UNAVAILABLE' });
 		expect((await none.dataStatus()).status).toBe('unavailable');
+	});
+
+	it('routes from a point with lat,lon places and refuses points outside coverage', async () => {
+		const withBbox: Manifest = { ...manifest, coverageBbox: [10.38, 45.66, 12.49, 47.1] };
+		const { backend: b, calls } = backend(regular, { manifest: async () => withBbox });
+		const { originStopId: _, ...rest } = request();
+		await b.search({ ...rest, originPoint: { lat: 46.0689, lon: 11.1212 }, originName: 'Via Belenzani' });
+		expect(calls.find((q) => q.get('arriveBy') === 'false')?.get('fromPlace')).toBe('46.0689,11.1212');
+		expect(calls.find((q) => q.get('arriveBy') === 'true')?.get('toPlace')).toBe('46.0689,11.1212');
+
+		await expect(b.search({ ...rest, originPoint: { lat: 41.9, lon: 12.5 } })).rejects.toMatchObject({
+			status: 422,
+			code: 'ORIGIN_NOT_COVERED'
+		});
+	});
+
+	it('maps geocoding results to contract place matches', () => {
+		const address = toPlaceMatch({
+			type: 'ADDRESS',
+			name: 'Via Belenzani',
+			street: 'Via Belenzani',
+			houseNumber: '1',
+			lat: 46.0689,
+			lon: 11.1212,
+			areas: [{ name: 'Trento', adminLevel: 8, default: true }]
+		});
+		expect(address).toEqual({ kind: 'address', name: 'Via Belenzani 1', point: { lat: 46.0689, lon: 11.1212 }, area: 'Trento' });
+		expect(validate('PlaceMatch', address)).toEqual({ ok: true });
+		const stop = toPlaceMatch({ type: 'STOP', id: 'tte_1', name: 'Trento. Autostaz. Dante', lat: 46.07, lon: 11.118 });
+		expect(stop).toMatchObject({ kind: 'stop', stopId: 'tte_1', feedId: 'tte' });
 	});
 
 	it('shows drafts only when explicitly allowed', async () => {

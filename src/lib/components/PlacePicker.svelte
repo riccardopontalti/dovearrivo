@@ -1,13 +1,14 @@
 <script lang="ts">
 	// Accessible combobox (WAI-ARIA 1.2 list autocomplete). Without JavaScript the text field
 	// is submitted as `fromQuery` and the server resolves it.
-	import type { Stop } from '$lib/api/types';
-	import { feedLabel } from '$lib/format';
+	import type { PlaceMatch } from '$lib/api/types';
+	import { placeLabel } from '$lib/format';
 	import type { Messages } from '$lib/i18n';
+	import { coordinateFrom } from '$lib/search-form';
 
 	let { t, from = $bindable(''), query = $bindable('') }: { t: Messages; from?: string; query?: string } = $props();
 
-	let stops = $state<Stop[]>([]);
+	let stops = $state<PlaceMatch[]>([]);
 	let open = $state(false);
 	let loading = $state(false);
 	let active = $state(-1);
@@ -30,8 +31,8 @@
 			loading = true;
 			open = true;
 			try {
-				const r = await fetch(`/api/v1/stops?q=${encodeURIComponent(text.trim())}`, { signal: controller.signal });
-				stops = r.ok ? ((await r.json()) as Stop[]) : [];
+				const r = await fetch(`/api/v1/places?q=${encodeURIComponent(text.trim())}`, { signal: controller.signal });
+				stops = r.ok ? ((await r.json()) as PlaceMatch[]) : [];
 				active = -1;
 			} catch {
 				// superseded by a newer query
@@ -47,9 +48,9 @@
 		search(query);
 	}
 
-	function choose(stop: Stop) {
-		from = stop.id;
-		query = stop.name;
+	function choose(place: PlaceMatch) {
+		from = place.stopId ?? coordinateFrom(place.point);
+		query = place.name;
 		open = false;
 		active = -1;
 	}
@@ -104,7 +105,7 @@
 		{:else if stops.length === 0}
 			<li class="info" role="presentation">{t.noStops}</li>
 		{/if}
-		{#each stops as stop, i (stop.id)}
+		{#each stops as stop, i (`${stop.kind}:${stop.stopId ?? coordinateFrom(stop.point)}`)}
 			<li
 				id={optionId(i)}
 				role="option"
@@ -114,8 +115,8 @@
 					choose(stop);
 				}}
 			>
-				<span>{stop.name}</span>
-				<span class="feed">{feedLabel(stop.feedId, t)}</span>
+				<span>{stop.name}{#if stop.area && stop.kind !== 'stop'}<span class="feed">, {stop.area}</span>{/if}</span>
+				<span class="feed">{placeLabel(stop, t)}</span>
 			</li>
 		{/each}
 	</ul>

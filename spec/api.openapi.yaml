@@ -6,9 +6,10 @@ info:
     Contract to implement. Answers are based on scheduled timetables and the
     declared catalogue; no guarantee that every possible route is enumerated.
     Examples are illustrative. Seconds in responses, minutes in filters.
-    Phase 3 (D08) will extend SearchRequest with a coordinate origin from geocoding.
-    Status codes: 400 for malformed requests and window rules, 422 for UNKNOWN_ORIGIN
-    and DATE_NOT_COVERED, 413 for bodies over 16 KiB.
+    The origin is either a stop (originStopId) or a point from /api/v1/places
+    (originPoint); walking from a point to the first stop counts toward the limits.
+    Status codes: 400 for malformed requests and window rules, 422 for UNKNOWN_ORIGIN,
+    ORIGIN_NOT_COVERED and DATE_NOT_COVERED, 413 for bodies over 16 KiB.
   license:
     name: MIT
     identifier: MIT
@@ -33,6 +34,28 @@ paths:
                 type: array
                 maxItems: 20
                 items: {$ref: '#/components/schemas/Stop'}
+        '400': {$ref: '#/components/responses/Problem'}
+        '429': {$ref: '#/components/responses/RateLimit'}
+        '503': {$ref: '#/components/responses/Problem'}
+  /api/v1/places:
+    get:
+      operationId: findPlaces
+      summary: Search stops, addresses and places to start from
+      description: Geocoding runs on the service's own OpenStreetMap extract; no third-party geocoder.
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema: {type: string, minLength: 2, maxLength: 80}
+      responses:
+        '200':
+          description: At most 20 matches, best first
+          content:
+            application/json:
+              schema:
+                type: array
+                maxItems: 20
+                items: {$ref: '#/components/schemas/PlaceMatch'}
         '400': {$ref: '#/components/responses/Problem'}
         '429': {$ref: '#/components/responses/RateLimit'}
         '503': {$ref: '#/components/responses/Problem'}
@@ -146,12 +169,31 @@ components:
         infoUrl: {type: string, format: uri}
         checkedAt: {type: string, format: date}
         accessNotes: {type: string}
+    PlaceMatch:
+      type: object
+      additionalProperties: false
+      required: [kind, name, point]
+      properties:
+        kind: {type: string, enum: [stop, address, place]}
+        name: {type: string}
+        point: {$ref: '#/components/schemas/Point'}
+        stopId: {type: string, description: Present for kind=stop}
+        feedId: {type: string, description: Present for kind=stop}
+        area: {type: string, description: Municipality or locality, when known}
     SearchRequest:
       type: object
       additionalProperties: false
-      required: [originStopId, departAfter, returnBy]
+      required: [departAfter, returnBy]
+      oneOf:
+        - required: [originStopId]
+        - required: [originPoint]
       properties:
         originStopId: {type: string, minLength: 1, maxLength: 200}
+        originPoint: {$ref: '#/components/schemas/Point'}
+        originName:
+          type: string
+          maxLength: 80
+          description: Label of the origin shown in itineraries when it is a point
         departAfter: {type: string, format: date-time}
         returnBy: {type: string, format: date-time}
         maxJourneyMinutes: {type: integer, minimum: 30, maximum: 180, default: 90}
@@ -295,6 +337,7 @@ components:
           enum:
             - INVALID_REQUEST
             - UNKNOWN_ORIGIN
+            - ORIGIN_NOT_COVERED
             - DATE_NOT_COVERED
             - DATA_UNAVAILABLE
             - REQUEST_TOO_LARGE

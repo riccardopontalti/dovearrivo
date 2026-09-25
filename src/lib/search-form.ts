@@ -45,6 +45,17 @@ export function defaultForm(today: string, availableFrom: string | null, availab
 }
 
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
+const COORDINATE = /^(-?\d{1,2}(?:\.\d{1,7})?),(-?\d{1,3}(?:\.\d{1,7})?)$/;
+
+/** `from` holds a stop id or "lat,lon" for an address or place. */
+export function parseFrom(from: string): { stopId: string } | { point: { lat: number; lon: number } } {
+	const m = COORDINATE.exec(from);
+	return m ? { point: { lat: Number(m[1]), lon: Number(m[2]) } } : { stopId: from };
+}
+
+export function coordinateFrom(point: { lat: number; lon: number }): string {
+	return `${Number(point.lat.toFixed(7))},${Number(point.lon.toFixed(7))}`;
+}
 const TIME = /^([01]\d|2[0-3]):[0-5]\d$/;
 
 export function readForm(params: URLSearchParams, defaults: SearchForm): SearchForm {
@@ -69,9 +80,12 @@ export function readForm(params: URLSearchParams, defaults: SearchForm): SearchF
 	};
 }
 
-export function toRequest(form: SearchForm, originStopId: string): SearchRequest {
+export function toRequest(form: SearchForm, from: string): SearchRequest {
+	const origin = parseFrom(from);
 	return {
-		originStopId,
+		...('point' in origin
+			? { originPoint: origin.point, ...(form.fromQuery ? { originName: form.fromQuery.slice(0, 80) } : {}) }
+			: { originStopId: origin.stopId }),
 		departAfter: formatInstant(localToMillis(form.date, form.start)),
 		returnBy: formatInstant(localToMillis(form.date, form.end)),
 		maxJourneyMinutes: form.maxJourneyMinutes,

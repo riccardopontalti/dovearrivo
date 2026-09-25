@@ -1,5 +1,6 @@
 // Backend over a private MOTIS instance, the destination catalogue and the snapshot manifest.
-import type { NormalizedSearchRequest, SearchResponse, Stop } from '$lib/api/types';
+import type { NormalizedSearchRequest, PlaceMatch, SearchResponse, Stop } from '$lib/api/types';
+import { insideBbox, originOf } from '$lib/domain/origin';
 import { summarize } from '$lib/domain/outcome';
 import { formatInstant, localDate } from '$lib/domain/time';
 import type { Backend } from '../backend';
@@ -8,7 +9,7 @@ import { toDestination, visibleEntries, type Catalogue } from '../catalogue';
 import { ApiError } from '../errors';
 import { Limiter } from '../limiter';
 import { deriveDataStatus, type Manifest } from '../manifest';
-import type { MotisClient } from './client';
+import type { GeocodeMatch, MotisClient } from './client';
 import { evaluateDestination } from './evaluate';
 
 export const ENGINE_VERSION = 'motis-2.11.3';
@@ -27,6 +28,22 @@ export interface MotisBackendOptions {
 const CACHE_BYTES = 64 * 1024 * 1024;
 const CACHE_TTL_MS = 15 * 60 * 1000;
 
+function area(m: GeocodeMatch): string | undefined {
+	const areas = m.areas ?? [];
+	return (areas.find((a) => a.default) ?? areas.find((a) => a.adminLevel === 8))?.name;
+}
+
+export function toPlaceMatch(m: GeocodeMatch): PlaceMatch {
+	const point = { lat: m.lat, lon: m.lon };
+	const where = area(m);
+	if (m.type === 'STOP' && m.id) {
+		return { kind: 'stop', name: m.name, point, stopId: m.id, feedId: m.id.split('_')[0], ...(where ? { area: where } : {}) };
+	}
+	const name =
+		m.type === 'ADDRESS' && m.street ? `${m.street}${m.houseNumber ? ` ${m.houseNumber}` : ''}` : m.name;
+	return { kind: m.type === 'ADDRESS' ? 'address' : 'place', name, point, ...(where ? { area: where } : {}) };
+}
+
 export function createMotisBackend(options: MotisBackendOptions): Backend {
 	const now = options.now ?? Date.now;
 	const includeDrafts = options.includeDrafts ?? false;
@@ -41,7 +58,7 @@ export function createMotisBackend(options: MotisBackendOptions): Backend {
 
 	return {
 		async findStops(query): Promise<Stop[]> {
-			const matches = await options.client.geocode(query);
+			const matches = await options.client.geocode(query, 'STOP');
 			return matches
 				.filter((m) => m.type === 'STOP' && m.id)
 				.slice(0, 20)
@@ -51,6 +68,11 @@ export function createMotisBackend(options: MotisBackendOptions): Backend {
 					point: { lat: m.lat, lon: m.lon },
 					feedId: (m.id as string).split('_')[0]
 				}));
+		},
+
+		async findPlaces(query): Promise<PlaceMatch[]> {
+			const matches = await options.client.geocode(query);
+			return matches.slice(0, 20).map((m) => toPlaceMatch(m));
 		},
 
 		async listDestinations() {
@@ -65,6 +87,10 @@ export function createMotisBackend(options: MotisBackendOptions): Backend {
 				throw new ApiError(503, 'DATA_UNAVAILABLE', 'Timetable data is not available right now', {
 					'retry-after': '300'
 				});
+			}
+			const origin = originOf(request);
+			if (origin.kind === 'point' && manifest.coverageBbox && !insideBbox(origin.point, manifest.coverageBbox)) {
+				throw new ApiError(422, 'ORIGIN_NOT_COVERED', 'The starting point is outside the covered area');
 			}
 			const day = localDate(request.departAfter);
 			if (day < manifest.availableFrom || day > manifest.availableTo) {

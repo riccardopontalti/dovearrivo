@@ -27,6 +27,13 @@ describe('search form in the URL', () => {
 		expect(readForm(p, defaults)).toEqual(defaults);
 	});
 
+	it('turns a coordinate origin into originPoint with its label', () => {
+		const r = toRequest({ ...defaults, fromQuery: 'Via Belenzani 1' }, '46.0689,11.1212');
+		expect(r).toMatchObject({ originPoint: { lat: 46.0689, lon: 11.1212 }, originName: 'Via Belenzani 1' });
+		expect(r.originStopId).toBeUndefined();
+		expect(toRequest(defaults, 'trenitalia_IT::StopPlace:otherTRENITALIA:830002038').originStopId).toMatch(/^trenitalia_/);
+	});
+
 	it('builds instants with the offset valid on the chosen day', () => {
 		const summer = toRequest({ ...defaults, date: '2026-09-26' }, 'tte_1');
 		const winter = toRequest({ ...defaults, date: '2026-10-26' }, 'tte_1');

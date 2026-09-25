@@ -38,6 +38,12 @@ export function modeLabel(mode: string, t: Messages): string {
 	return t.modeOther;
 }
 
+export function placeLabel(place: { kind: string; feedId?: string }, t: Messages): string {
+	if (place.kind === 'address') return t.kindAddress;
+	if (place.kind === 'place') return t.kindPlace;
+	return feedLabel(place.feedId ?? '', t);
+}
+
 export function feedLabel(feedId: string, t: Messages): string {
 	const key = `feed_${feedId}` as keyof Messages;
 	return key in t ? t[key] : t.feed_other;

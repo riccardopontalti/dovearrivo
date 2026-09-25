@@ -23,11 +23,15 @@ export interface GeocodeMatch {
 	name: string;
 	lat: number;
 	lon: number;
+	houseNumber?: string;
+	street?: string;
+	areas?: Array<{ name: string; adminLevel: number; default?: boolean }>;
 }
 
 export interface MotisClient {
 	plan(query: URLSearchParams, signal?: AbortSignal): Promise<MotisPlanResponse>;
-	geocode(text: string, signal?: AbortSignal): Promise<GeocodeMatch[]>;
+	/** `type` limits results to STOP, ADDRESS or PLACE; all types when omitted. */
+	geocode(text: string, type?: 'STOP', signal?: AbortSignal): Promise<GeocodeMatch[]>;
 }
 
 // The engine enforces its own timeout; the client allows a small margin on top.
@@ -59,10 +63,10 @@ export function createMotisClient(baseUrl: string, fetchFn: typeof fetch = fetch
 
 	return {
 		plan: (query, signal) => get<MotisPlanResponse>('/api/v6/plan', query, signal),
-		geocode: (text, signal) =>
+		geocode: (text, type, signal) =>
 			get<GeocodeMatch[]>(
 				'/api/v1/geocode',
-				new URLSearchParams({ text, type: 'STOP', language: 'it' }),
+				new URLSearchParams({ text, language: 'it', ...(type ? { type } : {}) }),
 				signal
 			)
 	};

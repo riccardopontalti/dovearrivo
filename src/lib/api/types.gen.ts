@@ -21,6 +21,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/places": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Search stops, addresses and places to start from
+         * @description Geocoding runs on the service's own OpenStreetMap extract; no third-party geocoder.
+         */
+        get: operations["findPlaces"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/destinations": {
         parameters: {
             query?: never;
@@ -103,8 +123,23 @@ export interface components {
             checkedAt: string;
             accessNotes?: string;
         };
+        PlaceMatch: {
+            /** @enum {string} */
+            kind: "stop" | "address" | "place";
+            name: string;
+            point: components["schemas"]["Point"];
+            /** @description Present for kind=stop */
+            stopId?: string;
+            /** @description Present for kind=stop */
+            feedId?: string;
+            /** @description Municipality or locality */
+            area?: string;
+        };
         SearchRequest: {
-            originStopId: string;
+            originStopId?: string;
+            originPoint?: components["schemas"]["Point"];
+            /** @description Label of the origin shown in itineraries when it is a point */
+            originName?: string;
             /** Format: date-time */
             departAfter: string;
             /** Format: date-time */
@@ -117,7 +152,7 @@ export interface components {
             maxWalkMinutes: number;
             /** @default 1 */
             maxTransfers: number;
-        };
+        } & (unknown | unknown);
         SearchResponse: {
             /**
              * @description complete = catalogue processed without detected errors or truncation, not an exhaustive enumeration of every possible route.
@@ -208,7 +243,7 @@ export interface components {
         };
         Problem: {
             /** @enum {string} */
-            code: "INVALID_REQUEST" | "UNKNOWN_ORIGIN" | "DATE_NOT_COVERED" | "DATA_UNAVAILABLE" | "REQUEST_TOO_LARGE" | "RATE_LIMITED" | "ROUTING_UNAVAILABLE";
+            code: "INVALID_REQUEST" | "UNKNOWN_ORIGIN" | "ORIGIN_NOT_COVERED" | "DATE_NOT_COVERED" | "DATA_UNAVAILABLE" | "REQUEST_TOO_LARGE" | "RATE_LIMITED" | "ROUTING_UNAVAILABLE";
             message: string;
         };
     };
@@ -258,6 +293,31 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Stop"][];
+                };
+            };
+            400: components["responses"]["Problem"];
+            429: components["responses"]["RateLimit"];
+            503: components["responses"]["Problem"];
+        };
+    };
+    findPlaces: {
+        parameters: {
+            query: {
+                q: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description At most 20 matches, best first */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlaceMatch"][];
                 };
             };
             400: components["responses"]["Problem"];

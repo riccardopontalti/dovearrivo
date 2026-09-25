@@ -8,9 +8,11 @@ import type {
 	Journey,
 	NormalizedSearchRequest,
 	Place,
+	PlaceMatch,
 	SearchResponse,
 	Stop
 } from '$lib/api/types';
+import { insideBbox, originOf, type Bbox } from '$lib/domain/origin';
 import { summarize } from '$lib/domain/outcome';
 import { chooseProposal } from '$lib/domain/pairing';
 import { addDays, formatInstant, localDate, localToMillis } from '$lib/domain/time';
@@ -20,6 +22,8 @@ import { ApiError } from '../errors';
 const REPO = 'https://github.com/riccardopontalti/dovearrivo';
 const DATA_VERSION = 'mock-synthetic-fixture';
 const COVERAGE_DAYS = 30;
+/** Area around the synthetic stops; points outside behave like an uncovered region. */
+const COVERAGE_BBOX: Bbox = [10.9, 45.9, 11.3, 46.3];
 
 const STOPS: Stop[] = [
 	{ id: 'syn_A', name: 'Origine sintetica A', point: { lat: 46.0, lon: 11.0 }, feedId: 'syn' },
@@ -88,6 +92,11 @@ function journey(trip: FixtureTrip, date: string): Journey {
 	};
 }
 
+function matchStops(query: string): Stop[] {
+	const q = query.trim().toLocaleLowerCase('it');
+	return STOPS.filter((s) => s.name.toLocaleLowerCase('it').includes(q)).slice(0, 20);
+}
+
 export function createMockBackend(now: () => number = Date.now): Backend {
 	function coverage() {
 		const from = localDate(now());
@@ -96,8 +105,13 @@ export function createMockBackend(now: () => number = Date.now): Backend {
 
 	return {
 		async findStops(query) {
-			const q = query.trim().toLocaleLowerCase('it');
-			return STOPS.filter((s) => s.name.toLocaleLowerCase('it').includes(q)).slice(0, 20);
+			return matchStops(query);
+		},
+
+		async findPlaces(query) {
+			return matchStops(query).map(
+				(s): PlaceMatch => ({ kind: 'stop', name: s.name, point: s.point, stopId: s.id, feedId: s.feedId })
+			);
 		},
 
 		async listDestinations() {
@@ -105,7 +119,16 @@ export function createMockBackend(now: () => number = Date.now): Backend {
 		},
 
 		async search(request: NormalizedSearchRequest): Promise<SearchResponse> {
-			if (request.originStopId !== A.id) {
+			const origin = originOf(request);
+			if (origin.kind === 'point' && !insideBbox(origin.point, COVERAGE_BBOX)) {
+				throw new ApiError(422, 'ORIGIN_NOT_COVERED', 'The starting point is outside the covered area');
+			}
+			// The mock has no walking network: only stop A, or a point exactly on it, can start a trip.
+			const atA =
+				origin.kind === 'stop'
+					? origin.stopId === A.id
+					: origin.point.lat === A.point.lat && origin.point.lon === A.point.lon;
+			if (origin.kind === 'stop' && !atA) {
 				throw new ApiError(422, 'UNKNOWN_ORIGIN', 'The origin stop is not in the active data');
 			}
 			const date = localDate(request.departAfter);
@@ -114,12 +137,14 @@ export function createMockBackend(now: () => number = Date.now): Backend {
 				throw new ApiError(422, 'DATE_NOT_COVERED', `Timetables are available from ${from} to ${to}`);
 			}
 
-			const proposal = chooseProposal(
-				DESTINATIONS[0].id,
-				OUTBOUND_TRIPS.map((t) => journey(t, date)),
-				INBOUND_TRIPS.map((t) => journey(t, date)),
-				request
-			);
+			const proposal = atA
+				? chooseProposal(
+						DESTINATIONS[0].id,
+						OUTBOUND_TRIPS.map((t) => journey(t, date)),
+						INBOUND_TRIPS.map((t) => journey(t, date)),
+						request
+					)
+				: null;
 			const summary = summarize([
 				{ destinationId: DESTINATIONS[0].id, kind: 'evaluated', proposal }
 			]);

@@ -92,19 +92,76 @@ export const schemas = {
 			}
 		}
 	},
+	"PlaceMatch": {
+		"type": "object",
+		"additionalProperties": false,
+		"required": [
+			"kind",
+			"name",
+			"point"
+		],
+		"properties": {
+			"kind": {
+				"type": "string",
+				"enum": [
+					"stop",
+					"address",
+					"place"
+				]
+			},
+			"name": {
+				"type": "string"
+			},
+			"point": {
+				"$ref": "#/components/schemas/Point"
+			},
+			"stopId": {
+				"type": "string",
+				"description": "Present for kind=stop"
+			},
+			"feedId": {
+				"type": "string",
+				"description": "Present for kind=stop"
+			},
+			"area": {
+				"type": "string",
+				"description": "Municipality or locality",
+				"when known": null
+			}
+		}
+	},
 	"SearchRequest": {
 		"type": "object",
 		"additionalProperties": false,
 		"required": [
-			"originStopId",
 			"departAfter",
 			"returnBy"
+		],
+		"oneOf": [
+			{
+				"required": [
+					"originStopId"
+				]
+			},
+			{
+				"required": [
+					"originPoint"
+				]
+			}
 		],
 		"properties": {
 			"originStopId": {
 				"type": "string",
 				"minLength": 1,
 				"maxLength": 200
+			},
+			"originPoint": {
+				"$ref": "#/components/schemas/Point"
+			},
+			"originName": {
+				"type": "string",
+				"maxLength": 80,
+				"description": "Label of the origin shown in itineraries when it is a point"
 			},
 			"departAfter": {
 				"type": "string",
@@ -478,6 +535,7 @@ export const schemas = {
 				"enum": [
 					"INVALID_REQUEST",
 					"UNKNOWN_ORIGIN",
+					"ORIGIN_NOT_COVERED",
 					"DATE_NOT_COVERED",
 					"DATA_UNAVAILABLE",
 					"REQUEST_TOO_LARGE",

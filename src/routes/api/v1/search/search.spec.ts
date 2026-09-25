@@ -48,6 +48,19 @@ describe('POST /api/v1/search', () => {
 		);
 	});
 
+	it('requires exactly one origin: a stop or a point', async () => {
+		const { originStopId: _, ...noOrigin } = valid;
+		await expectProblem(await post(JSON.stringify(noOrigin)), 400, 'INVALID_REQUEST');
+		const both = { ...valid, originPoint: { lat: 46, lon: 11 } };
+		await expectProblem(await post(JSON.stringify(both)), 400, 'INVALID_REQUEST');
+	});
+
+	it('distinguishes a point outside the covered area (422 ORIGIN_NOT_COVERED)', async () => {
+		const { originStopId: _, ...rest } = valid;
+		const rome = { ...rest, originPoint: { lat: 41.9, lon: 12.5 } };
+		await expectProblem(await post(JSON.stringify(rome)), 422, 'ORIGIN_NOT_COVERED');
+	});
+
 	it('rejects oversized bodies with 413', async () => {
 		await expectProblem(await post(' '.repeat(17 * 1024)), 413, 'REQUEST_TOO_LARGE');
 	});

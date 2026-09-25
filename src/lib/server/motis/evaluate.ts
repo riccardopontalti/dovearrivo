@@ -2,6 +2,7 @@
 // page per direction, then pairing. Engine failures become outcomes, never itineraries.
 import type { Destination, Journey, NormalizedSearchRequest } from '$lib/api/types';
 import type { DestinationOutcome } from '$lib/domain/outcome';
+import { originOf } from '$lib/domain/origin';
 import { chooseProposal } from '$lib/domain/pairing';
 import { ApiError } from '../errors';
 import type { Limiter } from '../limiter';
@@ -52,19 +53,21 @@ export async function evaluateDestination(
 	ctx: EvaluationContext,
 	destination: Destination
 ): Promise<DestinationOutcome> {
-	const origin = ctx.request.originStopId;
+	const o = originOf(ctx.request);
+	const origin = o.kind === 'stop' ? o.stopId : coordinatePlace(o.point);
+	const originName = o.kind === 'stop' ? o.stopId : (o.name ?? '');
 	const entrance = coordinatePlace(destination.entrance);
 	try {
 		const [out, back] = await Promise.all([
 			fetchProfile(ctx, 'outbound', origin, entrance),
 			fetchProfile(ctx, 'inbound', entrance, origin)
 		]);
-		// MOTIS names coordinate endpoints START/END; the origin is a stop and keeps its name.
+		// MOTIS names coordinate endpoints START/END; a stop origin keeps its own name.
 		const outbounds: Journey[] = out.itineraries.map((it) =>
-			toJourney(it, { start: origin, end: destination.name })
+			toJourney(it, { start: originName, end: destination.name })
 		);
 		const inbounds: Journey[] = back.itineraries.map((it) =>
-			toJourney(it, { start: destination.name, end: origin })
+			toJourney(it, { start: destination.name, end: originName })
 		);
 		return {
 			destinationId: destination.id,

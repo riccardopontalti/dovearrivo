@@ -19,6 +19,8 @@ export interface Manifest {
 	availableTo: string;
 	sources: ManifestSource[];
 	limitations: string[];
+	/** Walking network coverage [minLon, minLat, maxLon, maxLat]; points outside cannot be routed. */
+	coverageBbox?: [number, number, number, number];
 }
 
 const WARNING_AFTER_MS = 72 * 3600 * 1000;

@@ -40,6 +40,7 @@ interface SnapshotManifest {
 	availableTo: string;
 	sources: ManifestSource[];
 	limitations: string[];
+	coverageBbox: [number, number, number, number];
 	window: { firstDay: string; lastDay: string };
 	sourceHashes: Record<string, string>;
 	metrics: Record<string, DatasetMetrics>;
@@ -264,6 +265,7 @@ async function pipeline(config: ReturnType<typeof loadConfig>, bin: string, stor
 			{ id: 'osm', publisher: 'OpenStreetMap contributors', checkedAt: state.osm!.checkedAt ?? null, sourceUrl: street.source_page, licenseUrl: street.license_url }
 		],
 		limitations,
+		coverageBbox: street.clip.bbox,
 		window: { firstDay: window.firstDay, lastDay: window.lastDay },
 		sourceHashes: hashes,
 		metrics,

@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { navigating, page } from '$app/state';
 	import ProposalCard from '$lib/components/ProposalCard.svelte';
-	import StopPicker from '$lib/components/StopPicker.svelte';
-	import { feedLabel, longDate } from '$lib/format';
+	import PlacePicker from '$lib/components/PlacePicker.svelte';
+	import { longDate, placeLabel } from '$lib/format';
 	import { fill, messages, type Messages } from '$lib/i18n';
-	import { OPTIONS, toParams } from '$lib/search-form';
+	import { coordinateFrom, OPTIONS, toParams } from '$lib/search-form';
 
 	let { data } = $props();
 	const t = $derived(messages(data.locale));
@@ -57,7 +57,7 @@
 
 			<form method="GET" action="/">
 				<input type="hidden" name="lang" value={data.locale} />
-				<StopPicker {t} bind:from bind:query />
+				<PlacePicker {t} bind:from bind:query />
 
 				<div class="row">
 					<div class="field grow">
@@ -126,12 +126,15 @@
 				<p class="alert" role="alert">{errorText(outcome.error)}</p>
 			{:else if outcome?.kind === 'chooseStop'}
 				<h2>{t.chooseStop}</h2>
-				{#if outcome.stops.length === 0}
+				{#if outcome.places.length === 0}
 					<p>{fill(t.chooseStopNone, { q: data.form.fromQuery })}</p>
 				{:else}
 					<ul class="choices">
-						{#each outcome.stops as stop (stop.id)}
-							<li><a href={chooseHref(stop.id, stop.name)}>{stop.name}</a> <span class="muted">{feedLabel(stop.feedId, t)}</span></li>
+						{#each outcome.places as place (`${place.kind}:${place.stopId ?? coordinateFrom(place.point)}`)}
+							<li>
+								<a href={chooseHref(place.stopId ?? coordinateFrom(place.point), place.name)}>{place.name}</a>
+								<span class="muted">{place.area && place.kind !== 'stop' ? `${place.area} · ` : ''}{placeLabel(place, t)}</span>
+							</li>
 						{/each}
 					</ul>
 				{/if}

@@ -1,7 +1,7 @@
-import type { Stop } from '$lib/api/types';
+import type { PlaceMatch } from '$lib/api/types';
 import { localDate } from '$lib/domain/time';
 import { localeFromUrl } from '$lib/i18n';
-import { defaultForm, readForm, toRequest } from '$lib/search-form';
+import { coordinateFrom, defaultForm, readForm, toRequest } from '$lib/search-form';
 import { backend } from '$lib/server/backend';
 import { ApiError } from '$lib/server/errors';
 import { executeSearch, WindowError } from '$lib/server/search';
@@ -9,7 +9,7 @@ import type { PageServerLoad } from './$types';
 
 export type SearchOutcome =
 	| { kind: 'results'; response: Awaited<ReturnType<typeof executeSearch>> }
-	| { kind: 'chooseStop'; stops: Stop[] }
+	| { kind: 'chooseStop'; places: PlaceMatch[] }
 	| { kind: 'error'; error: string };
 
 export const load: PageServerLoad = async ({ url }) => {
@@ -29,13 +29,13 @@ export const load: PageServerLoad = async ({ url }) => {
 
 	let from = form.from;
 	if (!from) {
-		// Without JavaScript the stop is typed, not picked: resolve it on the server.
+		// Without JavaScript the place is typed, not picked: resolve it on the server.
 		if (form.fromQuery.length < 2) return { ...base, outcome: { kind: 'error', error: 'errFromMissing' } as SearchOutcome };
-		const stops = await backend().findStops(form.fromQuery);
-		if (stops.length !== 1) return { ...base, outcome: { kind: 'chooseStop', stops } as SearchOutcome };
-		from = stops[0].id;
+		const places = await backend().findPlaces(form.fromQuery);
+		if (places.length !== 1) return { ...base, outcome: { kind: 'chooseStop', places } as SearchOutcome };
+		from = places[0].stopId ?? coordinateFrom(places[0].point);
 		form.from = from;
-		form.fromQuery = stops[0].name;
+		form.fromQuery = places[0].name;
 	}
 
 	try {
@@ -49,6 +49,7 @@ export const load: PageServerLoad = async ({ url }) => {
 		if (error instanceof ApiError) {
 			const byCode: Record<string, string> = {
 				UNKNOWN_ORIGIN: 'errUnknownOrigin',
+				ORIGIN_NOT_COVERED: 'errOriginNotCovered',
 				DATE_NOT_COVERED: 'errDateNotCovered',
 				DATA_UNAVAILABLE: 'errDataUnavailable',
 				ROUTING_UNAVAILABLE: 'errRoutingUnavailable'
