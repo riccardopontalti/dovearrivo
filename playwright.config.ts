@@ -14,7 +14,11 @@ export default defineConfig({
 			ORIGIN: 'http://localhost:4173',
 			DOVEARRIVO_BACKEND: 'mock',
 			// No basemap: the tests cover the map-unavailable path deterministically.
-			DOVEARRIVO_BASEMAP_DIR: 'tests/fixtures/no-basemap'
+			DOVEARRIVO_BASEMAP_DIR: 'tests/fixtures/no-basemap',
+			// All test traffic comes from one address; the limiter has its own unit tests.
+			DOVEARRIVO_RATE_PER_MINUTE: '10000',
+			DOVEARRIVO_RATE_ACTIVE_PER_IP: '50',
+			DOVEARRIVO_RATE_GLOBAL: '50'
 		},
 		reuseExistingServer: !process.env.CI,
 		timeout: 120_000

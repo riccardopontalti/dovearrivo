@@ -1,6 +1,7 @@
 // Admission control for expensive requests (searches and reachability previews), from
 // docs/OPERATIONS.md: per IP at most 2 active and 12 started per minute; at most 10
 // searches running or waiting globally. IPs live only in memory with a short expiry.
+import { env } from '$env/dynamic/private';
 import { ApiError } from './errors';
 
 export interface RateLimitOptions {
@@ -65,4 +66,14 @@ function limited(seconds: number): ApiError {
 	});
 }
 
-export const admission = new SearchAdmission({ perIpActive: 2, perIpPerMinute: 12, globalActive: 10 });
+const envInt = (name: string, fallback: number) => {
+	const value = Number(env[name]);
+	return Number.isInteger(value) && value > 0 ? value : fallback;
+};
+
+/** Production defaults; the end-to-end tests raise them because every request comes from one IP. */
+export const admission = new SearchAdmission({
+	perIpActive: envInt('DOVEARRIVO_RATE_ACTIVE_PER_IP', 2),
+	perIpPerMinute: envInt('DOVEARRIVO_RATE_PER_MINUTE', 12),
+	globalActive: envInt('DOVEARRIVO_RATE_GLOBAL', 10)
+});
