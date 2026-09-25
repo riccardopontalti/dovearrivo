@@ -46,4 +46,4 @@ jobs:
           install -m 700 -d ~/.ssh
           printf '%s\n' "$KEY" > ~/.ssh/deploy_key && chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -H "$HOST" >> ~/.ssh/known_hosts 2> /dev/null
-          ssh -i ~/.ssh/deploy_key "$USER_NAME@$HOST" "PREVIEW=$PREVIEW bash -s" < deploy/bootstrap.sh
+          ssh -o ServerAliveInterval=30 -o ServerAliveCountMax=10 -i ~/.ssh/deploy_key "$USER_NAME@$HOST" "PREVIEW=$PREVIEW bash -s" < deploy/bootstrap.sh

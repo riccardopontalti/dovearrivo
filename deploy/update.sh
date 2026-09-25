@@ -4,7 +4,7 @@
 set -uo pipefail
 cd "$(dirname "$0")"
 
-docker compose --profile jobs run --rm pipeline
+docker compose --profile jobs run --rm -T pipeline < /dev/null
 code=$?
 
 if [ -f ../data/pipeline/promoted ]; then

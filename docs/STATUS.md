@@ -40,3 +40,4 @@ Last updated: 25/09/2026. Read this after README and AGENTS.md when picking up t
 - SvelteKit reruns a `load` only for URL parameters it reads: read `lang` via `localeFromUrl(url)` in each load.
 - All E2E traffic comes from one IP: `playwright.config.ts` raises the rate limits through env variables.
 - `data/`, `.engine/` and the basemap are never committed; scripts rebuild them (`npm run data:update`, `scripts/basemap.sh`, `npm run engine:fixtures`).
+- `deploy/bootstrap.sh` reaches the server on stdin (`ssh … bash -s`). A command that reads stdin (`docker compose run` without `-T`) swallowed the rest of the script, so the first deploy reported success without starting the stack. The script is now wrapped in `main()`, jobs run with `-T < /dev/null`, and the deploy fails unless the app answers.
