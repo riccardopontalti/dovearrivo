@@ -66,7 +66,7 @@ test.describe('without JavaScript', () => {
 		await page.goto('/');
 		await page.getByRole('combobox', { name: 'Parto da' }).fill('sintetica');
 		await page.getByRole('button', { name: 'Cerca mete' }).click();
-		await expect(page.getByRole('heading', { name: 'Scegli la fermata di partenza' })).toBeVisible();
+		await expect(page.getByRole('heading', { name: 'Scegli il punto di partenza' })).toBeVisible();
 		await page.getByRole('link', { name: 'Origine sintetica A' }).click();
 		await expect(page.getByRole('article', { name: 'Destinazione sintetica B' })).toBeVisible();
 	});
