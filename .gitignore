@@ -12,3 +12,5 @@ data/
 .output
 vite.config.ts.timestamp-*
 .engine/
+test-results/
+playwright-report/

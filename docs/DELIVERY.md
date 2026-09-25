@@ -19,6 +19,8 @@ Four phases, about 6 weeks for one person with coding agents and human review. A
 
 **D06a status (25/09/2026): done** — `pipeline/` (TypeScript, run by Node 24 directly): conditional size-limited downloads with retries, GTFS/NeTEx structure and coverage checks, NAP gzip → ZIP, Geofabrik clip with `osmium` (complete ways, zero missing references), MOTIS import, per-dataset metrics, sample searches on a private server, 20% drift review, manifest, atomic promotion, retention of 2 snapshots and rollback. Demonstrated on real data: first build in 12 s with all samples passing; a no-change run records checks without rebuilding; a corrupted TT file is rejected with the active snapshot untouched; rollback restores the previous snapshot. The first run caught two real problems: MOTIS rejects a 16-hour `searchWindow` with `plan_max_search_window_minutes: 960` (now 1440), and Trenitalia stop ids change between feed versions (samples now use coordinates).
 
+**D05 status (25/09/2026): done** — Search page with an accessible stop combobox, date and time window, filters as bounded selects, result cards (stay, both legs, backup return or "No later return found", leg details), partial and empty states, localised errors for every Problem code and window rule, Italian/English with the search kept on language switch, and a `/data-status` page. The search lives in the URL (shareable) and works without JavaScript: a typed stop name is resolved on the server, with a choice list when ambiguous. Playwright covers the flows on desktop and mobile, with and without JavaScript, and axe reports no WCAG 2.2 A/AA violations. Verified end-to-end on real data (Trento → Levico test point). Limits: destination names and descriptions are served in Italian only (D09); no hint yet when a larger walking limit would unlock proposals; screens are functional, the visual identity comes in D12a.
+
 D01 decides whether Trenitalia enters the pilot. If the feed is stale, its licence is unclear or memory exceeds the server, record the reason and apply the partial-rail rule in [PRODUCT](PRODUCT.md).
 
 ## Phase 2 — Walking skeleton online (weeks 2–3)
@@ -74,7 +76,7 @@ Unit tests for the logic on fixtures; contract tests on the pinned engine; manua
 
 ## Commands to implement
 
-Available since D02: `npm run dev`, `check`, `test`, `build` and `gen:api`. Since D06a: `npm run data:update` and `npm run data:rollback`. Still to implement: `test:e2e` (D05) and `docker compose up` for the full environment (D06b).
+Available since D02: `npm run dev`, `check`, `test`, `build` and `gen:api`. Since D06a: `npm run data:update` and `npm run data:rollback`. Since D05: `npm run test:e2e`. Still to implement: `docker compose up` for the full environment (D06b).
 
 ## Release criteria
 

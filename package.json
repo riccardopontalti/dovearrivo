@@ -21,7 +21,8 @@
 		"engine:fixtures": "scripts/engine-fixtures.sh",
 		"test:engine": "MOTIS_URL=${MOTIS_URL:-http://127.0.0.1:8090} vitest --run --project engine",
 		"data:update": "node pipeline/run.ts",
-		"data:rollback": "node pipeline/rollback.ts"
+		"data:rollback": "node pipeline/rollback.ts",
+		"test:e2e": "playwright test"
 	},
 	"dependencies": {
 		"ajv": "8.20.0",
@@ -29,6 +30,8 @@
 		"yaml": "2.9.1"
 	},
 	"devDependencies": {
+		"@axe-core/playwright": "4.13.0",
+		"@playwright/test": "1.63.0",
 		"@sveltejs/adapter-node": "5.5.7",
 		"@sveltejs/kit": "2.70.3",
 		"@sveltejs/vite-plugin-svelte": "7.3.1",

@@ -63,7 +63,8 @@ Details in [DELIVERY](docs/DELIVERY.md).
 - **D03 — routing domain: done.** Pure, tested functions choose the outbound/return pair, the backup return on a different first vehicle and the ranking; partial failures stay visible.
 - **D04 — MOTIS adapter: done.** Real searches over Trentino Trasporti, Trenitalia and OpenStreetMap answer in under 100 ms locally; engine contract tests run in CI against the pinned MOTIS release.
 - **D06a — data pipeline: done.** Downloads, checks, imports, verifies and promotes timetable snapshots with rollback; a corrupted feed never replaces valid data.
-- **Next: D05** — minimal search UI (form and results list); then D06b, the first public deployment.
+- **D05 — search UI: done.** Stop autocomplete, time window and filters, result cards with the backup return; works on phone and desktop, in Italian and English, even without JavaScript; end-to-end and accessibility tests in CI.
+- **Next: D06b** — first public deployment on a small VPS.
 
 ## Local development
 
@@ -75,6 +76,7 @@ npm run dev        # http://localhost:5173, mock backend with synthetic data
 npm test           # unit and contract tests
 npm run check      # type checking
 npm run build      # production build (adapter-node)
+npm run test:e2e   # browser flows (first run: npx playwright install chromium)
 npm run gen:api    # regenerate types and schemas after editing spec/api.openapi.yaml
 ```
 
