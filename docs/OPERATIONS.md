@@ -30,11 +30,11 @@ Version basemap asset URLs and their HTTP cache when the PMTiles file changes. A
 
 - Public ports only 80/443; protected admin access; MOTIS on a private network.
 - Input validated by schema, bounded strings, time budgets, at most 4 simultaneous MOTIS calls globally.
-- Simple per-IP rate limit at the proxy and a global search queue of at most 10; reject excess with 429 and `Retry-After`. Tune after launch.
+- Admission control in the app (`src/lib/server/ratelimit.ts`) for searches and reachability previews: per IP at most 2 active and 12 started per minute, at most 10 running globally; excess gets 429 with `Retry-After` (a localised message on pages). IPs stay in memory only. Behind Caddy set `ADDRESS_HEADER=X-Forwarded-For` and `XFF_DEPTH=1` so the app sees the real client address.
 - The client cancels superseded searches; cache hits avoid new work.
 - Origins and destinations come from the catalogue or from our geocoder. No user-controllable upstream URL, file upload or generic proxy.
 - Downloads only from expected domains; size and decompression limits; no ZIP extraction with arbitrary paths.
-- Security headers and a CSP compatible with MapLibre workers; local assets; pinned and audited dependencies.
+- Security headers (`nosniff`, strict referrer, restrictive permissions policy, COOP) and a CSP from SvelteKit with nonces: only `self`, plus `blob:` for MapLibre workers and images; `frame-ancestors 'none'`. Verified with the maps loaded and no violations. HSTS is added by Caddy.
 - Never expose MOTIS internals or debug fields.
 
 Configure SvelteKit `ORIGIN` and proxy headers correctly: trust only the proxy actually managed.

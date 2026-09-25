@@ -9,7 +9,26 @@ export default defineConfig({
 				// Force runes mode for the project, except for libraries. Can be removed in svelte 6.
 				runes: ({ filename }) => filename.split(/[/\\]/).includes('node_modules') ? undefined : true
 			},
-			adapter: adapter()
+			adapter: adapter(),
+			// Everything is served by us: no third-party scripts, tiles, fonts or APIs.
+			// SvelteKit adds hashes/nonces for its own inline scripts; MapLibre needs blob:
+			// workers and images; inline style attributes are used by Svelte components.
+			csp: {
+				mode: 'auto',
+				directives: {
+					'default-src': ['self'],
+					'script-src': ['self'],
+					'style-src': ['self', 'unsafe-inline'],
+					'img-src': ['self', 'data:', 'blob:'],
+					'font-src': ['self'],
+					'connect-src': ['self'],
+					'worker-src': ['self', 'blob:'],
+					'object-src': ['none'],
+					'base-uri': ['self'],
+					'form-action': ['self'],
+					'frame-ancestors': ['none']
+				}
+			}
 		})
 	],
 	test: {

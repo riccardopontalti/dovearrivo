@@ -5,6 +5,7 @@ import { defaultForm, readForm, toRequest } from '$lib/search-form';
 import { backend } from '$lib/server/backend';
 import { ApiError } from '$lib/server/errors';
 import { resolveOrigin } from '$lib/server/origin';
+import { admission } from '$lib/server/ratelimit';
 import { executeSearch, WindowError } from '$lib/server/search';
 import type { PageServerLoad } from './$types';
 
@@ -13,7 +14,7 @@ export type SearchOutcome =
 	| { kind: 'chooseStop'; places: PlaceMatch[] }
 	| { kind: 'error'; error: string };
 
-export const load: PageServerLoad = async ({ url }) => {
+export const load: PageServerLoad = async ({ url, getClientAddress }) => {
 	const locale = localeFromUrl(url);
 	const [status, destinations] = await Promise.all([backend().dataStatus(locale), backend().listDestinations(locale)]);
 	const defaults = defaultForm(localDate(Date.now()), status.availableFrom, status.availableTo);
@@ -35,7 +36,7 @@ export const load: PageServerLoad = async ({ url }) => {
 	const from = resolved.from;
 
 	try {
-		const response = await executeSearch(toRequest(form, from), Date.now());
+		const response = await admission.run(getClientAddress(), () => executeSearch(toRequest(form, from), Date.now()));
 		return { ...base, outcome: { kind: 'results', response } as SearchOutcome };
 	} catch (error) {
 		if (error instanceof WindowError) {
@@ -48,7 +49,8 @@ export const load: PageServerLoad = async ({ url }) => {
 				ORIGIN_NOT_COVERED: 'errOriginNotCovered',
 				DATE_NOT_COVERED: 'errDateNotCovered',
 				DATA_UNAVAILABLE: 'errDataUnavailable',
-				ROUTING_UNAVAILABLE: 'errRoutingUnavailable'
+				ROUTING_UNAVAILABLE: 'errRoutingUnavailable',
+				RATE_LIMITED: 'errRateLimited'
 			};
 			return { ...base, outcome: { kind: 'error', error: byCode[error.code] ?? 'errInvalid' } as SearchOutcome };
 		}

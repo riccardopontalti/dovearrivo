@@ -5,13 +5,17 @@ import { POST } from './+server';
 
 type Event = Parameters<typeof POST>[0];
 
+let calls = 0;
+
 function post(body: string): Promise<Response> {
 	const request = new Request('http://localhost/api/v1/search', {
 		method: 'POST',
 		headers: { 'content-type': 'application/json' },
 		body
 	});
-	return POST({ request } as Event) as Promise<Response>;
+	// A distinct client address per call keeps the real rate limiter out of these tests.
+	const address = `10.0.0.${++calls}`;
+	return POST({ request, getClientAddress: () => address } as unknown as Event) as Promise<Response>;
 }
 
 // A covered date in the future, so the test does not depend on the day it runs.

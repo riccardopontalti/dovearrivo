@@ -103,6 +103,7 @@ export const it = {
 	errDateNotCovered: 'Per questa data non ci sono orari: scegli un giorno tra il {from} e il {to}.',
 	errDataUnavailable: 'Gli orari non sono disponibili in questo momento. Riprova più tardi.',
 	errRoutingUnavailable: 'Il calcolo degli itinerari non risponde. Riprova tra poco.',
+	errRateLimited: 'Troppe ricerche in poco tempo: riprova tra un minuto.',
 	errInvalid: 'Controlla i dati della ricerca.',
 
 	modeWalk: 'A piedi',

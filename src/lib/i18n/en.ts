@@ -105,6 +105,7 @@ export const en: Messages = {
 	errDateNotCovered: 'No timetables for this date: choose a day between {from} and {to}.',
 	errDataUnavailable: 'Timetables are not available right now. Please try again later.',
 	errRoutingUnavailable: 'Journey planning is not responding. Please try again shortly.',
+	errRateLimited: 'Too many searches in a short time: please try again in a minute.',
 	errInvalid: 'Please check the search details.',
 
 	modeWalk: 'Walk',
