@@ -1,0 +1,48 @@
+# Project baseline for MOTIS v2.11.3.
+# The full configuration with all feeds and OSM must pass D01 before release.
+# Paths are inside the container; files are acquired by the pipeline.
+# Generate first_day = yesterday in Europe/Rome at every import.
+server:
+  host: 0.0.0.0
+  port: 8080
+  n_threads: 4
+osm: /data/source/streets.osm.pbf
+street_routing: true
+osr_footpath: true
+# Place and stop search for the origin field (phase 3). Served only through the app adapter.
+geocoding: true
+reverse_geocoding: false
+# No `tiles` key: the basemap is a static Protomaps PMTiles file served by Caddy.
+timetable:
+  first_day: "2026-09-24"
+  num_days: 32
+  with_shapes: true
+  adjust_footpaths: true
+  max_footpath_length: 15
+  merge_dupes_intra_src: false
+  merge_dupes_inter_src: false
+  # Dataset tags are stop/trip ID prefixes and must not contain "_".
+  datasets:
+    tte:
+      path: /data/source/extraurbano.zip
+      extend_calendar: false
+    ttu:
+      path: /data/source/urbano.zip
+      extend_calendar: false
+    # Candidate, enable only after D01 confirms licence, coverage and memory.
+    # NeTEx loading and per-dataset scripts are not described in the v2.11.3
+    # setup guide: check the pinned release and the Transitous import before use.
+    # trenitalia:
+    #   path: /data/source/trenitalia-netex.zip
+    #   extend_calendar: false
+    # Optional:
+    # sta:
+    #   path: /data/source/sta.zip
+    #   extend_calendar: false
+limits:
+  plan_max_results: 128
+  plan_max_search_window_minutes: 960
+  routing_max_timeout_seconds: 3
+  street_routing_max_prepost_transit_seconds: 1800
+logging:
+  log_level: info

@@ -1,0 +1,11 @@
+.DS_Store
+node_modules/
+.svelte-kit/
+build/
+.env
+.env.*
+!.env.example
+# Downloaded data, MOTIS indexes and basemaps never go into Git
+data/
+*.osm.pbf
+*.pmtiles

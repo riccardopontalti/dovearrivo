@@ -1,0 +1,79 @@
+# Initial registry: project configuration, not a MOTIS format.
+# status: verified = inspected and usable; candidate = must pass D01; optional = evaluate in D01.
+schema_version: 2
+region_id: trentino
+timezone: Europe/Rome
+transit:
+  - id: tte
+    status: verified
+    publisher: Trentino Trasporti S.p.A.
+    url: https://www.trentinotrasporti.it/opendata/google_transit_extraurbano_tte.zip
+    local_name: extraurbano.zip
+    source_page: https://www.trentinotrasporti.it/it/opendata-it
+    license: CC-BY-2.5-IT
+    license_url: https://creativecommons.org/licenses/by/2.5/it/
+    kind: gtfs-static
+  - id: ttu
+    status: verified
+    publisher: Trentino Trasporti S.p.A.
+    url: https://www.trentinotrasporti.it/opendata/google_transit_urbano_tte.zip
+    local_name: urbano.zip
+    source_page: https://www.trentinotrasporti.it/it/opendata-it
+    license: CC-BY-2.5-IT
+    license_url: https://creativecommons.org/licenses/by/2.5/it/
+    kind: gtfs-static
+  - id: trenitalia
+    status: candidate
+    publisher: Trenitalia S.p.A.
+    # Community mirror converted by the Transitous preprocessor; last modified 2026-05-27 when checked.
+    url: https://public-transport.github.io/transitous-trenitalia-preprocessor/trenitalia-netex.zip
+    local_name: trenitalia-netex.zip
+    source_page: https://www.cciss.it/nap/mmtis/public/static/multimodal
+    license: null # confirm from the National Access Point in D01; do not import until set
+    license_url: null
+    kind: netex
+    notes:
+      - National feed; D01 measures memory with the full feed before any filtering.
+      - Transitous applies it-trenitalia.lua; review before reuse.
+  - id: sta
+    status: optional
+    publisher: STA — Südtiroler Transportstrukturen AG
+    url: ftp://ftp.sta.bz.it/gtfs/google_transit_shp.zip
+    local_name: sta.zip
+    source_page: https://github.com/noi-techpark/opendatahub-gtfs-api
+    license: CC0-1.0 # as stated by Open Data Hub; confirm in D01
+    license_url: https://github.com/noi-techpark/opendatahub-gtfs-api/blob/839d698938a224a7db4885f717ca05706fa6bae1/datasets.yml#L33
+    kind: gtfs-static
+street:
+  id: osm-trentino-alto-adige
+  url: https://download.openstreetmap.fr/extracts/europe/italy/trentino_alto_adige-latest.osm.pbf
+  local_name: streets.osm.pbf
+  source_page: https://download.openstreetmap.fr/extracts/europe/italy/
+  license: ODbL-1.0
+  license_url: https://www.openstreetmap.org/copyright
+basemap:
+  id: protomaps
+  status: candidate
+  kind: pmtiles
+  local_name: basemap.pmtiles
+  source_page: https://docs.protomaps.com/
+  license: ODbL-1.0 # data; record style, font and sprite licences separately in D07
+  license_url: https://www.openstreetmap.org/copyright
+updates:
+  gtfs_check_hours: 6
+  timetable_rollover_hours: 24
+  osm_check_days: 7
+  unverified_warning_hours: 72
+  unverified_suspend_days: 7
+limits:
+  gtfs_download_bytes: 83886080
+  gtfs_total_uncompressed_bytes: 536870912
+  netex_download_bytes: 104857600
+  osm_download_bytes: 419430400
+  http_timeout_seconds: 30
+  retries: 2
+  retain_generations: 2
+notes:
+  - The Dati Trentino catalogue also lists CC BY 4.0; keep the operator's direct statement.
+  - No real-time source approved for the first release (STA publishes GTFS-RT, evaluate after launch).
+  - Verify actual coverage through calendars and trips, not only feed_info.

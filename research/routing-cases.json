@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "status": "Test specifications, not an executable application suite",
+  "timezone": "Europe/Rome",
+  "timeUnit": "seconds unless a field ends with Minutes",
+  "fixture": {
+    "file": "synthetic-gtfs.zip",
+    "license": "MIT",
+    "stops": ["A", "B"],
+    "service": "Every day from 2026-09-01 to 2026-10-31",
+    "trips": ["A 09:00 → B 09:30", "A 10:00 → B 10:20", "B 15:00 → A 15:30"],
+    "use": "For cases C01/C02 import only this GTFS into MOTIS v2.11.3, without OSM; use the stop IDs returned by the engine and a dedicated namespace. It tests timetables, not destination entrances.",
+    "profileParameters": {"timetableView": true, "searchWindow": 36000, "maxTravelTime": 60, "numItineraries": 1, "maxItineraries": 64, "directModes": ""}
+  },
+  "cases": [
+    {
+      "id": "C01",
+      "name": "Initial waiting and final margin are not journey duration",
+      "evidence": "Engine behaviour observed; application pairing to implement",
+      "given": {"departAfter": "2026-09-26T08:00:00+02:00", "returnBy": "2026-09-26T18:00:00+02:00", "maxJourneyMinutes": 60, "minStayMinutes": 120},
+      "expect": {"oneToAllWith60MinuteAnchorMissesB": true, "validOutboundCountAfterDateFilter": 2, "validInboundCountAfterDateFilter": 1, "chosenOutboundStart": "2026-09-26T09:00:00+02:00", "chosenInboundStart": "2026-09-26T15:00:00+02:00", "staySeconds": 19800, "returnStatus": "no_later_option_found"}
+    },
+    {
+      "id": "C02",
+      "name": "Engine pages may include adjacent days",
+      "evidence": "Engine responses observed; application filter to implement",
+      "given": {"selectedDate": "2026-09-26", "outsideCandidates": ["2026-09-25T15:00:00+02:00", "2026-09-27T09:00:00+02:00"]},
+      "expect": {"outsideCandidatesAccepted": 0, "note": "Do not expect the same page across engine versions; always check time constraints on every result."}
+    },
+    {
+      "id": "C03",
+      "name": "Outbound available, no return",
+      "evidence": "Case specified, not executed",
+      "given": {"validOutboundCount": 1, "validInboundCount": 0, "profilesSuccessful": true},
+      "expect": {"proposalCount": 0, "httpStatus": 200, "searchStatus": "complete"}
+    },
+    {
+      "id": "C04",
+      "name": "Prefer a proposal with a later backup on a distinct first trip",
+      "evidence": "Case specified, not executed",
+      "given": {"arrivalAtDestination": "09:30", "returns": [{"id": "r14", "start": "14:00", "firstTransitTrip": "trip14@2026-09-26"}, {"id": "r15", "start": "15:00", "firstTransitTrip": "trip15@2026-09-26"}], "allReturnsMeetLimits": true},
+      "expect": {"chosenReturn": "r14", "backupReturn": "r15", "sameFirstTripVariantQualifiesAsBackup": false}
+    },
+    {
+      "id": "C05",
+      "name": "The walking limit applies to the whole leg",
+      "evidence": "Case specified, not executed",
+      "given": {"walkLegsSeconds": [600, 720], "maxWalkMinutes": 20},
+      "expect": {"walkingBudgetSeconds": 1320, "journeyAccepted": false}
+    },
+    {
+      "id": "C06",
+      "name": "Minimum stay without rounding",
+      "evidence": "Case specified, not executed",
+      "given": {"arrivalAtDestination": "2026-09-26T10:00:00+02:00", "returnDeparture": "2026-09-26T11:59:59+02:00", "minStayMinutes": 120},
+      "expect": {"staySeconds": 7199, "pairAccepted": false}
+    },
+    {
+      "id": "C07",
+      "name": "Previous service day and time beyond 24:00",
+      "evidence": "Integration case specified, requires a dedicated fixture",
+      "given": {"serviceDate": "2026-09-26", "gtfsDeparture": "31:10:00", "selectedDate": "2026-09-27"},
+      "expect": {"normalizedDeparture": "2026-09-27T07:10:00+02:00", "previousServiceDayMustBeImported": true, "note": "Separate the service calendar from the user's local day; respect calendar_dates."}
+    },
+    {
+      "id": "C08",
+      "name": "Europe/Rome has no fixed offset",
+      "evidence": "Case specified, not executed in the product",
+      "given": {"summerLocal": "2026-09-26T06:00:00+02:00", "winterLocal": "2026-10-25T06:00:00+01:00"},
+      "expect": {"summerUtc": "2026-09-26T04:00:00Z", "winterUtc": "2026-10-25T05:00:00Z"}
+    },
+    {
+      "id": "C09",
+      "name": "Partial failure distinct from absence of service",
+      "evidence": "Case specified, not executed",
+      "given": {"catalogCount": 2, "successfullyEvaluated": 1, "timedOut": 1},
+      "expect": {"httpStatus": 200, "searchStatus": "partial", "evaluatedCount": 1, "warning": "PARTIAL_TIMEOUT", "ifAllDestinationsFailHttpStatus": 503}
+    },
+    {
+      "id": "C10",
+      "name": "Entrance without a valid walking path",
+      "evidence": "Integration case specified, requires OSM",
+      "given": {"nearbyStopHasService": true, "validPathToEntrance": false},
+      "expect": {"proposalAccepted": false, "straightLineFallbackAllowed": false, "note": "Do not turn a nearby stop into proof that the entrance is accessible."}
+    },
+    {
+      "id": "C11",
+      "name": "Window rollover with unchanged GTFS",
+      "evidence": "Pipeline case specified, not executed",
+      "given": {"newLocalDay": true, "gtfsHashUnchanged": true, "calendarStillValid": true},
+      "expect": {"rollingTimetableRebuilt": true, "firstImportedDay": "yesterday", "lastImportedDay": "today+30", "sourceRedownloadRequired": false, "osmRebuildRequiredIfCompatibleArtifactsExist": false}
+    }
+  ]
+}

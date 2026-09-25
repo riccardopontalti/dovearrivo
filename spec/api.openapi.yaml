@@ -1,0 +1,302 @@
+openapi: 3.1.0
+info:
+  title: DoveArrivo API
+  version: 0.1.0
+  description: >
+    Contract to implement. Answers are based on scheduled timetables and the
+    declared catalogue; no guarantee that every possible route is enumerated.
+    Examples are illustrative. Seconds in responses, minutes in filters.
+    Phase 3 (D08) will extend SearchRequest with a coordinate origin from geocoding.
+  license:
+    name: MIT
+    identifier: MIT
+servers:
+  - url: /
+paths:
+  /api/v1/stops:
+    get:
+      operationId: findStops
+      summary: Search physical stops of the active data snapshot
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema: {type: string, minLength: 2, maxLength: 80}
+      responses:
+        '200':
+          description: At most 20 stops; opaque identifiers
+          content:
+            application/json:
+              schema:
+                type: array
+                maxItems: 20
+                items: {$ref: '#/components/schemas/Stop'}
+        '400': {$ref: '#/components/responses/Problem'}
+        '429': {$ref: '#/components/responses/RateLimit'}
+        '503': {$ref: '#/components/responses/Problem'}
+  /api/v1/destinations:
+    get:
+      operationId: listDestinations
+      summary: Published catalogue, at most 24 destinations in v0.1
+      responses:
+        '200':
+          description: Draft destinations are excluded
+          content:
+            application/json:
+              schema:
+                type: array
+                maxItems: 24
+                items: {$ref: '#/components/schemas/Destination'}
+        '503': {$ref: '#/components/responses/Problem'}
+  /api/v1/search:
+    post:
+      operationId: searchTrips
+      summary: Propose outbound journey, stay and return
+      description: >
+        Validate Europe/Rome, same day, 06:00-23:00 range, 2-16 hour window,
+        no past dates and available coverage. For a search today, departAfter
+        cannot precede the current instant. Pin the data snapshot for the whole
+        request. At most 12 seconds of processing.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/SearchRequest'}
+            example:
+              originStopId: tte_1
+              departAfter: '2026-09-26T08:00:00+02:00'
+              returnBy: '2026-09-26T18:00:00+02:00'
+              maxJourneyMinutes: 90
+              minStayMinutes: 120
+              maxWalkMinutes: 20
+              maxTransfers: 1
+      responses:
+        '200':
+          description: >
+            A complete search may be empty. A partial search must report causes
+            and counts; it does not justify conclusions of unreachability.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/SearchResponse'}
+        '400': {$ref: '#/components/responses/Problem'}
+        '413': {$ref: '#/components/responses/Problem'}
+        '422': {$ref: '#/components/responses/Problem'}
+        '429': {$ref: '#/components/responses/RateLimit'}
+        '503':
+          description: No destination could be processed because of a technical failure or unusable data
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Problem'}
+  /api/v1/data-status:
+    get:
+      operationId: getDataStatus
+      summary: Public coverage and provenance
+      responses:
+        '200':
+          description: Data status, also when routing is suspended
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/DataStatus'}
+components:
+  responses:
+    Problem:
+      description: Readable error; no engine internals
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/Problem'}
+    RateLimit:
+      description: Request limit or capacity temporarily exhausted
+      headers:
+        Retry-After:
+          required: true
+          schema: {type: integer, minimum: 1}
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/Problem'}
+  schemas:
+    Point:
+      type: object
+      additionalProperties: false
+      required: [lat, lon]
+      properties:
+        lat: {type: number, minimum: -90, maximum: 90}
+        lon: {type: number, minimum: -180, maximum: 180}
+    Stop:
+      type: object
+      additionalProperties: false
+      required: [id, name, point, feedId]
+      properties:
+        id: {type: string}
+        name: {type: string}
+        point: {$ref: '#/components/schemas/Point'}
+        feedId: {type: string, description: 'Dataset id from config/sources.yaml, e.g. tte, ttu, trenitalia'}
+        publicCode: {type: string}
+    Destination:
+      type: object
+      additionalProperties: false
+      required: [id, name, category, entrance, description, infoUrl, checkedAt]
+      properties:
+        id: {type: string}
+        name: {type: string}
+        category: {type: string}
+        entrance: {$ref: '#/components/schemas/Point'}
+        description: {type: string, maxLength: 500}
+        infoUrl: {type: string, format: uri}
+        checkedAt: {type: string, format: date}
+        accessNotes: {type: string}
+    SearchRequest:
+      type: object
+      additionalProperties: false
+      required: [originStopId, departAfter, returnBy]
+      properties:
+        originStopId: {type: string, minLength: 1, maxLength: 200}
+        departAfter: {type: string, format: date-time}
+        returnBy: {type: string, format: date-time}
+        maxJourneyMinutes: {type: integer, minimum: 30, maximum: 180, default: 90}
+        minStayMinutes: {type: integer, minimum: 30, maximum: 480, default: 120}
+        maxWalkMinutes: {type: integer, minimum: 5, maximum: 30, default: 20}
+        maxTransfers: {type: integer, minimum: 0, maximum: 2, default: 1}
+    SearchResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - status
+        - dataVersion
+        - generatedAt
+        - normalizedRequest
+        - catalogCount
+        - evaluatedCount
+        - warnings
+        - proposals
+      properties:
+        status:
+          type: string
+          enum: [complete, partial]
+          description: >
+            complete = catalogue processed without detected errors or truncation,
+            not an exhaustive enumeration of every possible route.
+        dataVersion: {type: string}
+        generatedAt: {type: string, format: date-time}
+        normalizedRequest: {$ref: '#/components/schemas/SearchRequest'}
+        catalogCount: {type: integer, minimum: 0, maximum: 24}
+        evaluatedCount:
+          type: integer
+          minimum: 0
+          maximum: 24
+          description: Destinations with both profiles processed successfully
+        warnings:
+          type: array
+          uniqueItems: true
+          items:
+            type: string
+            enum: [PARTIAL_TIMEOUT, PARTIAL_UPSTREAM_ERROR, PARTIAL_TRUNCATED, DATA_CHECK_OVERDUE]
+        proposals:
+          type: array
+          maxItems: 24
+          items: {$ref: '#/components/schemas/Proposal'}
+    Proposal:
+      type: object
+      additionalProperties: false
+      required: [destinationId, outbound, inbound, staySeconds, returnStatus]
+      properties:
+        destinationId: {type: string}
+        outbound: {$ref: '#/components/schemas/Journey'}
+        inbound: {$ref: '#/components/schemas/Journey'}
+        backupInbound: {$ref: '#/components/schemas/Journey'}
+        staySeconds: {type: integer, minimum: 0}
+        returnStatus:
+          type: string
+          enum: [later_option_found, no_later_option_found]
+          description: later_option_found requires a valid backupInbound
+    Journey:
+      type: object
+      additionalProperties: false
+      required: [startTime, endTime, durationSeconds, walkingBudgetSeconds, transfers, legs]
+      properties:
+        startTime: {type: string, format: date-time}
+        endTime: {type: string, format: date-time}
+        durationSeconds: {type: integer, minimum: 0}
+        walkingBudgetSeconds:
+          type: integer
+          minimum: 0
+          description: Conservative sum of WALK segments, including any engine margins
+        transfers: {type: integer, minimum: 0, maximum: 2}
+        legs:
+          type: array
+          minItems: 1
+          items: {$ref: '#/components/schemas/Leg'}
+    Leg:
+      type: object
+      additionalProperties: false
+      required: [mode, from, to, startTime, endTime, durationSeconds]
+      properties:
+        mode: {type: string, description: Mode normalised from MOTIS; WALK for walking}
+        from: {$ref: '#/components/schemas/Place'}
+        to: {$ref: '#/components/schemas/Place'}
+        startTime: {type: string, format: date-time}
+        endTime: {type: string, format: date-time}
+        durationSeconds: {type: integer, minimum: 0}
+        routeName: {type: string}
+        headsign: {type: string}
+        tripId: {type: string, description: Opaque identifier including the service date}
+        geometry:
+          $ref: '#/components/schemas/EncodedPolyline'
+          description: Optional; decode with the declared precision
+    Place:
+      type: object
+      additionalProperties: false
+      required: [name, point]
+      properties:
+        name: {type: string}
+        point: {$ref: '#/components/schemas/Point'}
+        stopId: {type: string}
+    EncodedPolyline:
+      type: object
+      additionalProperties: false
+      required: [points, precision]
+      properties:
+        points: {type: string}
+        precision: {type: integer, minimum: 0, maximum: 8}
+    DataStatus:
+      type: object
+      additionalProperties: false
+      required: [status, dataVersion, timezone, availableFrom, availableTo, sources, limitations]
+      properties:
+        status: {type: string, enum: [current, warning, unavailable]}
+        dataVersion: {type: [string, 'null']}
+        timezone: {type: string, const: Europe/Rome}
+        availableFrom: {type: [string, 'null'], format: date}
+        availableTo: {type: [string, 'null'], format: date}
+        sources:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required: [id, publisher, checkedAt, sourceUrl, licenseUrl]
+            properties:
+              id: {type: string}
+              publisher: {type: string}
+              checkedAt: {type: [string, 'null'], format: date-time}
+              feedVersion: {type: string}
+              sourceUrl: {type: string, format: uri}
+              licenseUrl: {type: string, format: uri}
+        limitations:
+          type: array
+          items: {type: string}
+    Problem:
+      type: object
+      additionalProperties: false
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          enum:
+            - INVALID_REQUEST
+            - UNKNOWN_ORIGIN
+            - DATE_NOT_COVERED
+            - DATA_UNAVAILABLE
+            - REQUEST_TOO_LARGE
+            - RATE_LIMITED
+            - ROUTING_UNAVAILABLE
+        message: {type: string, maxLength: 250}
+

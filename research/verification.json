@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "observedOn": "2026-09-24",
+  "documentedOn": "2026-09-25",
+  "purpose": "Log of preliminary checks; does not certify an implemented application.",
+  "engine": {
+    "name": "MOTIS",
+    "version": "2.11.3",
+    "release": "https://github.com/motis-project/motis/releases/tag/v2.11.3",
+    "verified": ["Extra-urban GTFS import", "Routing on real timetables", "Synthetic comparison of one-to-all and plan"],
+    "notYetVerified": ["Import with both GTFS feeds and OSM", "Routes to real entrances", "Complete basemap", "Service sizing and load"]
+  },
+  "downloads": [
+    {
+      "id": "tte",
+      "url": "https://www.trentinotrasporti.it/opendata/google_transit_extraurbano_tte.zip",
+      "bytes": 11137706,
+      "sha256": "9459d067792da0160a1a8ed14b1ae4becf8651234b9b9656aa1ee280d594b468",
+      "feedVersion": "20260910091556.305",
+      "feedInfoStartDate": "2026-09-10",
+      "feedInfoEndDate": "2027-06-25",
+      "agencyTimezone": "Europe/Rome",
+      "counts": {"stops": 2861, "routes": 120, "trips": 3085},
+      "routesByType": {"3": 119, "2": 1},
+      "railRoute": {"routeId": "352", "shortName": "R35", "longName": "FERROVIA TRENTO - MALE' - MEZZANA"},
+      "notes": ["No Trenitalia Valsugana/Brennero services observed", "transfers.txt present", "Observed a stop_times record with arrival hour of at least 24", "Counts do not indicate actual services per day"]
+    },
+    {
+      "id": "ttu",
+      "url": "https://www.trentinotrasporti.it/opendata/google_transit_urbano_tte.zip",
+      "bytes": 1175993,
+      "sha256": "ef2c19b213781797723eae375300e8ce5f57364c085932e14d9485df795d3093",
+      "feedVersion": "20260910090919.487",
+      "feedInfoStartDate": "2026-09-10",
+      "feedInfoEndDate": "2027-06-08",
+      "counts": {"stops": 1113, "routes": 44, "trips": 3715},
+      "routesByType": {"3": 43, "5": 1}
+    },
+    {
+      "id": "osm-trentino-alto-adige",
+      "url": "https://download.openstreetmap.fr/extracts/europe/italy/trentino_alto_adige-latest.osm.pbf",
+      "bytes": 135748929,
+      "sha256": "fe7d50beb205329e664d4ea014839dbdae4ebe065b31a00ae83bdfed549da00b",
+      "status": "downloaded_not_imported",
+      "notes": ["Moving URL: a later download may have a different hash and size"]
+    }
+  ],
+  "realTimetableExperiment": {
+    "serviceDate": "2026-09-26",
+    "origin": {"feed": "tte", "rawStopId": "1", "name": "Trento. Autostaz. Dante"},
+    "departAfter": "2026-09-26T08:00:00+02:00",
+    "returnBy": "2026-09-26T18:00:00+02:00",
+    "anchoredSearchLimitMinutes": 90,
+    "outwardStopsIncludingOrigin": 298,
+    "inwardStopsIncludingOrigin": 211,
+    "intersectionWithAtLeastThreeHoursExcludingOrigin": 173,
+    "interpretation": "Proof that the engine works. It measures neither the trip catalogue nor complete reachability; see the waiting-time counterexample."
+  },
+  "syntheticExperiment": {
+    "fixture": "synthetic-gtfs.zip",
+    "fixtureStatus": "Reconstruction of the test inputs, not an archive of the original download",
+    "serviceDate": "2026-09-26",
+    "departAfter": "2026-09-26T08:00:00+02:00",
+    "returnBy": "2026-09-26T18:00:00+02:00",
+    "maxTravelMinutes": 60,
+    "oneToAll": {"outwardDestinationFound": false, "inwardDestinationFound": false},
+    "plan": {
+      "timetableView": true,
+      "searchWindowSeconds": 36000,
+      "numItineraries": 1,
+      "maxItineraries": 64,
+      "observedOutward": [
+        {"start": "2026-09-26T07:00:00Z", "end": "2026-09-26T07:30:00Z"},
+        {"start": "2026-09-26T08:00:00Z", "end": "2026-09-26T08:20:00Z"},
+        {"start": "2026-09-27T07:00:00Z", "end": "2026-09-27T07:30:00Z"}
+      ],
+      "observedInward": [
+        {"start": "2026-09-25T13:00:00Z", "end": "2026-09-25T13:30:00Z"},
+        {"start": "2026-09-26T13:00:00Z", "end": "2026-09-26T13:30:00Z"}
+      ]
+    },
+    "conclusion": "Use complete itineraries and independent time filters; do not confuse waiting before/after the journey with leg duration."
+  },
+  "limitations": [
+    "No real TT/OSM data or MOTIS binaries are included.",
+    "Hashes identify the inspected files, not guaranteed versions of the current URLs.",
+    "Observations are a summary log, not full execution logs.",
+    "The repository does not contain the application; regression cases are specifications to implement."
+  ]
+}
