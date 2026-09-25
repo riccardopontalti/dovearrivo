@@ -18,7 +18,8 @@ Documentation revised on **25 September 2026** after a pre-development review. F
 | [MOTIS v2.11.3 setup](https://raw.githubusercontent.com/motis-project/motis/v2.11.3/docs/setup.md) | Import, transfers and limits |
 | [GTFS Schedule](https://gtfs.org/documentation/schedule/reference/) | Calendars, exceptions and service times |
 | [MobilityData validator](https://github.com/MobilityData/gtfs-validator) | Structural feed checks |
-| [OSM France extracts](https://download.openstreetmap.fr/extracts/europe/italy/) | Regional PBF actually downloaded |
+| [Geofabrik Italy Nord-Est](https://download.geofabrik.de/europe/italy/nord-est.html) / [osmium-tool](https://osmcode.org/osmium-tool/) | OSM source and regional clip (the OSM France extract failed D01) |
+| [Regione Liguria — Trenitalia dataset](https://dati.regione.liguria.it/dataset/ds-637) | Precedent: regional Trenitalia subset under CC BY 4.0 |
 | [OSM licence](https://www.openstreetmap.org/copyright) | Attribution and derived data |
 | [Protomaps basemaps](https://docs.protomaps.com/) / [OpenFreeMap](https://openfreemap.org/) | Self-hosted basemap; hosted fallback |
 | [Tile policy](https://operations.osmfoundation.org/policies/tiles/) / [Nominatim policy](https://operations.osmfoundation.org/policies/nominatim/) / [Transitous API policy](https://transitous.org/api/) | Avoid improper dependence on public services |
@@ -37,19 +38,23 @@ Related products: [Zuugle](https://www.zuugle.it) ([source, AGPL](https://github
 - Synthetic waiting case reproduced: one-to-all misses a short trip, plan in profile mode returns it.
 - Results outside the requested day observed: hence the independent time filter.
 - Regional OSM extract downloaded; size and hash recorded.
-- Pre-development review (25/09/2026): Transitous configures Trenitalia NeTEx and STA GTFS for MOTIS; the Trenitalia mirror responded with last modification 27/05/2026; Zuugle lists Trento, Bolzano and Merano as departure cities; `dovearrivo.it` was not registered.
+- Pre-development review (25/09/2026): Transitous configures Trenitalia NeTEx and STA GTFS for MOTIS; the Trenitalia mirror responded with last modification 27/05/2026; Zuugle lists Trento, Bolzano and Merano as departure cities.
+- Domain `dovearrivo.it` purchased by the maintainer on 25/09/2026.
 
-The fixture [synthetic-gtfs.zip](../research/synthetic-gtfs.zip) rebuilds the synthetic inputs of the test; expected results are in [routing-cases.json](../research/routing-cases.json). The experiments above were not re-run during the review: D01 must reproduce them before they are presented as evidence.
+- D01 (25/09/2026): full import with TT, Trenitalia and OSM on MOTIS v2.11.3; real outbound and return with bus–train transfers; synthetic C01/C02 reproduced. Details in [D01-engine-proof.md](../research/D01-engine-proof.md).
+
+The fixture [synthetic-gtfs.zip](../research/synthetic-gtfs.zip) rebuilds the synthetic inputs of the test; expected results are in [routing-cases.json](../research/routing-cases.json). The synthetic experiment was reproduced in D01.
 
 ## Still to verify
 
 | Point | How it closes |
 | --- | --- |
-| All feeds and walking network together | D01, real entrance and bus–train transfer |
-| Trenitalia licence, freshness and memory impact | D01, primary source and measurement |
+| Walk to a real, verified entrance | D11, on-site check |
+| Trenitalia licence | Written answer from NAP or Trenitalia |
+| Weekday and holiday dates; station shared by two feeds | Extend the D01 checks in D04 contract tests |
 | Map with local style and fonts | D07, no requests to demo servers |
 | Walking parameters and margin applied together | Transfer fixture + walking comparison |
-| Memory, import and latency on the VPS | D01/D06; not deducible from the PBF alone |
+| Memory, import and latency on the VPS | D06; measured on a laptop in D01 |
 | Destination and entrance quality | D11, on-site review |
 | Operator contact and privacy page | Before public launch |
 

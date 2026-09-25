@@ -4,7 +4,7 @@
 
 Baseline to test: a European VPS with 4 vCPU and 8 GiB RAM, e.g. Hetzner CX33 (x86, 8.49 €/month) or CAX21 (ARM, 10.49 €/month), prices excluding VAT and IPv4 as of June 2026. One server hosts Caddy, the application, MOTIS and the static basemap; the import job runs separately from the processes serving users.
 
-Target: about 11–15 €/month for hosting including VAT, IPv4 and a small backup, plus about 10 €/year for the `dovearrivo.it` domain. It is an estimate, not a quote. If D01 shows that importing the national Trenitalia feed needs more memory, move to a 16 GiB server (e.g. CAX31, 20.99 €/month) or filter the feed.
+Target: about 11–15 €/month for hosting including VAT, IPv4 and a small backup, plus about 11 €/year to renew the `dovearrivo.it` domain. It is an estimate, not a quote. D01 measured the full import (TT + Trenitalia + OSM clip + geocoding) at 14 s and a peak footprint of 3.9 GB, with the server at about 110 MB plus mapped data: 8 GiB is comfortable. Confirm on the target server in D06.
 
 No GPU requirement. No inference cost.
 
