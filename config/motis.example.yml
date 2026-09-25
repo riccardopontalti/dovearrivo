@@ -29,11 +29,10 @@ timetable:
     ttu:
       path: /data/source/urbano.zip
       extend_calendar: false
-    # Technically verified in D01 (NeTEx ZIP loads directly). Keep disabled in the
-    # public deployment until the licence is confirmed; enable locally for development.
-    # trenitalia:
-    #   path: /data/source/trenitalia-netex.zip
-    #   extend_calendar: false
+    # Verified in D01; NeTEx ZIP loads directly. Licence unstated, see docs/DATA.md.
+    trenitalia:
+      path: /data/source/trenitalia-netex.zip
+      extend_calendar: false
     # Optional:
     # sta:
     #   path: /data/source/sta.zip

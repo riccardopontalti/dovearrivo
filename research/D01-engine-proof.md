@@ -10,12 +10,12 @@ Run on 25/09/2026 on a MacBook (arm64, 8 GiB RAM) with the official MOTIS v2.11.
 | Real outbound and return | ✅ Trento Autostaz. Dante ↔ Levico Terme (Viale Lido), Saturday 26/09 |
 | Bus–train transfer | ✅ Bus B423 Levico → Pergine + train Pergine → Trento; train Levico → Povo + bus B402 |
 | Trenitalia NeTEx import | ✅ Loaded directly by MOTIS from the ZIP, no script needed |
-| Trenitalia licence | ❌ Not stated by the primary source; see below |
+| Trenitalia licence | ⚠️ Not stated by the primary source; used by maintainer decision, see below |
 | Import memory and time | ✅ 14.3 s, max RSS 1.75 GB, peak footprint 3.93 GB |
 | Query latency | ✅ 24–97 ms per `/api/v6/plan` call |
 | Geocoding | ✅ Stops of all three datasets, OSM places and addresses |
 
-**Decision:** Trenitalia is technically ready and stays enabled for local development. It stays out of the public deployment until its licence is confirmed. Until then the partial-rail rule in [PRODUCT](../docs/PRODUCT.md) applies.
+**Decision:** Trenitalia is included in the pilot. Its licence is not stated by the publisher; on 25/09/2026 the maintainer decided to use it with attribution and to remove it on request.
 
 ## Inputs
 
@@ -52,7 +52,7 @@ Product consequence: the choice of entrance and the default walking limit decide
 
 - The NAP asset and dataset pages show no licence or terms of use.
 - Regione Liguria publishes its Trenitalia subset under CC BY 4.0 ([ds-637](https://dati.regione.liguria.it/dataset/ds-637)); Toscana publishes a Trenitalia GTFS subset through its own open data portal. No equivalent Trentino dataset was found on Dati Trentino (only station locations, CC0).
-- Action: ask the NAP operator (CCISS / Ministry) and Trenitalia for the reuse terms of asset 1080596. Record the answer in [NOTICE](../NOTICE.md) and `config/sources.yaml`.
+- Maintainer decision: use the feed with attribution and remove it on request. A written confirmation from NAP or Trenitalia remains welcome and would be recorded in [NOTICE](../NOTICE.md).
 
 ## Remaining limits
 

@@ -18,7 +18,7 @@ Residents, students and visitors without a car. The distinctive value is answeri
 
 Do not copy code or content from AGPL projects into this MIT repository.
 
-First region: Trentino. Initial data: Trentino Trasporti urban and extra-urban feeds; Trenitalia regional rail is planned and must pass D01. The extra-urban feed contains only one rail line (R35 Trento–Malé–Mezzana); without Trenitalia, Valsugana and Brennero trains are missing. Until they are imported, the UI must state that rail coverage is partial and must not publish destinations whose natural access is a missing rail line.
+First region: Trentino. Initial data: Trentino Trasporti urban and extra-urban feeds; Trenitalia regional rail from the National Access Point (verified in D01). The extra-urban feed contains only one rail line (R35 Trento–Malé–Mezzana); without Trenitalia, Valsugana and Brennero trains are missing. If the Trenitalia feed is unavailable or stale, the UI must state that rail coverage is partial and must not publish destinations whose natural access is a missing rail line.
 
 ## Essential flow
 

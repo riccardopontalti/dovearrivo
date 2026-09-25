@@ -20,7 +20,7 @@ Related projects: [Zuugle](https://www.zuugle.it) (hiking tours by public transp
 
 ## Key decisions
 
-- Pilot in Trentino: Trentino Trasporti urban and extra-urban GTFS, plus Trenitalia regional rail (Valsugana and Brennero lines) subject to verification in ticket D01.
+- Pilot in Trentino: Trentino Trasporti urban and extra-urban GTFS, plus Trenitalia regional rail (Valsugana and Brennero lines) from the Italian National Access Point.
 - About 20 curated destinations with verified entrances; same-day trips.
 - SvelteKit + TypeScript for site, API and data pipeline; [MOTIS](https://github.com/motis-project/motis) for timetable routing, walking and geocoding.
 - MapLibre with a self-hosted Protomaps PMTiles basemap; no mandatory commercial API.
@@ -56,7 +56,7 @@ Details in [DELIVERY](docs/DELIVERY.md).
 
 ## Progress
 
-- **D01 — engine proof: done.** MOTIS v2.11.3 imports Trentino Trasporti, Trenitalia and OpenStreetMap together in 14 s and answers journey queries in under 100 ms, including bus–train transfers. Trenitalia stays local-only until its licence is confirmed. Details: [D01-engine-proof.md](research/D01-engine-proof.md).
+- **D01 — engine proof: done.** MOTIS v2.11.3 imports Trentino Trasporti, Trenitalia and OpenStreetMap together in 14 s and answers journey queries in under 100 ms, including bus–train transfers. Details: [D01-engine-proof.md](research/D01-engine-proof.md).
 - **Next: D02** — SvelteKit project, API contract types, CI.
 
 ## License

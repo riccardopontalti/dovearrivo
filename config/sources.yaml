@@ -23,14 +23,14 @@ transit:
     license_url: https://creativecommons.org/licenses/by/2.5/it/
     kind: gtfs-static
   - id: trenitalia
-    status: candidate
+    status: verified
     publisher: Trenitalia S.p.A.
     # Primary source: NAP asset 1080596 (IT-IT-TRENITALIA_L1.xml.gz). The pipeline repacks it as ZIP,
     # as the Transitous preprocessor does. D01 used the Transitous mirror (valid 2026-05-23..2026-12-12).
     url: https://www.cciss.it/nap/mmtis/public/api/v1/download/blob/Asset/1080596/resource
     local_name: trenitalia-netex.zip
     source_page: https://www.cciss.it/nap/mmtis/public/static/multimodal
-    license: null # not stated by the NAP (D01); ask NAP/Trenitalia; no public deployment until set
+    license: unstated # the NAP states no licence; used by maintainer decision on 2026-09-25, attribute and remove on request
     license_url: null
     kind: netex
     notes:

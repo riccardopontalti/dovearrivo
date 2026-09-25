@@ -50,7 +50,7 @@ The fixture [synthetic-gtfs.zip](../research/synthetic-gtfs.zip) rebuilds the sy
 | Point | How it closes |
 | --- | --- |
 | Walk to a real, verified entrance | D11, on-site check |
-| Trenitalia licence | Written answer from NAP or Trenitalia |
+| Trenitalia reuse terms | Optional written confirmation from NAP or Trenitalia; the feed is used meanwhile (maintainer decision) |
 | Weekday and holiday dates; station shared by two feeds | Extend the D01 checks in D04 contract tests |
 | Map with local style and fonts | D07, no requests to demo servers |
 | Walking parameters and margin applied together | Transfer fixture + walking comparison |

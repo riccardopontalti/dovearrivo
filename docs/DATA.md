@@ -8,7 +8,7 @@ Configuration lives in [sources.yaml](../config/sources.yaml). Use fixed downloa
 | --- | --- | --- |
 | TT extra-urban (GTFS) | Verified 24/09/2026 | 2,861 stops, 120 routes, 3,085 trips in the file |
 | TT urban (GTFS) | Verified 24/09/2026 | 1,113 stops, 44 routes, 3,715 trips in the file |
-| Trenitalia (NeTEx) | Technically verified in D01; licence unconfirmed | National regional/intercity rail from the National Access Point, valid 23/05–12/12/2026; 14 lines, 21,126 journeys; not in the public deployment until the licence is confirmed |
+| Trenitalia (NeTEx) | Verified in D01; licence not stated by the publisher | National regional/intercity rail from the National Access Point, valid 23/05–12/12/2026; 14 lines, 21,126 journeys |
 | STA South Tyrol (GTFS) | Optional, D01 | CC0 per Open Data Hub; also publishes GTFS-RT |
 | OSM Italy Nord-Est (Geofabrik PBF) | Verified in D01 | 623,907,525 bytes; clipped to the region with complete ways: 198,562,800 bytes |
 | OSM Trentino-Alto Adige (openstreetmap.fr) | Rejected in D01 | 10,305 missing node references; MOTIS import fails |
@@ -24,7 +24,7 @@ Extra-urban: 119 routes with `route_type=3` and R35 with `route_type=2`. Urban: 
 
 - The feed is national. Importing it whole is simplest; filtering to a bounding box saves memory but may cut through-trains. D01 measures memory with the full feed first.
 - The primary source is NAP asset 1080596 (`IT-IT-TRENITALIA_L1.xml.gz`); the Transitous preprocessor only repacks it as ZIP. Fetch the primary source directly and record its update date.
-- The NAP pages state no licence. Liguria and Toscana publish regional Trenitalia subsets under CC BY 4.0; no Trentino equivalent exists. Until the reuse terms are confirmed, Trenitalia is used only locally.
+- The NAP pages state no licence. Liguria and Toscana publish regional Trenitalia subsets under CC BY 4.0; no Trentino equivalent exists. Maintainer decision (25/09/2026): use the feed with visible attribution to Trenitalia and the NAP, never relabel it as MIT, and remove it promptly if the publisher objects.
 - MOTIS v2.11.3 loads the NeTEx ZIP directly; no Lua script is needed.
 - Check calendar coverage: the timetable changes on 13/12/2026 and a stale file may not cover the next 30 days.
 
