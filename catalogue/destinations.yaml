@@ -1,0 +1,22 @@
+# Destination catalogue. Schema: destinations.schema.json. See CONTRIBUTING.md.
+# Only `published` entries reach users. Drafts are visible only with
+# DOVEARRIVO_INCLUDE_DRAFTS=true on a local development server.
+
+- id: levico-lungolago-test
+  status: draft
+  name:
+    it: Levico Terme – lungolago (prova)
+    en: Levico Terme – lakeside (test)
+  category: test
+  description:
+    it: Punto di prova usato in D01. È un indirizzo OpenStreetMap, non un ingresso verificato.
+    en: Test point used in D01. It is an OpenStreetMap address point, not a verified entrance.
+  entrance:
+    lat: 46.0103715
+    lon: 11.2896984
+  infoUrl: https://www.openstreetmap.org/?mlat=46.0103715&mlon=11.2896984#map=18/46.0103715/11.2896984
+  check:
+    checkedAt: 2026-09-25
+    checkedBy: D01 engine proof
+    coordinateSource: OpenStreetMap address point "Viale Lido", Levico Terme (MOTIS geocoding)
+    exclusionReason: Not a verified entrance; for development only.

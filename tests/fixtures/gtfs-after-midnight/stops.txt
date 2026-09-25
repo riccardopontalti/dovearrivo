@@ -1,0 +1,3 @@
+stop_id,stop_name,stop_lat,stop_lon
+X,Notte sintetica X,46.0,11.5
+Y,Notte sintetica Y,46.1,11.6

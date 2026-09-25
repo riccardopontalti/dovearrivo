@@ -1,0 +1,41 @@
+{
+	"dataVersion": "2026-09-25-d01",
+	"availableFrom": "2026-09-24",
+	"availableTo": "2026-10-25",
+	"sources": [
+		{
+			"id": "tte",
+			"publisher": "Trentino Trasporti S.p.A.",
+			"checkedAt": "2026-09-25T07:30:00Z",
+			"feedVersion": "20260910091556.305",
+			"sourceUrl": "https://www.trentinotrasporti.it/it/opendata-it",
+			"licenseUrl": "https://creativecommons.org/licenses/by/2.5/it/"
+		},
+		{
+			"id": "ttu",
+			"publisher": "Trentino Trasporti S.p.A.",
+			"checkedAt": "2026-09-25T07:30:00Z",
+			"feedVersion": "20260910090919.487",
+			"sourceUrl": "https://www.trentinotrasporti.it/it/opendata-it",
+			"licenseUrl": "https://creativecommons.org/licenses/by/2.5/it/"
+		},
+		{
+			"id": "trenitalia",
+			"publisher": "Trenitalia S.p.A. via National Access Point",
+			"checkedAt": "2026-09-25T07:30:00Z",
+			"sourceUrl": "https://www.cciss.it/nap/mmtis/public/static/multimodal",
+			"licenseUrl": "https://github.com/riccardopontalti/dovearrivo/blob/main/NOTICE.md"
+		},
+		{
+			"id": "osm",
+			"publisher": "OpenStreetMap contributors",
+			"checkedAt": "2026-09-25T07:30:00Z",
+			"sourceUrl": "https://download.geofabrik.de/europe/italy/nord-est.html",
+			"licenseUrl": "https://www.openstreetmap.org/copyright"
+		}
+	],
+	"limitations": [
+		"Scheduled timetables only; no real-time data.",
+		"Trenitalia licence is not stated by the publisher; see NOTICE."
+	]
+}

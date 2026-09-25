@@ -21,7 +21,16 @@ export default defineConfig({
 					name: 'server',
 					environment: 'node',
 					include: ['src/**/*.{test,spec}.{js,ts}'],
-					exclude: ['src/**/*.svelte.{test,spec}.{js,ts}']
+					exclude: ['src/**/*.svelte.{test,spec}.{js,ts}', 'src/**/*.engine.spec.ts']
+				}
+			},
+			{
+				// Contract tests against a pinned MOTIS with synthetic fixtures (npm run test:engine).
+				extends: './vite.config.ts',
+				test: {
+					name: 'engine',
+					environment: 'node',
+					include: ['src/**/*.engine.spec.ts']
 				}
 			}
 		]

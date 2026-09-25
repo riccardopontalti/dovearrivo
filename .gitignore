@@ -11,3 +11,4 @@ data/
 *.pmtiles
 .output
 vite.config.ts.timestamp-*
+.engine/

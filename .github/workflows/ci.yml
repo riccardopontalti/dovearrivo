@@ -24,3 +24,27 @@ jobs:
       - run: npm run check
       - run: npm test
       - run: npm run build
+
+  engine:
+    # Contract tests against the pinned MOTIS release with synthetic fixtures (no live data).
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Download MOTIS and import fixtures
+        run: npm run engine:fixtures
+      - name: Start MOTIS
+        run: |
+          .engine/bin/motis server -d .engine/data > .engine/server.log 2>&1 &
+          for i in $(seq 1 60); do
+            curl -sf http://127.0.0.1:8090/api/v1/health > /dev/null && exit 0
+            sleep 1
+          done
+          cat .engine/server.log
+          exit 1
+      - run: npm run test:engine

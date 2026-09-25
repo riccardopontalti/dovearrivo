@@ -16,12 +16,15 @@
 		"gen:api": "openapi-typescript spec/api.openapi.yaml -o src/lib/api/types.gen.ts && node scripts/gen-schemas.ts",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-		"test:unit": "vitest",
-		"test": "npm run test:unit -- --run"
+		"test:unit": "vitest --project server",
+		"test": "npm run test:unit -- --run",
+		"engine:fixtures": "scripts/engine-fixtures.sh",
+		"test:engine": "MOTIS_URL=${MOTIS_URL:-http://127.0.0.1:8090} vitest --run --project engine"
 	},
 	"dependencies": {
 		"ajv": "8.20.0",
-		"ajv-formats": "3.0.1"
+		"ajv-formats": "3.0.1",
+		"yaml": "2.9.1"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-node": "5.5.7",
@@ -33,7 +36,6 @@
 		"svelte-check": "4.7.6",
 		"typescript": "5.9.3",
 		"vite": "8.3.1",
-		"vitest": "4.1.11",
-		"yaml": "2.9.1"
+		"vitest": "4.1.11"
 	}
 }

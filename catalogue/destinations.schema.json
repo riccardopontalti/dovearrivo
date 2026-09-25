@@ -1,0 +1,70 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://github.com/riccardopontalti/dovearrivo/catalogue/destinations.schema.json",
+	"title": "DoveArrivo destination catalogue",
+	"type": "array",
+	"maxItems": 24,
+	"items": {
+		"type": "object",
+		"additionalProperties": false,
+		"required": [
+			"id",
+			"status",
+			"name",
+			"category",
+			"description",
+			"entrance",
+			"infoUrl",
+			"check"
+		],
+		"properties": {
+			"id": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$", "maxLength": 60 },
+			"status": { "enum": ["draft", "published"] },
+			"name": { "$ref": "#/$defs/localized" },
+			"category": { "enum": ["town", "lake", "park", "viewpoint", "test"] },
+			"description": { "$ref": "#/$defs/localizedLong" },
+			"entrance": {
+				"type": "object",
+				"additionalProperties": false,
+				"required": ["lat", "lon"],
+				"properties": {
+					"lat": { "type": "number", "minimum": 45.5, "maximum": 47.2 },
+					"lon": { "type": "number", "minimum": 10.3, "maximum": 12.6 }
+				}
+			},
+			"infoUrl": { "type": "string", "format": "uri", "pattern": "^https://" },
+			"accessNotes": { "$ref": "#/$defs/localizedLong" },
+			"check": {
+				"type": "object",
+				"additionalProperties": false,
+				"required": ["checkedAt", "checkedBy", "coordinateSource"],
+				"properties": {
+					"checkedAt": { "type": "string", "format": "date" },
+					"checkedBy": { "type": "string", "minLength": 1 },
+					"coordinateSource": { "type": "string", "minLength": 1 },
+					"exclusionReason": { "type": "string" }
+				}
+			}
+		}
+	},
+	"$defs": {
+		"localized": {
+			"type": "object",
+			"additionalProperties": false,
+			"required": ["it", "en"],
+			"properties": {
+				"it": { "type": "string", "minLength": 1, "maxLength": 80 },
+				"en": { "type": "string", "minLength": 1, "maxLength": 80 }
+			}
+		},
+		"localizedLong": {
+			"type": "object",
+			"additionalProperties": false,
+			"required": ["it", "en"],
+			"properties": {
+				"it": { "type": "string", "minLength": 1, "maxLength": 500 },
+				"en": { "type": "string", "minLength": 1, "maxLength": 500 }
+			}
+		}
+	}
+}

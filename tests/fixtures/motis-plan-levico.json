@@ -1,0 +1,111 @@
+{
+ "_note": "Trimmed real MOTIS v2.11.3 /api/v6/plan response (D01 data, 2026-09-25): Levico Terme lakeside test point to Trento. Autostaz. Dante, arriveBy 19:00. Timetables: Trentino Trasporti (CC BY 2.5 IT) and Trenitalia via NAP; walking: OpenStreetMap (ODbL). Geometry strings truncated.",
+ "itineraries": [
+  {
+   "startTime": "2026-09-26T13:12:00Z",
+   "endTime": "2026-09-26T14:33:00Z",
+   "transfers": 1,
+   "legs": [
+    {
+     "mode": "WALK",
+     "from": {
+      "name": "START",
+      "lat": 46.0103715,
+      "lon": 11.2896984
+     },
+     "to": {
+      "name": "LEVICO",
+      "stopId": "trenitalia_IT::Quay:otherTRENITALIA:830002309",
+      "lat": 46.005707,
+      "lon": 11.304939000000001
+     },
+     "duration": 1800,
+     "startTime": "2026-09-26T13:12:00Z",
+     "endTime": "2026-09-26T13:42:00Z",
+     "legGeometry": {
+      "points": "g_gwvAceapT????TeFOid@kA",
+      "precision": 6,
+      "length": 127
+     }
+    },
+    {
+     "mode": "REGIONAL_RAIL",
+     "from": {
+      "name": "LEVICO",
+      "stopId": "trenitalia_IT::Quay:otherTRENITALIA:830002309",
+      "lat": 46.005707,
+      "lon": 11.304939000000001
+     },
+     "to": {
+      "name": "POVO",
+      "stopId": "trenitalia_IT::Quay:otherTRENITALIA:830002302",
+      "lat": 46.065681,
+      "lon": 11.142619
+     },
+     "duration": 1740,
+     "startTime": "2026-09-26T13:42:00Z",
+     "endTime": "2026-09-26T14:11:00Z",
+     "headsign": "",
+     "tripId": "20260926_14:25_trenitalia_IT::VehicleJourney:railTRENITALIA:10083_0_1-16118-310C-0083_1-16118-310C-0083",
+     "routeShortName": "REG",
+     "displayName": "REG",
+     "legGeometry": {
+      "points": "u{}vvAu}~pTd|NhjmAwcRlan",
+      "precision": 6,
+      "length": 6
+     }
+    },
+    {
+     "mode": "WALK",
+     "from": {
+      "name": "POVO",
+      "stopId": "trenitalia_IT::Quay:otherTRENITALIA:830002302",
+      "lat": 46.065681,
+      "lon": 11.142619
+     },
+     "to": {
+      "name": "Trento. Via Valsugana",
+      "stopId": "tte_1248",
+      "lat": 46.069121,
+      "lon": 11.136315999999999
+     },
+     "duration": 600,
+     "startTime": "2026-09-26T14:11:00Z",
+     "endTime": "2026-09-26T14:21:00Z",
+     "legGeometry": {
+      "points": "}_szvA}zagT_F\\oDF??eC???",
+      "precision": 6,
+      "length": 135
+     }
+    },
+    {
+     "mode": "BUS",
+     "from": {
+      "name": "Trento. Via Valsugana",
+      "stopId": "tte_1248",
+      "lat": 46.069121,
+      "lon": 11.136315999999999
+     },
+     "to": {
+      "name": "Trento. Autostaz. Dante",
+      "stopId": "tte_1",
+      "lat": 46.070785,
+      "lon": 11.118457
+     },
+     "duration": 480,
+     "startTime": "2026-09-26T14:25:00Z",
+     "endTime": "2026-09-26T14:33:00Z",
+     "headsign": "Trento. Autostaz. Dante",
+     "tripId": "20260926_15:55_tte_0003503832026091020270625",
+     "routeShortName": "B402",
+     "displayName": "B402",
+     "legGeometry": {
+      "points": "awyzvAwrufTkCIFkDF{ALBxB",
+      "precision": 6,
+      "length": 159
+     }
+    }
+   ]
+  }
+ ]
+}

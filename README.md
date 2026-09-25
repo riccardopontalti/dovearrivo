@@ -61,7 +61,8 @@ Details in [DELIVERY](docs/DELIVERY.md).
 - **D01 — engine proof: done.** MOTIS v2.11.3 imports Trentino Trasporti, Trenitalia and OpenStreetMap together in 14 s and answers journey queries in under 100 ms, including bus–train transfers. Details: [D01-engine-proof.md](research/D01-engine-proof.md).
 - **D02 — project and contracts: done.** SvelteKit app, types and runtime validation generated from the OpenAPI contract, mock API over the synthetic fixture, Italian/English skeleton, CI.
 - **D03 — routing domain: done.** Pure, tested functions choose the outbound/return pair, the backup return on a different first vehicle and the ranking; partial failures stay visible.
-- **Next: D04** — MOTIS adapter and real search API.
+- **D04 — MOTIS adapter: done.** Real searches over Trentino Trasporti, Trenitalia and OpenStreetMap answer in under 100 ms locally; engine contract tests run in CI against the pinned MOTIS release.
+- **Next: D05** — minimal search UI (form and results list).
 
 ## Local development
 
@@ -77,6 +78,16 @@ npm run gen:api    # regenerate types and schemas after editing spec/api.openapi
 ```
 
 The mock backend serves only the synthetic stops "Origine sintetica A" (`syn_A`) and "Destinazione sintetica B". It never returns real timetables.
+
+Engine contract tests (downloads the pinned MOTIS release, verifies its checksum and imports synthetic fixtures):
+
+```bash
+npm run engine:fixtures
+.engine/bin/motis server -d .engine/data &
+npm run test:engine
+```
+
+To run against real data, import the sources as described in [D01-engine-proof.md](research/D01-engine-proof.md), write a manifest like [manifest.example.json](config/manifest.example.json) and start the app with `DOVEARRIVO_BACKEND=motis MOTIS_URL=http://127.0.0.1:8080 DOVEARRIVO_MANIFEST=data/manifest.json`. Add `DOVEARRIVO_INCLUDE_DRAFTS=true` locally to include draft destinations.
 
 ## How this project is built
 

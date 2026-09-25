@@ -15,6 +15,8 @@ Four phases, about 6 weeks for one person with coding agents and human review. A
 
 **D03 status (25/09/2026): done** — `src/lib/domain`: deduplication, per-leg filters, outbound/return pairing, backup return on a distinct first trip, destination ranking and partial/complete aggregation. Cases C01–C06, C08 and C09 run as unit tests (mapping in `research/routing-cases.json`); mutation checks confirmed the C04 tests catch a broken backup rule. C07, C10 and C11 need the engine or the pipeline and move to D04/D06.
 
+**D04 status (25/09/2026): done** — `src/lib/server/motis`: query builder, client with per-call timeouts, normalisation to contract Journeys, one extra page per direction with truncation detection, global limit of 4 concurrent calls, 12 s search budget, in-memory LRU cache (64 MiB, 15 min) keyed by request, catalogue, data version and engine version. The destination catalogue is YAML validated by `catalogue/destinations.schema.json`; the data status comes from the snapshot manifest (72 h warning, 7 day suspension). CI runs C01, C02, C07 and an unknown-stop check against pinned MOTIS with synthetic fixtures. End-to-end on real data (Trento → Levico test point): 85 ms per search. C10 is covered by the engine itself: without a walking network MOTIS does not route to coordinates, so no straight-line fallback exists; a check with OSM on a verified entrance moves to D11.
+
 D01 decides whether Trenitalia enters the pilot. If the feed is stale, its licence is unclear or memory exceeds the server, record the reason and apply the partial-rail rule in [PRODUCT](PRODUCT.md).
 
 ## Phase 2 — Walking skeleton online (weeks 2–3)

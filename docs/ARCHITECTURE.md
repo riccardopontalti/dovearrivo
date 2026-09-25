@@ -46,6 +46,8 @@ The proxy exposes only the application and static assets. MOTIS stays on the pri
 - `config`: sources and reproducible settings.
 - `tests`: synthetic fixtures, integration and user flows.
 
+Runtime configuration (environment): `DOVEARRIVO_BACKEND` (`mock` or `motis`), `MOTIS_URL`, `DOVEARRIVO_CATALOGUE` (default `catalogue/destinations.yaml`), `DOVEARRIVO_MANIFEST` (snapshot manifest written by the pipeline) and `DOVEARRIVO_INCLUDE_DRAFTS` (local development only).
+
 UI and API share types generated from the [OpenAPI](../spec/api.openapi.yaml) contract. The backend still validates input at runtime.
 
 ## Deliberate choices
