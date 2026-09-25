@@ -81,9 +81,10 @@
 			const cells = 20 + name + 4;
 			size = { mode: 'wide', cell: Math.min(34, Math.floor(w / cells) - gap), name };
 		} else if (w >= 560) {
-			const name = 15;
-			const cells = 15 + name + 3;
-			size = { mode: 'medium', cell: Math.floor(w / cells) - gap, name };
+			// Leaves, destination, return: the arrival time is in the row's text and the trip.
+			const name = w >= 630 ? 20 : 16;
+			const cells = 10 + name + 2;
+			size = { mode: 'medium', cell: Math.min(30, Math.floor(w / cells) - gap), name };
 		} else {
 			const cell = 17;
 			size = { mode: 'narrow', cell, name: Math.max(10, Math.floor(w / (cell + gap))) };
@@ -141,7 +142,7 @@
 		<h2 id="board-title">
 			<span class="visually-hidden">{title}</span>
 			{#if mounted}
-				<FlapText text={size.mode === 'narrow' ? shortTitle : title} length={size.mode === 'narrow' ? size.name - 6 : size.name + 11} still />
+				<FlapText text={size.mode === 'narrow' ? shortTitle : title} length={size.mode === 'narrow' ? size.name - 6 : size.mode === 'wide' ? size.name + 11 : size.name + 5} still />
 			{:else}
 				<BlankFlaps length={size.name + 11} />
 			{/if}
@@ -156,7 +157,7 @@
 		<div class="cols" aria-hidden="true">
 			<span style="--n:5">{t.colTime}</span>
 			<span style="--n:{size.name}">{t.colDest}</span>
-			<span style="--n:5">{t.colArrive}</span>
+			{#if size.mode === 'wide'}<span style="--n:5">{t.colArrive}</span>{/if}
 			<span style="--n:5">{t.colLeave}</span>
 			{#if size.mode === 'wide'}<span style="--n:5">{t.colBackup}</span>{/if}
 		</div>
@@ -179,7 +180,9 @@
 						{:else}
 							<span class="time"><FlapText text={row.depart} length={5} delay={i * 110} {still} /></span>
 							<FlapText text={row.name} length={size.name} delay={i * 110 + 120} stagger={28} {still} />
-							<span class="time"><FlapText text={row.arrive} length={5} delay={i * 110 + 300} {still} /></span>
+							{#if size.mode === 'wide'}
+								<span class="time"><FlapText text={row.arrive} length={5} delay={i * 110 + 300} {still} /></span>
+							{/if}
 							<span class="time"><FlapText text={row.leave} length={5} delay={i * 110 + 380} {still} /></span>
 							{#if size.mode === 'wide'}
 								<span class="time"><FlapText text={row.backup ?? '-'} length={5} delay={i * 110 + 460} {still} /></span>
@@ -190,9 +193,9 @@
 				{:else}
 					<div class="row blank" aria-hidden="true">
 						{#if mounted && i === 0 && visualMessage}
-							<FlapText text={visualMessage} length={size.mode === 'narrow' ? size.name : size.name + 20} stagger={30} still={still || !live} />
+							<FlapText text={visualMessage} length={size.mode === 'narrow' ? size.name : size.mode === 'wide' ? size.name + 20 : size.name + 10} stagger={30} still={still || !live} />
 						{:else}
-							<BlankFlaps length={size.mode === 'narrow' ? size.name : size.mode === 'wide' ? size.name + 24 : size.name + 18} />
+							<BlankFlaps length={size.mode === 'narrow' ? size.name : size.mode === 'wide' ? size.name + 24 : size.name + 12} />
 						{/if}
 					</div>
 				{/if}

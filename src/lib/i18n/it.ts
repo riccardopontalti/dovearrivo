@@ -131,6 +131,7 @@ export const it = {
 	heroLine3: 'in tempo?',
 	reachTitleHome: 'Fin dove arrivi in 90 minuti',
 	reachScrollHint: 'Scorri: ogni punto è una fermata raggiungibile, nell\'ordine in cui la raggiungi.',
+	reachScrollCue: 'Scorri: il tempo avanza',
 	reachCounter: 'entro {m} min',
 	reachStops: '{n} fermate',
 	tickerLabel: 'Mete nel catalogo',

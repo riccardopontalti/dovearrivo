@@ -133,6 +133,7 @@ export const en: Messages = {
 	heroLine3: 'in time?',
 	reachTitleHome: 'How far you get in 90 minutes',
 	reachScrollHint: 'Scroll: each dot is a stop you can reach, in the order you reach it.',
+	reachScrollCue: 'Scroll: the clock runs',
 	reachCounter: 'within {m} min',
 	reachStops: '{n} stops',
 	tickerLabel: 'Destinations in the catalogue',

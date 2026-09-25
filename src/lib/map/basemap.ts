@@ -1,6 +1,7 @@
 // Loads MapLibre with the self-hosted basemap (/basemap: PMTiles, fonts, sprites).
 // Throws when the basemap or WebGL is unavailable so callers can show a text fallback.
 import type { Map as MapLibreMap, MapOptions } from 'maplibre-gl';
+import type { LayerSpecification } from 'maplibre-gl';
 import { effectiveTheme } from '$lib/theme';
 
 export type MapLibre = typeof import('maplibre-gl');
@@ -60,7 +61,7 @@ export async function createBasemapMap(
 	container: HTMLElement,
 	locale: 'it' | 'en',
 	options: Omit<MapOptions, 'container' | 'style'>,
-	look: 'auto' | 'paper' = 'auto'
+	look: 'auto' | 'paper' | 'print' = 'auto'
 ): Promise<BasemapMap> {
 	const meta = await fetch('/basemap/basemap.json');
 	if (!meta.ok || !webglAvailable()) throw new Error('basemap unavailable');
@@ -97,11 +98,11 @@ export async function createBasemapMap(
 					attribution
 				}
 			},
-			layers: basemaps.layers('protomaps', colors, { lang: locale })
+			layers: look === 'print' ? printLayers(flavor, locale) : basemaps.layers('protomaps', colors, { lang: locale })
 		},
 		attributionControl: { compact: true }
 	});
-	map.addControl(new ml.NavigationControl({ showCompass: false }), 'top-right');
+	if (options.interactive !== false) map.addControl(new ml.NavigationControl({ showCompass: false }), 'top-right');
 	return { ml, map };
 }
 
@@ -112,4 +113,88 @@ export function boundsOf(coords: Array<[number, number]>): [number, number, numb
 		(b, [x, y]) => [Math.min(b[0], x), Math.min(b[1], y), Math.max(b[2], x), Math.max(b[3], y)],
 		[Infinity, Infinity, -Infinity, -Infinity]
 	);
+}
+
+/**
+ * "Printed map" style for the home page reach map: paper, forests a shade darker so the
+ * valleys read, lakes and rivers in grey-blue, railways in the old black-and-white pattern,
+ * town names in spaced capitals. Only a few layers of the basemap, drawn in the site style.
+ */
+export function printLayers(flavor: 'light' | 'dark', locale: 'it' | 'en'): LayerSpecification[] {
+	const c =
+		flavor === 'light'
+			? { paper: '#ede9df', forest: '#dedace', water: '#c3cfcd', waterEdge: '#8fa19e', road: '#d3cdbd', rail: '#111111', label: '#3d3b36' }
+			: { paper: '#111110', forest: '#191a17', water: '#1d2729', waterEdge: '#3b4b4d', road: '#2a2a26', rail: '#ede9df', label: '#bdb8ad' };
+	const name = ['coalesce', ['get', `name:${locale}`], ['get', 'name']];
+	return [
+		{ id: 'paper', type: 'background', paint: { 'background-color': c.paper } },
+		{
+			id: 'forest',
+			type: 'fill',
+			source: 'protomaps',
+			'source-layer': 'landuse',
+			filter: ['in', 'kind', 'forest', 'wood', 'scrub', 'nature_reserve', 'protected_area'],
+			paint: { 'fill-color': c.forest }
+		},
+		{
+			id: 'water',
+			type: 'fill',
+			source: 'protomaps',
+			'source-layer': 'water',
+			filter: ['==', '$type', 'Polygon'],
+			paint: { 'fill-color': c.water, 'fill-outline-color': c.waterEdge }
+		},
+		{
+			id: 'rivers',
+			type: 'line',
+			source: 'protomaps',
+			'source-layer': 'water',
+			filter: ['in', 'kind', 'river'],
+			paint: { 'line-color': c.waterEdge, 'line-width': ['interpolate', ['linear'], ['zoom'], 8, 0.6, 13, 2.2] }
+		},
+		{
+			id: 'roads',
+			type: 'line',
+			source: 'protomaps',
+			'source-layer': 'roads',
+			filter: ['in', 'kind', 'highway', 'major_road'],
+			paint: { 'line-color': c.road, 'line-width': ['interpolate', ['linear'], ['zoom'], 8, 0.5, 13, 2] }
+		},
+		{
+			id: 'rail-base',
+			type: 'line',
+			source: 'protomaps',
+			'source-layer': 'roads',
+			filter: ['==', 'kind', 'rail'],
+			paint: { 'line-color': c.rail, 'line-width': ['interpolate', ['linear'], ['zoom'], 8, 1.6, 13, 3.4] }
+		},
+		{
+			id: 'rail-dash',
+			type: 'line',
+			source: 'protomaps',
+			'source-layer': 'roads',
+			filter: ['==', 'kind', 'rail'],
+			paint: {
+				'line-color': c.paper,
+				'line-width': ['interpolate', ['linear'], ['zoom'], 8, 0.7, 13, 1.8],
+				'line-dasharray': [3, 3]
+			}
+		},
+		{
+			id: 'towns',
+			type: 'symbol',
+			source: 'protomaps',
+			'source-layer': 'places',
+			filter: ['all', ['==', 'kind', 'locality'], ['in', 'kind_detail', 'city', 'town']],
+			layout: {
+				'text-field': name as unknown as string,
+				'text-font': ['Noto Sans Medium'],
+				'text-size': ['interpolate', ['linear'], ['zoom'], 8, 10, 13, 13],
+				'text-transform': 'uppercase',
+				'text-letter-spacing': 0.14,
+				'text-max-width': 8
+			},
+			paint: { 'text-color': c.label, 'text-halo-color': c.paper, 'text-halo-width': 1.6 }
+		}
+	];
 }

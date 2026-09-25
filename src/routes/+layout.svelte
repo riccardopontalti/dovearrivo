@@ -40,7 +40,8 @@
 
 <style>
 	/* "Tabellone" palette: paper, ink and one signal yellow (DESIGN-BRIEF.md). Yellow is used
-	   only as a background under ink or outlined in ink: on paper it has no contrast. */
+	   only as a background under ink or outlined in ink: on paper it has no contrast.
+	   Light by default; dark only when chosen with the header switch. */
 	:global(:root) {
 		--paper: #ede9df;
 		--surface: #f7f5ef;
@@ -87,29 +88,6 @@
 		--band-3: #184f95;
 		--band-4: #0d366b;
 		color-scheme: light;
-	}
-	@media (prefers-color-scheme: dark) {
-		:global(:root:not([data-theme='light'])) {
-			--paper: #111110;
-			--surface: #1b1b19;
-			--surface-2: #262623;
-			--ink: #ede9df;
-			--muted: #a9a59b;
-			--rule: #ede9df;
-			--hair: rgb(237 233 223 / 0.16);
-			--notice: #3b3417;
-			--alert: #4a2320;
-			--out: var(--ink);
-			--back-edge: #111110;
-			--focus: var(--signal);
-			--accent-soft: rgb(255 199 0 / 0.2);
-			--band-0: #184f95;
-			--band-1: #2a78d6;
-			--band-2: #5598e7;
-			--band-3: #86b6ef;
-			--band-4: #b7d3f6;
-			color-scheme: dark;
-		}
 	}
 	:global(:root[data-theme='dark']) {
 		--paper: #111110;

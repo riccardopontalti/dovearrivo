@@ -13,7 +13,7 @@ const SECURITY_HEADERS: Record<string, string> = {
 export const handle: Handle = async ({ event, resolve }) => {
 	const locale = localeFromUrl(event.url);
 	event.locals.locale = locale;
-	// Theme chosen with the header switch; without the cookie the page follows the system.
+	// Theme chosen with the header switch; without the cookie the page is light.
 	const theme = themeFromCookie(event.cookies.get(THEME_COOKIE));
 	const response = await resolve(event, {
 		transformPageChunk: ({ html }) => html.replace('%lang%', locale).replace('%theme%', theme ?? '')

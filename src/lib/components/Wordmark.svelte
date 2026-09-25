@@ -1,57 +1,29 @@
 <script lang="ts">
-	// Wordmark: "Dove" light, "Arrivo" heavy, and the last "o" drawn as a stop on a line map,
-	// the place you arrive at. The letter stays in the text for copy and assistive technology.
+	// Wordmark: heavy slanted grotesque, like railway brands; "Arrivo" on a signal-yellow
+	// band, the place you get to. Plain text, so it reads, copies and scales like text.
 	let { text = 'DoveArrivo' }: { text?: string } = $props();
-	const light = $derived(text.startsWith('Dove') ? 'Dove' : '');
-	const heavy = $derived(text.slice(light.length, -1));
-	const last = $derived(text.slice(-1));
+	const first = $derived(text.startsWith('Dove') ? 'Dove' : text);
+	const second = $derived(text.startsWith('Dove') ? text.slice(4) : '');
 </script>
 
-<span class="wordmark"><span class="light">{light}</span><span class="heavy">{heavy}<span class="stop">{last}</span></span></span>
+<span class="wordmark"><span class="first">{first}</span>{#if second}<span class="second">{second}</span>{/if}</span>
 
 <style>
 	.wordmark {
 		display: inline-flex;
 		align-items: baseline;
-		letter-spacing: -0.03em;
+		font-weight: 900;
+		font-stretch: 88%;
+		letter-spacing: -0.035em;
 		line-height: 1;
 		white-space: nowrap;
+		/* A slant drawn from the upright font: no extra italic file to download. */
+		transform: skewX(-9deg);
 	}
-	.light {
-		font-weight: 350;
-		font-stretch: 88%;
-	}
-	.heavy {
-		font-weight: 850;
-		font-stretch: 78%;
-	}
-	.stop {
-		position: relative;
-		display: inline-block;
-		color: transparent;
-		margin-left: 0.04em;
-	}
-	/* The stop: a signal-yellow ring the size of the "o". */
-	.stop::before {
-		content: '';
-		position: absolute;
-		left: 50%;
-		/* Sits on the baseline, as tall as the lowercase letters. */
-		bottom: 0.2em;
-		width: 0.5em;
-		height: 0.5em;
-		transform: translateX(-50%);
-		border: 0.1em solid var(--ink);
-		border-radius: 50%;
+	.second {
+		margin-left: 0.1em;
+		padding: 0.02em 0.14em 0.06em;
 		background: var(--signal);
-		box-sizing: border-box;
-	}
-	@media (forced-colors: active) {
-		.stop {
-			color: CanvasText;
-		}
-		.stop::before {
-			display: none;
-		}
+		color: #111;
 	}
 </style>

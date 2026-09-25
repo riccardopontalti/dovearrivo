@@ -83,6 +83,24 @@
 		document.getElementById(`card-${id}`)?.scrollIntoView({ block: 'nearest', behavior: smooth() });
 	}
 
+	/** Arms a card's scene, then plays it once when the card comes into view. Without
+	 * JavaScript the scenes show their final state. */
+	const reveal = (el: HTMLElement) => {
+		if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+		el.classList.add('armed');
+		const io = new IntersectionObserver(
+			(entries) => {
+				if (entries.some((e) => e.isIntersecting)) {
+					el.classList.add('in');
+					io.disconnect();
+				}
+			},
+			{ threshold: 0.45 }
+		);
+		io.observe(el);
+		return () => io.disconnect();
+	};
+
 	/** Opens the search editor after an error or an ambiguous place; set only when that changes. */
 	const openOnProblems = (open: boolean) => (el: HTMLDetailsElement) => {
 		el.open = open;
@@ -153,6 +171,9 @@
 						<SearchForm {t} locale={data.locale} form={data.form} status={data.status} {busy} bind:from bind:query />
 					</div>
 				</div>
+				<div class="board-slot">
+					<Board {t} locale={data.locale} />
+				</div>
 			</section>
 
 			{#if destinationList.length}
@@ -170,27 +191,57 @@
 				</div>
 			{/if}
 
-			<section class="board-section">
-				<Board {t} locale={data.locale} />
-			</section>
-
 			<section class="how" aria-labelledby="how-title">
 				<h2 id="how-title">{t.howTitle}</h2>
-				<ol>
-					<li>
-						<span class="num" aria-hidden="true">01</span>
-						<h3>{t.how1Title}</h3>
-						<p>{t.how1Text}</p>
+				<ol class="stack">
+					<li class="card c1" style="--i:0" {@attach reveal}>
+						<div class="scene" aria-hidden="true">
+							<div class="mini-field">
+								<span class="mini-label">{t.from}</span>
+								<span class="mini-value"><span class="typed">Trento</span><span class="caret"></span></span>
+							</div>
+							<div class="mini-times">
+								<span class="mini-chip" style="--d:1">09:00</span>
+								<span class="mini-dash">→</span>
+								<span class="mini-chip" style="--d:2">19:00</span>
+							</div>
+						</div>
+						<div class="card-text">
+							<span class="num" aria-hidden="true">01</span>
+							<h3>{t.how1Title}</h3>
+							<p>{t.how1Text}</p>
+						</div>
 					</li>
-					<li>
-						<span class="num" aria-hidden="true">02</span>
-						<h3>{t.how2Title}</h3>
-						<p>{t.how2Text}</p>
+					<li class="card c2" style="--i:1" {@attach reveal}>
+						<div class="scene" aria-hidden="true">
+							<div class="mini-ribbon">
+								<span class="seg out"></span>
+								<span class="seg stay"></span>
+								<span class="seg back"></span>
+								<span class="flag"></span>
+							</div>
+							<div class="mini-hours"><span>09</span><span>12</span><span>15</span><span>19</span></div>
+							<span class="mini-ok">✓ {fill(t.ribbonBackBy, { time: '19:00' })}</span>
+						</div>
+						<div class="card-text">
+							<span class="num" aria-hidden="true">02</span>
+							<h3>{t.how2Title}</h3>
+							<p>{t.how2Text}</p>
+						</div>
 					</li>
-					<li>
-						<span class="num" aria-hidden="true">03</span>
-						<h3>{t.how3Title}</h3>
-						<p>{t.how3Text}</p>
+					<li class="card c3" style="--i:2" {@attach reveal}>
+						<div class="scene" aria-hidden="true">
+							<div class="mini-ticket">
+								<span class="mini-stub"></span>
+								<span class="mini-lines"><span></span><span></span><span></span></span>
+								<span class="mini-stamp">{t.backup}<b>18:40</b></span>
+							</div>
+						</div>
+						<div class="card-text">
+							<span class="num" aria-hidden="true">03</span>
+							<h3>{t.how3Title}</h3>
+							<p>{t.how3Text}</p>
+						</div>
 					</li>
 				</ol>
 				<p class="data-line">{t.howData}</p>
@@ -379,11 +430,13 @@
 	/* ---------- home: hero ---------- */
 	.hero {
 		display: grid;
-		grid-template-columns: 1fr;
+		grid-template-columns: minmax(0, 1fr);
+		grid-template-areas: 'kicker' 'title' 'side' 'board';
 		gap: 1.25rem;
-		padding: clamp(1.25rem, 4vw, 3.5rem) clamp(1rem, 3vw, 2.5rem) clamp(2rem, 5vw, 4rem);
+		padding: clamp(1.25rem, 3vw, 2.5rem) clamp(1rem, 3vw, 2.5rem) clamp(2rem, 4vw, 3rem);
 	}
 	.kicker {
+		grid-area: kicker;
 		display: inline-flex;
 		align-items: center;
 		gap: 0.6rem;
@@ -408,15 +461,15 @@
 		}
 	}
 	h1 {
+		grid-area: title;
 		margin: 0;
-		font-size: clamp(3rem, 8.6vw, 9.5rem);
+		font-size: clamp(3rem, 12.5vw, 6.6rem);
 		font-weight: 850;
-		font-stretch: 100%;
 		letter-spacing: -0.045em;
 		line-height: 0.86;
 	}
 	@supports (animation-timeline: scroll()) {
-		/* Scrolling squeezes the headline as it leaves. */
+		/* Scrolling lifts and fades the headline as it leaves. */
 		h1 {
 			animation: squeeze linear both;
 			animation-timeline: scroll(root);
@@ -480,16 +533,16 @@
 		}
 	}
 	.side {
+		grid-area: side;
 		display: grid;
 		gap: 1.25rem;
-		align-content: end;
 	}
 	.lead {
 		margin: 0;
 		max-width: 34rem;
-		font-size: clamp(1.05rem, 1.6vw, 1.25rem);
+		font-size: clamp(1.05rem, 1.5vw, 1.2rem);
 		line-height: 1.45;
-		animation: fade 800ms 700ms var(--ease) backwards;
+		animation: fade 800ms 600ms var(--ease) backwards;
 	}
 	.panel {
 		display: grid;
@@ -504,6 +557,11 @@
 	.panel .notice {
 		margin: 0;
 	}
+	.board-slot {
+		grid-area: board;
+		min-width: 0;
+		margin-top: 1rem;
+	}
 	@keyframes fade {
 		from {
 			opacity: 0;
@@ -516,23 +574,26 @@
 			box-shadow: 0 0 0 var(--ink);
 		}
 	}
-	@media (min-width: 1000px) {
+	/* Desktop: words and search on the left, the departures board on the right, all on the
+	   first screen. */
+	@media (min-width: 1100px) {
 		.hero {
-			grid-template-columns: minmax(0, 1fr) minmax(22rem, 27rem);
-			grid-template-areas: 'kicker kicker' 'title side';
-			column-gap: clamp(2rem, 4vw, 4rem);
-			align-items: end;
-			min-height: calc(100svh - 12rem);
-		}
-		.kicker {
-			grid-area: kicker;
-			align-self: start;
+			grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+			grid-template-rows: auto auto 1fr;
+			grid-template-areas:
+				'kicker board'
+				'title board'
+				'side board';
+			column-gap: clamp(2rem, 4vw, 4.5rem);
+			row-gap: 1.5rem;
+			align-items: start;
 		}
 		h1 {
-			grid-area: title;
+			font-size: clamp(3.4rem, 5.6vw, 6.4rem);
 		}
-		.side {
-			grid-area: side;
+		.board-slot {
+			margin-top: 0;
+			align-self: center;
 		}
 	}
 
@@ -578,76 +639,307 @@
 		}
 	}
 
-	/* ---------- board ---------- */
-	.board-section {
-		padding: clamp(2rem, 6vw, 5rem) clamp(0.75rem, 3vw, 2.5rem);
-	}
-
-	/* ---------- how it works ---------- */
+	/* ---------- how it works: stacked cards ---------- */
 	.how {
-		padding: clamp(2.5rem, 7vw, 6rem) clamp(1rem, 3vw, 2.5rem);
+		padding: clamp(2.5rem, 7vw, 6rem) clamp(1rem, 3vw, 2.5rem) clamp(2rem, 5vw, 4rem);
 		border-top: 1.5px solid var(--rule);
 	}
 	.how h2 {
-		margin: 0 0 2rem;
+		margin: 0 0 1.5rem;
 		font-size: clamp(2.4rem, 6vw, 5rem);
 	}
-	.how ol {
+	.stack {
 		list-style: none;
 		margin: 0;
-		padding: 0;
+		padding: 0 0 12vh;
 		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
-		border-top: 1.5px solid var(--rule);
+		gap: 12vh;
 	}
-	.how li {
-		padding: 1.25rem 1.25rem 1.5rem 0;
+	.card {
+		position: sticky;
+		top: calc(5rem + var(--i) * 1.6rem);
+		display: grid;
+		grid-template-columns: 1fr;
+		min-height: min(26rem, 70svh);
+		border: 1.5px solid var(--rule);
+		border-radius: 14px;
+		overflow: hidden;
+		box-shadow: 0 -10px 30px -12px rgb(0 0 0 / 0.25);
 	}
-	.how li + li {
-		border-top: 1px solid var(--hair);
+	.c1 {
+		background: var(--surface);
 	}
-	@media (min-width: 800px) {
-		.how li + li {
-			border-top: 0;
-			border-left: 1px solid var(--hair);
-			padding-left: 1.25rem;
-		}
+	.c2 {
+		background: var(--signal);
+		color: #111;
+	}
+	.c3 {
+		background: #111;
+		color: #ede9df;
+		border-color: #111;
+	}
+	.scene {
+		position: relative;
+		display: grid;
+		place-content: center;
+		gap: 1rem;
+		min-height: 12rem;
+		padding: 1.5rem;
+		border-bottom: 1.5px dashed currentColor;
+	}
+	.card-text {
+		padding: 1.25rem 1.5rem 1.5rem;
+		align-self: end;
 	}
 	.num {
 		display: block;
 		font-family: var(--font-mono);
-		font-size: clamp(2.6rem, 5vw, 4rem);
+		font-size: clamp(2.4rem, 5vw, 3.6rem);
 		font-weight: 700;
 		letter-spacing: -0.06em;
 		line-height: 1;
 	}
-	.how h3 {
-		margin: 1rem 0 0.5rem;
-		font-size: 1.6rem;
+	.card h3 {
+		margin: 0.8rem 0 0.5rem;
+		font-size: clamp(1.6rem, 3vw, 2.4rem);
 	}
-	.how li p {
+	.card p {
 		margin: 0;
-		color: var(--muted);
-		max-width: 26rem;
+		max-width: 28rem;
+		opacity: 0.85;
+	}
+	@media (min-width: 800px) {
+		.card {
+			grid-template-columns: 1.1fr 1fr;
+		}
+		.scene > * {
+			scale: 1.3;
+		}
+		.scene {
+			border-bottom: 0;
+			border-right: 1.5px dashed currentColor;
+		}
+	}
+	/* Scene 1: typing a place, then the time window. */
+	.mini-field {
+		width: min(20rem, 70vw);
+		padding: 0.6rem 0.8rem;
+		border: 1.5px solid var(--rule);
+		border-radius: 4px;
+		background: var(--paper);
+		box-shadow: 5px 5px 0 var(--ink);
+	}
+	.mini-label {
+		display: block;
+		font-family: var(--font-mono);
+		font-size: 0.65rem;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+	}
+	.mini-value {
+		display: inline-flex;
+		align-items: center;
+		font-size: 1.6rem;
+		font-weight: 750;
+		font-stretch: 85%;
+	}
+	.typed {
+		display: inline-block;
+		overflow: hidden;
+		white-space: nowrap;
+		width: 6ch;
+	}
+	.caret {
+		width: 2px;
+		height: 1.3em;
+		margin-left: 2px;
+		background: var(--ink);
+		animation: caret 1s steps(1) infinite;
+	}
+	@keyframes caret {
+		50% {
+			opacity: 0;
+		}
+	}
+	.mini-times {
+		display: flex;
+		align-items: center;
+		gap: 0.6rem;
+		font-family: var(--font-mono);
+		font-weight: 700;
+	}
+	.mini-chip {
+		padding: 0.35rem 0.7rem;
+		border: 1.5px solid var(--rule);
+		border-radius: 999px;
+		background: var(--signal);
+		color: #111;
+	}
+	:global(.armed):not(:global(.in)) .typed {
+		width: 0;
+	}
+	:global(.armed):not(:global(.in)) .mini-chip {
+		transform: scale(0.4);
+		opacity: 0;
+	}
+	:global(.armed) .typed {
+		transition: width 900ms steps(6) 200ms;
+	}
+	:global(.armed) .mini-chip {
+		transition:
+			transform 450ms cubic-bezier(0.3, 1.6, 0.5, 1) calc(1000ms + var(--d) * 180ms),
+			opacity 200ms calc(1000ms + var(--d) * 180ms);
+	}
+	/* Scene 2: the day ribbon draws itself. */
+	.mini-ribbon {
+		position: relative;
+		width: min(22rem, 72vw);
+		height: 18px;
+		border-bottom: 2px solid #111;
+	}
+	.seg {
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		transform-origin: left;
+	}
+	.seg.out {
+		left: 0;
+		width: 12%;
+		background: #111;
+	}
+	.seg.stay {
+		left: 12%;
+		width: 58%;
+		top: 4px;
+		bottom: 4px;
+		background: repeating-linear-gradient(135deg, #111 0 1.5px, transparent 1.5px 6px);
+	}
+	.seg.back {
+		left: 70%;
+		width: 12%;
+		background: #fff8d6;
+		box-shadow: inset 0 0 0 2px #111;
+	}
+	.flag {
+		position: absolute;
+		right: 0;
+		top: -10px;
+		bottom: -10px;
+		width: 3px;
+		background: #111;
+	}
+	.mini-hours {
+		display: flex;
+		justify-content: space-between;
+		width: min(22rem, 72vw);
+		font-family: var(--font-mono);
+		font-size: 0.75rem;
+		font-weight: 600;
+	}
+	.mini-ok {
+		justify-self: start;
+		padding: 0.3rem 0.7rem;
+		border: 1.5px solid #111;
+		border-radius: 999px;
+		background: #fff8d6;
+		font-family: var(--font-mono);
+		font-size: 0.8rem;
+		font-weight: 700;
+	}
+	:global(.armed):not(:global(.in)) .seg {
+		transform: scaleX(0);
+	}
+	:global(.armed):not(:global(.in)) .mini-ok {
+		opacity: 0;
+		transform: translateY(8px);
+	}
+	:global(.armed) .seg {
+		transition: transform 500ms var(--ease);
+	}
+	:global(.armed) .seg.stay {
+		transition-delay: 450ms;
+		transition-duration: 900ms;
+	}
+	:global(.armed) .seg.back {
+		transition-delay: 1300ms;
+	}
+	:global(.armed) .mini-ok {
+		transition:
+			opacity 300ms 1800ms,
+			transform 300ms 1800ms var(--ease);
+	}
+	/* Scene 3: a ticket gets its backup stamp. */
+	.mini-ticket {
+		position: relative;
+		display: flex;
+		width: min(20rem, 70vw);
+		height: 8rem;
+		border-radius: 8px;
+		background: #ede9df;
+		overflow: hidden;
+	}
+	.mini-stub {
+		width: 28%;
+		background: var(--signal);
+		border-right: 2px dashed #111;
+	}
+	.mini-lines {
+		flex: 1;
+		display: grid;
+		align-content: center;
+		gap: 0.6rem;
+		padding: 1rem;
+	}
+	.mini-lines span {
+		height: 8px;
+		border-radius: 4px;
+		background: #111;
+		opacity: 0.8;
+	}
+	.mini-lines span:nth-child(2) {
+		width: 70%;
+		opacity: 0.35;
+	}
+	.mini-lines span:nth-child(3) {
+		width: 50%;
+		opacity: 0.35;
+	}
+	.mini-stamp {
+		position: absolute;
+		right: 0.8rem;
+		bottom: 0.7rem;
+		display: grid;
+		padding: 0.25rem 0.6rem;
+		border: 3px double #111;
+		border-radius: 6px;
+		color: #111;
+		font-family: var(--font-mono);
+		font-size: 0.65rem;
+		font-weight: 700;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+		transform: rotate(-8deg);
+		background: rgb(255 199 0 / 0.35);
+	}
+	.mini-stamp b {
+		font-size: 1.1rem;
+		letter-spacing: 0;
+	}
+	:global(.armed):not(:global(.in)) .mini-stamp {
+		opacity: 0;
+		transform: scale(2.2) rotate(-20deg);
+	}
+	:global(.armed) .mini-stamp {
+		transition:
+			transform 420ms cubic-bezier(0.3, 1.6, 0.5, 1) 600ms,
+			opacity 120ms 600ms;
 	}
 	.data-line {
-		margin: 2rem 0 0;
+		margin: 0;
 		font-family: var(--font-mono);
 		font-size: 0.82rem;
 		color: var(--muted);
-	}
-	@supports (animation-timeline: view()) {
-		.how li {
-			animation: reveal linear both;
-			animation-timeline: view();
-			animation-range: entry 0% entry 60%;
-		}
-		@keyframes reveal {
-			from {
-				opacity: 0;
-				transform: translateY(40px);
-			}
-		}
 	}
 
 	/* ---------- outro ---------- */
@@ -657,8 +949,8 @@
 		overflow: hidden;
 	}
 	.wordmark {
-		margin: 0;
-		font-size: clamp(3.4rem, 15.5vw, 18rem);
+		margin: 0 0 0 0.05em;
+		font-size: clamp(3rem, 13.5vw, 15rem);
 		line-height: 1;
 		padding-bottom: 0.1em;
 	}
