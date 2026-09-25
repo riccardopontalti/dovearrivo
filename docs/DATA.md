@@ -8,9 +8,10 @@ Configuration lives in [sources.yaml](../config/sources.yaml). Use fixed downloa
 | --- | --- | --- |
 | TT extra-urban (GTFS) | Verified 24/09/2026 | 2,861 stops, 120 routes, 3,085 trips in the file |
 | TT urban (GTFS) | Verified 24/09/2026 | 1,113 stops, 44 routes, 3,715 trips in the file |
-| Trenitalia (NeTEx) | Candidate, D01 | National regional/intercity rail from the Italian National Access Point; acquisition through the Transitous preprocessor; mirror last modified 27/05/2026 |
+| Trenitalia (NeTEx) | Technically verified in D01; licence unconfirmed | National regional/intercity rail from the National Access Point, valid 23/05–12/12/2026; 14 lines, 21,126 journeys; not in the public deployment until the licence is confirmed |
 | STA South Tyrol (GTFS) | Optional, D01 | CC0 per Open Data Hub; also publishes GTFS-RT |
-| OSM Trentino-Alto Adige (PBF) | Downloaded, not imported | 135,748,929 bytes |
+| OSM Italy Nord-Est (Geofabrik PBF) | Verified in D01 | 623,907,525 bytes; clipped to the region with complete ways: 198,562,800 bytes |
+| OSM Trentino-Alto Adige (openstreetmap.fr) | Rejected in D01 | 10,305 missing node references; MOTIS import fails |
 | Protomaps basemap (PMTiles) | Planned, D07 | Regional extract of the daily build |
 
 Stop counts do not add up to unique places. Trips in the file are not trips per day.
@@ -22,9 +23,10 @@ Extra-urban: 119 routes with `route_type=3` and R35 with `route_type=2`. Urban: 
 ### Trenitalia specifics
 
 - The feed is national. Importing it whole is simplest; filtering to a bounding box saves memory but may cut through-trains. D01 measures memory with the full feed first.
-- The primary source is the National Access Point; the Transitous preprocessor output is a community mirror. Record which one is used, its update date and the licence stated by the primary source. If the licence cannot be confirmed, the feed stays out.
-- Transitous applies a MOTIS Lua script (`it-trenitalia.lua`) to this feed. Review it before reuse; copy only with its licence and attribution.
-- Check calendar coverage: a mirror updated months ago may not cover the next 30 days.
+- The primary source is NAP asset 1080596 (`IT-IT-TRENITALIA_L1.xml.gz`); the Transitous preprocessor only repacks it as ZIP. Fetch the primary source directly and record its update date.
+- The NAP pages state no licence. Liguria and Toscana publish regional Trenitalia subsets under CC BY 4.0; no Trentino equivalent exists. Until the reuse terms are confirmed, Trenitalia is used only locally.
+- MOTIS v2.11.3 loads the NeTEx ZIP directly; no Lua script is needed.
+- Check calendar coverage: the timetable changes on 13/12/2026 and a stale file may not cover the next 30 days.
 
 ## Identity and models
 
@@ -51,7 +53,7 @@ Written in TypeScript and run by a scheduled job, separate from the processes se
 5. Run sample searches and compare with the active snapshot.
 6. Promote the whole snapshot; keep the previous one for rollback.
 
-OSM: weekly check, rebuild only after a change. Use the full regional extract in the first implementation; a tight crop can break walks. Destinations are limited to the imported walking coverage. The same extract feeds MOTIS geocoding.
+OSM: weekly check, rebuild only after a change. Download the Geofabrik Nord-Est extract and clip it with `osmium extract --strategy complete_ways`; run `osmium check-refs` and block the snapshot if references are missing. Keep the clip generous; a tight crop can break walks. Destinations are limited to the imported walking coverage. The same extract feeds MOTIS geocoding.
 
 Rebuild the timetable window every day even if GTFS content has not changed. Reuse compatible geographic artefacts according to the pinned MOTIS release: do not re-download OSM when only the date advances.
 

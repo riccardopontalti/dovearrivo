@@ -37,6 +37,8 @@ First region: Trentino. Initial data: Trentino Trasporti urban and extra-urban f
 | Walking per leg | 20 minutes | 5–30 minutes, conservative estimate |
 | Transfers per leg | 1 | 0–2 |
 
+When a larger walking limit would unlock more proposals, say so next to the filter; never raise the limit silently. D01 showed that the Levico lakeside is about 30 minutes on foot from the train station, beyond the 20-minute default.
+
 Duration per leg includes walking and waiting during the journey. It excludes waiting at home before the actual departure and time already spent at home after arrival.
 
 ## Experience

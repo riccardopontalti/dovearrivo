@@ -1,5 +1,5 @@
 # Project baseline for MOTIS v2.11.3.
-# The full configuration with all feeds and OSM must pass D01 before release.
+# Verified in D01 (research/D01-engine-proof.md) with TT, Trenitalia and a Geofabrik OSM clip.
 # Paths are inside the container; files are acquired by the pipeline.
 # Generate first_day = yesterday in Europe/Rome at every import.
 server:
@@ -29,9 +29,8 @@ timetable:
     ttu:
       path: /data/source/urbano.zip
       extend_calendar: false
-    # Candidate, enable only after D01 confirms licence, coverage and memory.
-    # NeTEx loading and per-dataset scripts are not described in the v2.11.3
-    # setup guide: check the pinned release and the Transitous import before use.
+    # Technically verified in D01 (NeTEx ZIP loads directly). Keep disabled in the
+    # public deployment until the licence is confirmed; enable locally for development.
     # trenitalia:
     #   path: /data/source/trenitalia-netex.zip
     #   extend_calendar: false

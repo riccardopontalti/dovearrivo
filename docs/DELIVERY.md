@@ -9,6 +9,8 @@ Four phases, about 6 weeks for one person with coding agents and human review. A
 | D01 — integrated engine proof | Pinned MOTIS with TT urban, TT extra-urban and Trenitalia (NeTEx); STA optional; OSM walking to a real entrance | Waiting-time case correct; real outbound and return including one bus–train transfer; Trenitalia calendar coverage and licence documented; import memory and query latency measured |
 | D02 — project and contracts | SvelteKit, API types from OpenAPI, i18n skeleton, fixtures, CI (check, test, build) | Reproducible install and build; mock API conforms to contract |
 
+**D01 status (25/09/2026): done** — see [D01-engine-proof.md](../research/D01-engine-proof.md). Trenitalia works technically but its licence is unconfirmed, so it stays local-only for now.
+
 D01 decides whether Trenitalia enters the pilot. If the feed is stale, its licence is unclear or memory exceeds the server, record the reason and apply the partial-rail rule in [PRODUCT](PRODUCT.md).
 
 ## Phase 2 — Walking skeleton online (weeks 2–3)

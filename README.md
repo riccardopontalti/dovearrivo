@@ -54,9 +54,10 @@ Details in [DELIVERY](docs/DELIVERY.md).
 | [AGENTS.md](AGENTS.md) | Instructions for coding agents |
 | [Contributing](CONTRIBUTING.md) | Corrections, destinations and code |
 
-## First step
+## Progress
 
-Ticket **D01** in [DELIVERY](docs/DELIVERY.md): reproduce the timetable cases in [routing-cases.json](research/routing-cases.json), import all feeds together and verify a real journey up to a destination entrance on OpenStreetMap.
+- **D01 — engine proof: done.** MOTIS v2.11.3 imports Trentino Trasporti, Trenitalia and OpenStreetMap together in 14 s and answers journey queries in under 100 ms, including bus–train transfers. Trenitalia stays local-only until its licence is confirmed. Details: [D01-engine-proof.md](research/D01-engine-proof.md).
+- **Next: D02** — SvelteKit project, API contract types, CI.
 
 ## License
 
