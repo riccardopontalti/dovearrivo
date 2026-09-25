@@ -8,12 +8,12 @@ import type {
 	Journey,
 	NormalizedSearchRequest,
 	Place,
-	Proposal,
 	SearchResponse,
 	Stop
 } from '$lib/api/types';
-import { journeyViolations, pairViolations, staySeconds } from '$lib/domain/constraints';
-import { addDays, formatInstant, localDate, localToMillis, toMillis } from '$lib/domain/time';
+import { summarize } from '$lib/domain/outcome';
+import { chooseProposal } from '$lib/domain/pairing';
+import { addDays, formatInstant, localDate, localToMillis } from '$lib/domain/time';
 import type { Backend } from '../backend';
 import { ApiError } from '../errors';
 
@@ -88,10 +88,6 @@ function journey(trip: FixtureTrip, date: string): Journey {
 	};
 }
 
-function firstTripId(j: Journey): string | undefined {
-	return j.legs.find((leg) => leg.mode !== 'WALK')?.tripId;
-}
-
 export function createMockBackend(now: () => number = Date.now): Backend {
 	function coverage() {
 		const from = localDate(now());
@@ -118,45 +114,25 @@ export function createMockBackend(now: () => number = Date.now): Backend {
 				throw new ApiError(422, 'DATE_NOT_COVERED', `Timetables are available from ${from} to ${to}`);
 			}
 
-			const outbound = OUTBOUND_TRIPS.map((t) => journey(t, date)).filter(
-				(j) => journeyViolations(j, request).length === 0
+			const proposal = chooseProposal(
+				DESTINATIONS[0].id,
+				OUTBOUND_TRIPS.map((t) => journey(t, date)),
+				INBOUND_TRIPS.map((t) => journey(t, date)),
+				request
 			);
-			const inbound = INBOUND_TRIPS.map((t) => journey(t, date)).filter(
-				(j) => journeyViolations(j, request).length === 0
-			);
-			const pairs = outbound
-				.flatMap((o) => inbound.map((i) => ({ o, i })))
-				.filter(({ o, i }) => pairViolations(o, i, request).length === 0)
-				.sort((a, b) => staySeconds(b.o, b.i) - staySeconds(a.o, a.i));
-
-			const proposals: Proposal[] = [];
-			const best = pairs[0];
-			if (best) {
-				const backup = inbound.find(
-					(i) =>
-						toMillis(i.startTime) > toMillis(best.i.startTime) &&
-						firstTripId(i) !== firstTripId(best.i) &&
-						pairViolations(best.o, i, request).length === 0
-				);
-				proposals.push({
-					destinationId: DESTINATIONS[0].id,
-					outbound: best.o,
-					inbound: best.i,
-					...(backup ? { backupInbound: backup } : {}),
-					staySeconds: staySeconds(best.o, best.i),
-					returnStatus: backup ? 'later_option_found' : 'no_later_option_found'
-				});
-			}
+			const summary = summarize([
+				{ destinationId: DESTINATIONS[0].id, kind: 'evaluated', proposal }
+			]);
 
 			return {
-				status: 'complete',
+				status: summary.status,
 				dataVersion: DATA_VERSION,
 				generatedAt: formatInstant(now()),
 				normalizedRequest: request,
-				catalogCount: DESTINATIONS.length,
-				evaluatedCount: DESTINATIONS.length,
-				warnings: [],
-				proposals
+				catalogCount: summary.catalogCount,
+				evaluatedCount: summary.evaluatedCount,
+				warnings: summary.warnings,
+				proposals: summary.proposals
 			};
 		},
 

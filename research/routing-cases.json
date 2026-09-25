@@ -1,6 +1,19 @@
 {
   "schemaVersion": 1,
-  "status": "Test specifications, not an executable application suite",
+  "status": "Specifications; the unit cases run in the app test suite (see executedBy)",
+  "executedBy": {
+    "C01": "src/lib/domain/constraints.spec.ts, src/lib/domain/pairing.spec.ts, src/lib/server/mock/backend.spec.ts",
+    "C02": "src/lib/domain/constraints.spec.ts, src/lib/domain/pairing.spec.ts",
+    "C03": "src/lib/domain/pairing.spec.ts",
+    "C04": "src/lib/domain/pairing.spec.ts",
+    "C05": "src/lib/domain/constraints.spec.ts, src/lib/domain/pairing.spec.ts",
+    "C06": "src/lib/domain/constraints.spec.ts",
+    "C07": "pending: MOTIS contract test with a dedicated fixture (D04)",
+    "C08": "src/lib/domain/time.spec.ts",
+    "C09": "src/lib/domain/outcome.spec.ts",
+    "C10": "pending: MOTIS integration test with OSM (D04)",
+    "C11": "pending: pipeline test (D06)"
+  },
   "timezone": "Europe/Rome",
   "timeUnit": "seconds unless a field ends with Minutes",
   "fixture": {

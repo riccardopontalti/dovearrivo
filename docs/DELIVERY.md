@@ -13,6 +13,8 @@ Four phases, about 6 weeks for one person with coding agents and human review. A
 
 **D02 status (25/09/2026): done** — SvelteKit app with pinned dependencies; `npm run gen:api` generates TypeScript types (openapi-typescript) and runtime JSON schemas (Ajv) from the contract; the four endpoints answer from a mock backend over the synthetic fixture; Italian/English message catalogues; CI runs generation drift check, type check, tests and build. The ROUTING constraints and window rules already exist as pure functions with tests for C01, C02, C05, C06 and C08.
 
+**D03 status (25/09/2026): done** — `src/lib/domain`: deduplication, per-leg filters, outbound/return pairing, backup return on a distinct first trip, destination ranking and partial/complete aggregation. Cases C01–C06, C08 and C09 run as unit tests (mapping in `research/routing-cases.json`); mutation checks confirmed the C04 tests catch a broken backup rule. C07, C10 and C11 need the engine or the pipeline and move to D04/D06.
+
 D01 decides whether Trenitalia enters the pilot. If the feed is stale, its licence is unclear or memory exceeds the server, record the reason and apply the partial-rail rule in [PRODUCT](PRODUCT.md).
 
 ## Phase 2 — Walking skeleton online (weeks 2–3)

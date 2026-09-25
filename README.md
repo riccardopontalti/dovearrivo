@@ -60,7 +60,8 @@ Details in [DELIVERY](docs/DELIVERY.md).
 
 - **D01 — engine proof: done.** MOTIS v2.11.3 imports Trentino Trasporti, Trenitalia and OpenStreetMap together in 14 s and answers journey queries in under 100 ms, including bus–train transfers. Details: [D01-engine-proof.md](research/D01-engine-proof.md).
 - **D02 — project and contracts: done.** SvelteKit app, types and runtime validation generated from the OpenAPI contract, mock API over the synthetic fixture, Italian/English skeleton, CI.
-- **Next: D03** — routing domain: pairing, backup return and ranking.
+- **D03 — routing domain: done.** Pure, tested functions choose the outbound/return pair, the backup return on a different first vehicle and the ranking; partial failures stay visible.
+- **Next: D04** — MOTIS adapter and real search API.
 
 ## Local development
 
