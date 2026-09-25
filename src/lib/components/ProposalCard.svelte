@@ -3,8 +3,15 @@
 	import { clock, duration } from '$lib/format';
 	import { fill, type Messages } from '$lib/i18n';
 	import Journey from './Journey.svelte';
+	import MapView from './MapView.svelte';
 
-	let { proposal, destination, t }: { proposal: Proposal; destination?: Destination; t: Messages } = $props();
+	let {
+		proposal,
+		destination,
+		t,
+		locale
+	}: { proposal: Proposal; destination?: Destination; t: Messages; locale: 'it' | 'en' } = $props();
+	let open = $state(false);
 
 	function summary(j: JourneyType): string {
 		const parts = [
@@ -47,8 +54,9 @@
 		{/if}
 	</p>
 
-	<details>
+	<details bind:open>
 		<summary>{t.details}</summary>
+		{#if open}<MapView {proposal} {destination} {t} {locale} />{/if}
 		<h4>{t.outbound}</h4>
 		<Journey journey={proposal.outbound} {t} />
 		<h4>{t.inbound}</h4>

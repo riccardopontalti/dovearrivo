@@ -37,6 +37,23 @@
 	}
 
 	const found = (n: number, tt: Messages) => (n === 1 ? tt.foundOne : fill(tt.foundMany, { n }));
+
+	// The shared link repeats the search: the recipient always sees current timetables.
+	let shared = $state(false);
+	async function share() {
+		const url = location.href;
+		try {
+			if (navigator.share) {
+				await navigator.share({ title: t.appName, text: t.shareHint, url });
+				return;
+			}
+			await navigator.clipboard.writeText(url);
+			shared = true;
+			setTimeout(() => (shared = false), 4000);
+		} catch {
+			// cancelled by the user
+		}
+	}
 </script>
 
 <svelte:head>
@@ -141,9 +158,13 @@
 			{:else if outcome?.kind === 'results'}
 				{@const r = outcome.response}
 				<h2>{t.resultsTitle}</h2>
-				<p class="summary">
-					{data.form.fromQuery} · {longDate(data.form.date, data.locale)} · {data.form.start}–{data.form.end}
-				</p>
+				<div class="summary-row">
+					<p class="summary">
+						{data.form.fromQuery} · {longDate(data.form.date, data.locale)} · {data.form.start}–{data.form.end}
+					</p>
+					<button type="button" class="share" onclick={share}>{t.share}</button>
+				</div>
+				<p class="muted small" role="status">{shared ? t.linkCopied : ''}</p>
 				{#if r.status === 'partial'}
 					<p class="alert" role="alert"><strong>{t.partialSearch}.</strong> {t.partialHelp}</p>
 				{/if}
@@ -157,7 +178,7 @@
 					<p class="muted">{found(r.proposals.length, t)}. {t.rankingHelp}</p>
 					<ol class="cards">
 						{#each r.proposals as proposal (proposal.destinationId)}
-							<li><ProposalCard {proposal} destination={data.destinations[proposal.destinationId]} {t} /></li>
+							<li><ProposalCard {proposal} destination={data.destinations[proposal.destinationId]} {t} locale={data.locale} /></li>
 						{/each}
 					</ol>
 				{/if}
@@ -267,9 +288,24 @@
 	.results h2 {
 		margin: 0.5rem 0 0.25rem;
 	}
+	.summary-row {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: 0.75rem;
+		flex-wrap: wrap;
+	}
 	.summary {
-		margin: 0 0 0.5rem;
+		margin: 0;
 		color: var(--muted);
+	}
+	.share {
+		min-height: 44px;
+		padding: 0 1rem;
+		background: transparent;
+		color: var(--accent);
+		border: 1px solid var(--accent);
+		font-weight: 600;
 	}
 	.cards {
 		list-style: none;

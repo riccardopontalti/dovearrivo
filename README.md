@@ -66,7 +66,8 @@ Details in [DELIVERY](docs/DELIVERY.md).
 - **D05 — search UI: done.** Stop autocomplete, time window and filters, result cards with the backup return; works on phone and desktop, in Italian and English, even without JavaScript; end-to-end and accessibility tests in CI.
 - **D08 — start from an address or place: done.** Self-hosted geocoding; the walk to the first stop counts toward the limits; points outside the covered area get a clear message.
 - **D09 — English everywhere: done.** Destinations, data status and limitations follow the chosen language.
-- **Next:** D07/D10 (maps); D06b, the public deployment, waits for the server.
+- **D07 — maps: done.** Self-hosted regional basemap (Protomaps PMTiles, local fonts), itinerary map with both legs, share link; no request leaves our server.
+- **Next:** D10 (reachability preview); D06b, the public deployment, waits for the server.
 
 ## Local development
 

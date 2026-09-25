@@ -72,3 +72,27 @@ test.describe('without JavaScript', () => {
 		await expect(page.getByRole('article', { name: 'Destinazione sintetica B' })).toBeVisible();
 	});
 });
+
+test('itinerary details work without a basemap and never call external hosts', async ({ page, baseURL }) => {
+	const external: string[] = [];
+	page.on('request', (r) => {
+		if (!r.url().startsWith(baseURL!) && !r.url().startsWith('data:')) external.push(r.url());
+	});
+	await page.goto('/?from=syn_A&fromQuery=Origine+sintetica+A');
+	const card = page.getByRole('article', { name: 'Destinazione sintetica B' });
+	await card.getByText('Dettagli degli itinerari').click();
+	// CI has no basemap files: the map says so and the text itinerary stays complete.
+	await expect(card.getByText('La mappa non è disponibile')).toBeVisible();
+	await expect(card.getByText('Origine sintetica A → Destinazione sintetica B')).toBeVisible();
+	expect(external).toEqual([]);
+});
+
+test('share copies a link that repeats the search', async ({ page, context, browserName }, info) => {
+	test.skip(info.project.name !== 'desktop' || browserName !== 'chromium', 'clipboard API on desktop Chromium');
+	await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+	await page.goto('/?from=syn_A&fromQuery=Origine+sintetica+A');
+	await page.evaluate(() => Object.defineProperty(navigator, 'share', { value: undefined }));
+	await page.getByRole('button', { name: 'Condividi la ricerca' }).click();
+	await expect(page.getByRole('status').filter({ hasText: 'Link copiato' })).toBeVisible();
+	expect(await page.evaluate(() => navigator.clipboard.readText())).toContain('from=syn_A');
+});

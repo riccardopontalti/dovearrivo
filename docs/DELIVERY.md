@@ -25,6 +25,8 @@ Four phases, about 6 weeks for one person with coding agents and human review. A
 
 **D09 status (25/09/2026): done** — `lang` (it/en) on `/api/v1/destinations` and `/api/v1/data-status`; catalogue names and descriptions served in the requested language; the pipeline writes limitations in both languages into the manifest (older plain strings are still accepted); every UI string, error and data-status label exists in both catalogues, and the language switch keeps the search. E2E checks the English destination name.
 
+**D07 status (25/09/2026): done** — `scripts/basemap.sh` extracts the region from a pinned Protomaps daily build (maxzoom 14: 149 MB instead of 274 MB at z15) and pinned fonts/sprites; `/basemap/*` serves them with HTTP Range and path checks. The itinerary map loads only when a card's details open, draws outbound and return legs from the engine geometries (decoded with their declared precision; legs without geometry are not drawn as straight lines), marks start and entrance, and shows OSM/Protomaps attribution. Without WebGL or basemap files it says the map is unavailable and the text itinerary stays complete. A share button copies or shares the search URL. Verified on real data with zero requests to external hosts; E2E covers the unavailable path, no external requests and sharing. Limit: outbound and return lines overlap on shared roads.
+
 D01 decides whether Trenitalia enters the pilot. If the feed is stale, its licence is unclear or memory exceeds the server, record the reason and apply the partial-rail rule in [PRODUCT](PRODUCT.md).
 
 ## Phase 2 — Walking skeleton online (weeks 2–3)

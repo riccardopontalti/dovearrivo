@@ -9,7 +9,13 @@ export default defineConfig({
 	webServer: {
 		command: 'npm run build && node build',
 		port: 4173,
-		env: { PORT: '4173', ORIGIN: 'http://localhost:4173', DOVEARRIVO_BACKEND: 'mock' },
+		env: {
+			PORT: '4173',
+			ORIGIN: 'http://localhost:4173',
+			DOVEARRIVO_BACKEND: 'mock',
+			// No basemap: the tests cover the map-unavailable path deterministically.
+			DOVEARRIVO_BASEMAP_DIR: 'tests/fixtures/no-basemap'
+		},
 		reuseExistingServer: !process.env.CI,
 		timeout: 120_000
 	},
