@@ -1,5 +1,12 @@
 // Backend over a private MOTIS instance, the destination catalogue and the snapshot manifest.
-import type { NormalizedSearchRequest, PlaceMatch, SearchResponse, Stop } from '$lib/api/types';
+import type {
+	NormalizedSearchRequest,
+	PlaceMatch,
+	Reachability,
+	ReachabilityRequest,
+	SearchResponse,
+	Stop
+} from '$lib/api/types';
 import { insideBbox, originOf } from '$lib/domain/origin';
 import { summarize } from '$lib/domain/outcome';
 import { formatInstant, localDate } from '$lib/domain/time';
@@ -9,7 +16,8 @@ import { toDestination, visibleEntries, type Catalogue } from '../catalogue';
 import { ApiError } from '../errors';
 import { Limiter } from '../limiter';
 import { deriveDataStatus, type Manifest } from '../manifest';
-import type { GeocodeMatch, MotisClient } from './client';
+import { MotisError, type GeocodeMatch, type MotisClient } from './client';
+import { parseFrom } from '$lib/search-form';
 import { evaluateDestination } from './evaluate';
 
 export const ENGINE_VERSION = 'motis-2.11.3';
@@ -144,6 +152,54 @@ export function createMotisBackend(options: MotisBackendOptions): Backend {
 				cache.set(key, response, JSON.stringify(response).length);
 			}
 			return response;
+		},
+
+		async reachability(request: ReachabilityRequest): Promise<Reachability> {
+			const manifest = await options.manifest();
+			const status = deriveDataStatus(manifest, now());
+			if (!manifest || status.status === 'unavailable') {
+				throw new ApiError(503, 'DATA_UNAVAILABLE', 'Timetable data is not available right now');
+			}
+			const origin = parseFrom(request.from);
+			if ('point' in origin && manifest.coverageBbox && !insideBbox(origin.point, manifest.coverageBbox)) {
+				throw new ApiError(422, 'ORIGIN_NOT_COVERED', 'The starting point is outside the covered area');
+			}
+			const day = localDate(request.departAfter);
+			if (day < manifest.availableFrom || day > manifest.availableTo) {
+				throw new ApiError(422, 'DATE_NOT_COVERED', `Timetables are available from ${manifest.availableFrom} to ${manifest.availableTo}`);
+			}
+			const q = new URLSearchParams({
+				one: request.from,
+				time: request.departAfter,
+				maxTravelTime: String(request.minutes),
+				maxTransfers: String(request.maxTransfers),
+				maxPreTransitTime: String(request.maxWalkMinutes * 60),
+				pedestrianProfile: 'FOOT',
+				pedestrianSpeed: '1.2',
+				additionalTransferTime: '2',
+				transitModes: 'TRANSIT'
+			});
+			try {
+				const r = await limiter.run(() => options.client.oneToAll(q));
+				const places = r.all
+					// k = 0 means no public transport connection: not part of the preview.
+					.filter((p) => p.k > 0 && p.duration <= request.minutes)
+					.sort((a, b) => a.duration - b.duration)
+					.slice(0, 5000)
+					.map((p) => ({
+						name: p.place.name,
+						point: { lat: p.place.lat, lon: p.place.lon },
+						...(p.place.stopId ? { stopId: p.place.stopId } : {}),
+						minutes: p.duration,
+						transfers: Math.max(0, p.k - 1)
+					}));
+				return { dataVersion: manifest.dataVersion, departAfter: request.departAfter, minutes: request.minutes, places };
+			} catch (error) {
+				if (error instanceof MotisError && error.unknownLocation) {
+					throw new ApiError(422, 'UNKNOWN_ORIGIN', 'The origin stop is not in the active data');
+				}
+				throw new ApiError(503, 'ROUTING_UNAVAILABLE', 'The routing engine is not responding', { 'retry-after': '30' });
+			}
 		},
 
 		async dataStatus(locale = 'it') {

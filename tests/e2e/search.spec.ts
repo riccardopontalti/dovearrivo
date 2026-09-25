@@ -96,3 +96,12 @@ test('share copies a link that repeats the search', async ({ page, context, brow
 	await expect(page.getByRole('status').filter({ hasText: 'Link copiato' })).toBeVisible();
 	expect(await page.evaluate(() => navigator.clipboard.readText())).toContain('from=syn_A');
 });
+
+test('reachability preview lists stops with arrival times and passes accessibility checks', async ({ page }) => {
+	await page.goto('/reachability?from=syn_A&fromQuery=Origine+sintetica+A&start=09:00&minutes=60');
+	await expect(page.getByRole('heading', { name: '1 fermata raggiungibile entro le 10:00' })).toBeVisible();
+	await expect(page.getByText('La mappa non è disponibile')).toBeVisible();
+	await page.getByText('Elenco delle fermate raggiungibili').click();
+	await expect(page.getByRole('row', { name: /Destinazione sintetica B 30 0/ })).toBeVisible();
+	expect((await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag22aa']).analyze()).violations).toEqual([]);
+});

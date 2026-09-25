@@ -15,6 +15,16 @@ export type DataStatus = Schemas['DataStatus'];
 export type Problem = Schemas['Problem'];
 export type ProblemCode = Problem['code'];
 export type PlaceMatch = Schemas['PlaceMatch'];
+export type Reachability = Schemas['Reachability'];
+
+/** Reachability preview request (query parameters of /api/v1/reachability, validated). */
+export interface ReachabilityRequest {
+	from: string;
+	departAfter: string;
+	minutes: number;
+	maxTransfers: number;
+	maxWalkMinutes: number;
+}
 export type SchemaName = keyof Schemas;
 
 type Limits = 'maxJourneyMinutes' | 'minStayMinutes' | 'maxWalkMinutes' | 'maxTransfers';

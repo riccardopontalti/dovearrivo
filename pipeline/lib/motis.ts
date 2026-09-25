@@ -38,6 +38,8 @@ export function motisConfig(osmPath: string, datasets: Dataset[], window: Timeta
 			// Must exceed the 16-hour product window: MOTIS rejects a searchWindow equal to 960.
 			plan_max_search_window_minutes: 1440,
 			routing_max_timeout_seconds: 3,
+			// Reachability preview (D10) allows up to 4 hours; the default is 90 minutes.
+			onetoall_max_travel_minutes: 240,
 			street_routing_max_prepost_transit_seconds: 1800
 		},
 		logging: { log_level: 'info' }

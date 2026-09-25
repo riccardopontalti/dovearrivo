@@ -28,6 +28,12 @@
 		--alert: #fde2dd;
 		--accent-soft: #e0f1ec;
 		--on-accent: #ffffff;
+		/* Reachability bands: see src/lib/reach-bands.ts (validated ordinal ramps). */
+		--band-0: #86b6ef;
+		--band-1: #3987e5;
+		--band-2: #256abf;
+		--band-3: #184f95;
+		--band-4: #0d366b;
 		color-scheme: light dark;
 	}
 	@media (prefers-color-scheme: dark) {
@@ -42,6 +48,11 @@
 			--alert: #4a2320;
 			--accent-soft: #173a32;
 			--on-accent: #06221b;
+			--band-0: #184f95;
+			--band-1: #2a78d6;
+			--band-2: #5598e7;
+			--band-3: #86b6ef;
+			--band-4: #b7d3f6;
 		}
 	}
 	:global(body) {

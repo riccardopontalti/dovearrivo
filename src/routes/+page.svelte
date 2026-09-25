@@ -134,6 +134,9 @@
 
 				<button type="submit" disabled={busy}>{busy ? t.searching : t.submit}</button>
 			</form>
+			<p class="reach-link">
+				<a href="/reachability?{toParams({ ...data.form, from, fromQuery: query }, data.locale)}">{t.reachLink}</a>
+			</p>
 		</section>
 
 		<section class="results" aria-live="polite" aria-busy={busy}>
@@ -284,6 +287,11 @@
 	button:disabled {
 		opacity: 0.7;
 		cursor: progress;
+	}
+	.reach-link a {
+		display: inline-flex;
+		align-items: center;
+		min-height: 44px;
 	}
 	.results h2 {
 		margin: 0.5rem 0 0.25rem;

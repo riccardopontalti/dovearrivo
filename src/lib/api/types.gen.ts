@@ -41,6 +41,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/reachability": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Preview of the stops one can reach by a given time
+         * @description Earliest arrival at each stop leaving the origin not before departAfter, initial waiting included (one-to-all). It is a preview for the map: it checks no return, no destination entrance and no stay, and it never produces proposals.
+         */
+        get: operations["getReachability"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/destinations": {
         parameters: {
             query?: never;
@@ -122,6 +142,20 @@ export interface components {
             /** Format: date */
             checkedAt: string;
             accessNotes?: string;
+        };
+        Reachability: {
+            dataVersion: string;
+            /** Format: date-time */
+            departAfter: string;
+            minutes: number;
+            places: {
+                name: string;
+                point: components["schemas"]["Point"];
+                stopId?: string;
+                /** @description Arrival minus departAfter */
+                minutes: number;
+                transfers: number;
+            }[];
         };
         PlaceMatch: {
             /** @enum {string} */
@@ -324,6 +358,37 @@ export interface operations {
                 };
             };
             400: components["responses"]["Problem"];
+            429: components["responses"]["RateLimit"];
+            503: components["responses"]["Problem"];
+        };
+    };
+    getReachability: {
+        parameters: {
+            query: {
+                /** @description A stop id or "lat,lon" */
+                from: string;
+                departAfter: string;
+                minutes: number;
+                maxTransfers?: number;
+                maxWalkMinutes?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Reachable stops, nearest in time first */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Reachability"];
+                };
+            };
+            400: components["responses"]["Problem"];
+            422: components["responses"]["Problem"];
             429: components["responses"]["RateLimit"];
             503: components["responses"]["Problem"];
         };

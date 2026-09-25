@@ -92,6 +92,63 @@ export const schemas = {
 			}
 		}
 	},
+	"Reachability": {
+		"type": "object",
+		"additionalProperties": false,
+		"required": [
+			"dataVersion",
+			"departAfter",
+			"minutes",
+			"places"
+		],
+		"properties": {
+			"dataVersion": {
+				"type": "string"
+			},
+			"departAfter": {
+				"type": "string",
+				"format": "date-time"
+			},
+			"minutes": {
+				"type": "integer"
+			},
+			"places": {
+				"type": "array",
+				"maxItems": 5000,
+				"items": {
+					"type": "object",
+					"additionalProperties": false,
+					"required": [
+						"name",
+						"point",
+						"minutes",
+						"transfers"
+					],
+					"properties": {
+						"name": {
+							"type": "string"
+						},
+						"point": {
+							"$ref": "#/components/schemas/Point"
+						},
+						"stopId": {
+							"type": "string"
+						},
+						"minutes": {
+							"type": "integer",
+							"minimum": 0,
+							"description": "Arrival minus departAfter",
+							"waiting included": null
+						},
+						"transfers": {
+							"type": "integer",
+							"minimum": 0
+						}
+					}
+				}
+			}
+		}
+	},
 	"PlaceMatch": {
 		"type": "object",
 		"additionalProperties": false,

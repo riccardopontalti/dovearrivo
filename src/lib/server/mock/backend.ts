@@ -15,7 +15,8 @@ import type {
 import { insideBbox, originOf, type Bbox } from '$lib/domain/origin';
 import { summarize } from '$lib/domain/outcome';
 import { chooseProposal } from '$lib/domain/pairing';
-import { addDays, formatInstant, localDate, localToMillis } from '$lib/domain/time';
+import { addDays, formatInstant, localDate, localToMillis, toMillis } from '$lib/domain/time';
+import { parseFrom } from '$lib/search-form';
 import type { Backend } from '../backend';
 import { ApiError } from '../errors';
 
@@ -165,6 +166,26 @@ export function createMockBackend(now: () => number = Date.now): Backend {
 				warnings: summary.warnings,
 				proposals: summary.proposals
 			};
+		},
+
+		async reachability(request) {
+			const origin = parseFrom(request.from);
+			if ('point' in origin && !insideBbox(origin.point, COVERAGE_BBOX)) {
+				throw new ApiError(422, 'ORIGIN_NOT_COVERED', 'The starting point is outside the covered area');
+			}
+			const atA = 'point' in origin ? origin.point.lat === A.point.lat && origin.point.lon === A.point.lon : origin.stopId === A.id;
+			if (!('point' in origin) && !atA) throw new ApiError(422, 'UNKNOWN_ORIGIN', 'The origin stop is not in the active data');
+			const start = toMillis(request.departAfter);
+			const date = localDate(start);
+			const arrivals = atA
+				? OUTBOUND_TRIPS.map((t) => journey(t, date)).filter((j) => toMillis(j.startTime) >= start)
+				: [];
+			const first = arrivals.map((j) => (toMillis(j.endTime) - start) / 60_000).sort((a, b) => a - b)[0];
+			const places =
+				first !== undefined && first <= request.minutes
+					? [{ name: B.name, point: B.point, stopId: B.id, minutes: first, transfers: 0 }]
+					: [];
+			return { dataVersion: DATA_VERSION, departAfter: request.departAfter, minutes: request.minutes, places };
 		},
 
 		async dataStatus(locale = 'it'): Promise<DataStatus> {

@@ -7,6 +7,8 @@ import type {
 	Destination,
 	NormalizedSearchRequest,
 	PlaceMatch,
+	Reachability,
+	ReachabilityRequest,
 	SearchResponse,
 	Stop
 } from '$lib/api/types';
@@ -24,6 +26,8 @@ export interface Backend {
 	/** Throws ApiError for unknown or uncovered origins, uncovered dates or unavailable data. */
 	search(request: NormalizedSearchRequest): Promise<SearchResponse>;
 	dataStatus(locale?: 'it' | 'en'): Promise<DataStatus>;
+	/** One-to-all preview; throws ApiError like search for origin and date problems. */
+	reachability(request: ReachabilityRequest): Promise<Reachability>;
 }
 
 let current: Backend | undefined;

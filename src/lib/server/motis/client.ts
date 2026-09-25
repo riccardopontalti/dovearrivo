@@ -28,7 +28,12 @@ export interface GeocodeMatch {
 	areas?: Array<{ name: string; adminLevel: number; default?: boolean }>;
 }
 
+export interface MotisReachable {
+	all: Array<{ place: { name: string; lat: number; lon: number; stopId?: string }; duration: number; k: number }>;
+}
+
 export interface MotisClient {
+	oneToAll(query: URLSearchParams, signal?: AbortSignal): Promise<MotisReachable>;
 	plan(query: URLSearchParams, signal?: AbortSignal): Promise<MotisPlanResponse>;
 	/** `type` limits results to STOP, ADDRESS or PLACE; all types when omitted. */
 	geocode(text: string, type?: 'STOP', signal?: AbortSignal): Promise<GeocodeMatch[]>;
@@ -63,6 +68,7 @@ export function createMotisClient(baseUrl: string, fetchFn: typeof fetch = fetch
 
 	return {
 		plan: (query, signal) => get<MotisPlanResponse>('/api/v6/plan', query, signal),
+		oneToAll: (query, signal) => get<MotisReachable>('/api/v6/one-to-all', query, signal),
 		geocode: (text, type, signal) =>
 			get<GeocodeMatch[]>(
 				'/api/v1/geocode',

@@ -5,6 +5,7 @@
 	import { onMount } from 'svelte';
 	import type { Destination, Proposal } from '$lib/api/types';
 	import { decodePolyline } from '$lib/geo/polyline';
+	import { boundsOf, createBasemapMap } from '$lib/map/basemap';
 	import type { Messages } from '$lib/i18n';
 
 	let {
@@ -41,72 +42,24 @@
 		return out;
 	}
 
-	function webglAvailable(): boolean {
-		try {
-			return !!document.createElement('canvas').getContext('webgl2');
-		} catch {
-			return false;
-		}
-	}
-
 	onMount(() => {
 		let map: { remove(): void } | undefined;
 		let cancelled = false;
 
 		(async () => {
 			try {
-				const meta = await fetch('/basemap/basemap.json');
-				if (!meta.ok || !webglAvailable()) throw new Error('basemap unavailable');
-				const { version, attribution } = (await meta.json()) as { version: string; attribution: string };
-
-				const [ml, { Protocol }, basemaps, worker] = await Promise.all([
-					import('maplibre-gl'),
-					import('pmtiles'),
-					import('@protomaps/basemaps'),
-					import('maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url'),
-					import('maplibre-gl/dist/maplibre-gl.css')
-				]);
-				if (cancelled) return;
-				ml.setWorkerUrl(worker.default);
-				const w = window as unknown as { __pmtilesProtocol?: boolean };
-				if (!w.__pmtilesProtocol) {
-					ml.addProtocol('pmtiles', new Protocol().tile);
-					w.__pmtilesProtocol = true;
-				}
-
-				const dark = matchMedia('(prefers-color-scheme: dark)').matches;
-				const flavor = dark ? 'dark' : 'light';
-				const origin = location.origin;
 				const lines = features();
-				const coords = lines.flatMap((f) => f.geometry.coordinates);
+				const coords = lines.flatMap((f) => f.geometry.coordinates as Array<[number, number]>);
 				if (destination) coords.push([destination.entrance.lon, destination.entrance.lat]);
-
-				const instance = new ml.Map({
-					container,
-					style: {
-						version: 8,
-						glyphs: `${origin}/basemap/fonts/{fontstack}/{range}.pbf`,
-						sprite: `${origin}/basemap/sprites/v4/${flavor}`,
-						sources: {
-							protomaps: {
-								type: 'vector',
-								url: `pmtiles://${origin}/basemap/basemap.pmtiles?v=${version}`,
-								attribution
-							}
-						},
-						layers: basemaps.layers('protomaps', basemaps.namedFlavor(flavor), { lang: locale })
-					},
-					bounds: coords.length
-						? (coords.reduce(
-								(b, [x, y]) => [Math.min(b[0], x), Math.min(b[1], y), Math.max(b[2], x), Math.max(b[3], y)],
-								[Infinity, Infinity, -Infinity, -Infinity]
-							) as [number, number, number, number])
-						: undefined,
-					fitBoundsOptions: { padding: 36 },
-					attributionControl: { compact: true }
+				const { ml, map: instance } = await createBasemapMap(container, locale, {
+					bounds: boundsOf(coords),
+					fitBoundsOptions: { padding: 36 }
 				});
+				if (cancelled) {
+					instance.remove();
+					return;
+				}
 				map = instance;
-				instance.addControl(new ml.NavigationControl({ showCompass: false }), 'top-right');
 
 				instance.on('load', () => {
 					const accent = getComputedStyle(container).getPropertyValue('--accent').trim() || '#0f6e5a';

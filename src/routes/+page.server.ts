@@ -1,9 +1,10 @@
 import type { PlaceMatch } from '$lib/api/types';
 import { localDate } from '$lib/domain/time';
 import { localeFromUrl } from '$lib/i18n';
-import { coordinateFrom, defaultForm, readForm, toRequest } from '$lib/search-form';
+import { defaultForm, readForm, toRequest } from '$lib/search-form';
 import { backend } from '$lib/server/backend';
 import { ApiError } from '$lib/server/errors';
+import { resolveOrigin } from '$lib/server/origin';
 import { executeSearch, WindowError } from '$lib/server/search';
 import type { PageServerLoad } from './$types';
 
@@ -28,16 +29,10 @@ export const load: PageServerLoad = async ({ url }) => {
 		return { ...base, outcome: null as SearchOutcome | null };
 	}
 
-	let from = form.from;
-	if (!from) {
-		// Without JavaScript the place is typed, not picked: resolve it on the server.
-		if (form.fromQuery.length < 2) return { ...base, outcome: { kind: 'error', error: 'errFromMissing' } as SearchOutcome };
-		const places = await backend().findPlaces(form.fromQuery);
-		if (places.length !== 1) return { ...base, outcome: { kind: 'chooseStop', places } as SearchOutcome };
-		from = places[0].stopId ?? coordinateFrom(places[0].point);
-		form.from = from;
-		form.fromQuery = places[0].name;
-	}
+	const resolved = await resolveOrigin(form);
+	if ('error' in resolved) return { ...base, outcome: { kind: 'error', error: resolved.error } as SearchOutcome };
+	if ('choose' in resolved) return { ...base, outcome: { kind: 'chooseStop', places: resolved.choose } as SearchOutcome };
+	const from = resolved.from;
 
 	try {
 		const response = await executeSearch(toRequest(form, from), Date.now());

@@ -67,7 +67,8 @@ Details in [DELIVERY](docs/DELIVERY.md).
 - **D08 — start from an address or place: done.** Self-hosted geocoding; the walk to the first stop counts toward the limits; points outside the covered area get a clear message.
 - **D09 — English everywhere: done.** Destinations, data status and limitations follow the chosen language.
 - **D07 — maps: done.** Self-hosted regional basemap (Protomaps PMTiles, local fonts), itinerary map with both legs, share link; no request leaves our server.
-- **Next:** D10 (reachability preview); D06b, the public deployment, waits for the server.
+- **D10 — reachability preview: done.** Map of every stop you can reach by a given time, coloured by arrival band, with a table alternative.
+- **Next:** D06b, the public deployment (needs the server), then D11 catalogue and D12a visual design.
 
 ## Local development
 

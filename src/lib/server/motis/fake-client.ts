@@ -11,6 +11,9 @@ export function fakeClient(plan: PlanHandler, geocode: GeocodeMatch[] = []) {
 			calls.push(query);
 			return plan(query);
 		},
+		async oneToAll() {
+			return { all: [] };
+		},
 		async geocode(_text, type) {
 			return type ? geocode.filter((g) => g.type === type) : geocode;
 		}

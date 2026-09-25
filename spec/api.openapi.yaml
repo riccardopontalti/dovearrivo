@@ -59,6 +59,44 @@ paths:
         '400': {$ref: '#/components/responses/Problem'}
         '429': {$ref: '#/components/responses/RateLimit'}
         '503': {$ref: '#/components/responses/Problem'}
+  /api/v1/reachability:
+    get:
+      operationId: getReachability
+      summary: Preview of the stops one can reach by a given time
+      description: >
+        Earliest arrival at each stop leaving the origin not before departAfter, initial
+        waiting included (one-to-all). It is a preview for the map: it checks no return,
+        no destination entrance and no stay, and it never produces proposals.
+      parameters:
+        - name: from
+          in: query
+          required: true
+          description: A stop id or "lat,lon"
+          schema: {type: string, minLength: 1, maxLength: 200}
+        - name: departAfter
+          in: query
+          required: true
+          schema: {type: string, format: date-time}
+        - name: minutes
+          in: query
+          required: true
+          schema: {type: integer, minimum: 15, maximum: 240}
+        - name: maxTransfers
+          in: query
+          schema: {type: integer, minimum: 0, maximum: 2, default: 1}
+        - name: maxWalkMinutes
+          in: query
+          schema: {type: integer, minimum: 5, maximum: 30, default: 20}
+      responses:
+        '200':
+          description: Reachable stops, nearest in time first
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Reachability'}
+        '400': {$ref: '#/components/responses/Problem'}
+        '422': {$ref: '#/components/responses/Problem'}
+        '429': {$ref: '#/components/responses/RateLimit'}
+        '503': {$ref: '#/components/responses/Problem'}
   /api/v1/destinations:
     get:
       operationId: listDestinations
@@ -180,6 +218,27 @@ components:
         infoUrl: {type: string, format: uri}
         checkedAt: {type: string, format: date}
         accessNotes: {type: string}
+    Reachability:
+      type: object
+      additionalProperties: false
+      required: [dataVersion, departAfter, minutes, places]
+      properties:
+        dataVersion: {type: string}
+        departAfter: {type: string, format: date-time}
+        minutes: {type: integer}
+        places:
+          type: array
+          maxItems: 5000
+          items:
+            type: object
+            additionalProperties: false
+            required: [name, point, minutes, transfers]
+            properties:
+              name: {type: string}
+              point: {$ref: '#/components/schemas/Point'}
+              stopId: {type: string}
+              minutes: {type: integer, minimum: 0, description: Arrival minus departAfter, waiting included}
+              transfers: {type: integer, minimum: 0}
     PlaceMatch:
       type: object
       additionalProperties: false
