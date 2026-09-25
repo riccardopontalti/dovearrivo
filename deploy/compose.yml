@@ -27,6 +27,8 @@ services:
       MOTIS_URL: http://motis:8080
       DOVEARRIVO_MANIFEST: /data/pipeline/active/manifest.json
       DOVEARRIVO_BASEMAP_DIR: /data/basemap
+      # Preview: draft destinations visible, banner on every page, noindex.
+      DOVEARRIVO_PREVIEW: ${PREVIEW:-true}
     volumes:
       - ../data:/data:ro
     depends_on: [motis]

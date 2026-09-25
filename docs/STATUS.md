@@ -21,7 +21,7 @@ Last updated: 25/09/2026. Read this after README and AGENTS.md when picking up t
 
 ## Waiting for the maintainer
 
-- **Server**: OVHcloud VPS-1, Ubuntu 24.04. Deployment follows [DEPLOY.md](DEPLOY.md). Server access uses an SSH key that lives only on the maintainer's machine: never ask for a private key in a chat or commit one.
+- **Server**: OVHcloud VPS-1, Ubuntu 24.04. Deployment is automatic through GitHub Actions once the maintainer adds the `DEPLOY_HOST` and `DEPLOY_SSH_KEY` repository secrets and points the DNS A records to the server ([DEPLOY.md](DEPLOY.md)). It runs in preview mode (drafts visible, banner, noindex) so the maintainer can browse every change. Never ask for a private key in a chat or commit one.
 - **Destination verification**: entrances and access of the drafts (checklist in D11-candidates.md). Only then `status: published`.
 
 ## Next

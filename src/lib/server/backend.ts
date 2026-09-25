@@ -44,7 +44,7 @@ function fromEnvironment(): Backend {
 		client: createMotisClient(env.MOTIS_URL ?? 'http://127.0.0.1:8080'),
 		catalogue: () => (catalogue ??= loadCatalogue(cataloguePath)),
 		manifest: () => loadManifest(manifestPath),
-		includeDrafts: env.DOVEARRIVO_INCLUDE_DRAFTS === 'true'
+		includeDrafts: env.DOVEARRIVO_INCLUDE_DRAFTS === 'true' || env.DOVEARRIVO_PREVIEW === 'true'
 	});
 }
 

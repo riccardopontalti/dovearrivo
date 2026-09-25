@@ -1,3 +1,4 @@
+import { env } from '$env/dynamic/private';
 import type { Handle } from '@sveltejs/kit';
 import { localeFromUrl } from '$lib/i18n';
 
@@ -14,6 +15,8 @@ export const handle: Handle = async ({ event, resolve }) => {
 	const response = await resolve(event, {
 		transformPageChunk: ({ html }) => html.replace('%lang%', locale)
 	});
+	// A preview deployment shows unverified drafts: keep it out of search engines.
+	if (env.DOVEARRIVO_PREVIEW === 'true') response.headers.set('x-robots-tag', 'noindex, nofollow');
 	for (const [name, value] of Object.entries(SECURITY_HEADERS)) {
 		if (!response.headers.has(name)) response.headers.set(name, value);
 	}

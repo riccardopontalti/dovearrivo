@@ -1,5 +1,9 @@
 # Deploying DoveArrivo (D06b)
 
+**Automatic path (recommended).** Add two repository secrets on GitHub (Settings → Secrets and variables → Actions): `DEPLOY_HOST` = server IPv4 and `DEPLOY_SSH_KEY` = the private key whose public part was installed on the server at order time. Every push to `main` with green CI then runs [deploy.yml](../.github/workflows/deploy.yml), which executes [bootstrap.sh](../deploy/bootstrap.sh) over SSH: first run installs Docker, firewall, swap, basemap and data; later runs only update and restart. It deploys in **preview** mode (drafts visible, banner, `noindex`) until the repository variable `PREVIEW` is set to `false`. DNS (step 1 below) is still manual.
+
+The manual steps below do the same by hand.
+
 One VPS (OVHcloud VPS-1: 2 vCore, 4 GB, Ubuntu 24.04, x86_64) runs Caddy, the app, MOTIS and the scheduled data pipeline with Docker Compose. Everything below is run on the server as a sudo user, except the DNS step.
 
 ## 1. DNS (OVHcloud panel)

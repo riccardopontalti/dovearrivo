@@ -3,6 +3,7 @@ import type { Messages } from './it';
 export const en: Messages = {
 	appName: 'DoveArrivo',
 	tagline: 'Car-free day trips with a guaranteed way home.',
+	previewBanner: 'Preview: destinations are being verified and the service may change.',
 	devNotice: 'Development version: destinations are test entries and not yet verified.',
 	mockNotice: 'This instance uses synthetic test data, not real timetables.',
 	dataStatusTitle: 'Data status',

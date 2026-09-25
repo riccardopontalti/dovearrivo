@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import favicon from '$lib/assets/favicon.svg';
+	import { messages } from '$lib/i18n';
 
-	let { children } = $props();
+	let { children, data } = $props();
 
 	// The server sets <html lang>; keep it right after client-side language switches.
 	$effect(() => {
@@ -14,6 +15,9 @@
 	<link rel="icon" href={favicon} />
 </svelte:head>
 
+{#if data.preview}
+	<p class="preview-banner" role="note">{messages(data.layoutLocale).previewBanner}</p>
+{/if}
 {@render children()}
 
 <style>
@@ -85,6 +89,14 @@
 		margin: 0.3rem 0 0;
 		color: var(--muted);
 		font-size: 0.85rem;
+	}
+	.preview-banner {
+		margin: 0;
+		padding: 0.4rem 1rem;
+		text-align: center;
+		font-size: 0.85rem;
+		background: var(--notice);
+		color: var(--text);
 	}
 	:global(:focus-visible) {
 		outline: 3px solid var(--accent);

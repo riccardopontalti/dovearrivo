@@ -1,6 +1,7 @@
 export const it = {
 	appName: 'DoveArrivo',
 	tagline: 'Dove arrivo con i mezzi, e come torno in tempo.',
+	previewBanner: 'Anteprima: le mete sono in verifica e il servizio può cambiare.',
 	devNotice: 'Versione di sviluppo: le mete sono di prova e non ancora verificate.',
 	mockNotice: 'Questa istanza usa dati sintetici di prova, non orari reali.',
 	dataStatusTitle: 'Stato dei dati',
