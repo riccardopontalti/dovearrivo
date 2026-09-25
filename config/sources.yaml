@@ -73,7 +73,24 @@ updates:
   osm_check_days: 7
   unverified_warning_hours: 72
   unverified_suspend_days: 7
+samples:
+  # Checked on every new snapshot for tomorrow 06:00-22:00; a failure blocks promotion.
+  - name: Trento Autostaz. Dante -> Levico Terme Autostazione (bus)
+    from: tte_1
+    to: tte_939
+    min_itineraries: 3
+  # Trenitalia stop ids change between feed versions (D06a), so rail samples use coordinates.
+  - name: Trento FS -> Rovereto FS (rail)
+    from: "46.072396,11.118952"
+    to: "45.890972,11.033528"
+    min_itineraries: 3
+    require_mode: REGIONAL_RAIL
+  - name: Trento Autostaz. Dante -> Levico lakeside test point (walk + transit)
+    from: tte_1
+    to: "46.0103715,11.2896984"
+    min_itineraries: 1
 limits:
+  download_timeout_seconds: 900
   gtfs_download_bytes: 83886080
   gtfs_total_uncompressed_bytes: 536870912
   netex_download_bytes: 104857600

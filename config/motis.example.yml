@@ -39,7 +39,7 @@ timetable:
     #   extend_calendar: false
 limits:
   plan_max_results: 128
-  plan_max_search_window_minutes: 960
+  plan_max_search_window_minutes: 1440 # above the 16 h product window; 960 rejects it
   routing_max_timeout_seconds: 3
   street_routing_max_prepost_transit_seconds: 1800
 logging:

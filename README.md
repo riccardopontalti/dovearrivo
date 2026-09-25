@@ -62,7 +62,8 @@ Details in [DELIVERY](docs/DELIVERY.md).
 - **D02 — project and contracts: done.** SvelteKit app, types and runtime validation generated from the OpenAPI contract, mock API over the synthetic fixture, Italian/English skeleton, CI.
 - **D03 — routing domain: done.** Pure, tested functions choose the outbound/return pair, the backup return on a different first vehicle and the ranking; partial failures stay visible.
 - **D04 — MOTIS adapter: done.** Real searches over Trentino Trasporti, Trenitalia and OpenStreetMap answer in under 100 ms locally; engine contract tests run in CI against the pinned MOTIS release.
-- **Next: D05** — minimal search UI (form and results list).
+- **D06a — data pipeline: done.** Downloads, checks, imports, verifies and promotes timetable snapshots with rollback; a corrupted feed never replaces valid data.
+- **Next: D05** — minimal search UI (form and results list); then D06b, the first public deployment.
 
 ## Local development
 
@@ -87,7 +88,15 @@ npm run engine:fixtures
 npm run test:engine
 ```
 
-To run against real data, import the sources as described in [D01-engine-proof.md](research/D01-engine-proof.md), write a manifest like [manifest.example.json](config/manifest.example.json) and start the app with `DOVEARRIVO_BACKEND=motis MOTIS_URL=http://127.0.0.1:8080 DOVEARRIVO_MANIFEST=data/manifest.json`. Add `DOVEARRIVO_INCLUDE_DRAFTS=true` locally to include draft destinations.
+To run against real data (needs `unzip`, `zip`, `osmium` and the MOTIS binary):
+
+```bash
+MOTIS_BIN=/path/to/motis npm run data:update
+/path/to/motis server -d data/pipeline/active/motis &
+DOVEARRIVO_BACKEND=motis DOVEARRIVO_MANIFEST=data/pipeline/active/manifest.json npm run dev
+```
+
+The first run downloads about 650 MB of OpenStreetMap data from Geofabrik. Add `DOVEARRIVO_INCLUDE_DRAFTS=true` locally to include draft destinations.
 
 ## How this project is built
 

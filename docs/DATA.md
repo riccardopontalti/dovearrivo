@@ -26,6 +26,8 @@ Extra-urban: 119 routes with `route_type=3` and R35 with `route_type=2`. Urban: 
 - The primary source is NAP asset 1080596 (`IT-IT-TRENITALIA_L1.xml.gz`); the Transitous preprocessor only repacks it as ZIP. Fetch the primary source directly and record its update date.
 - The NAP pages state no licence. Liguria and Toscana publish regional Trenitalia subsets under CC BY 4.0; no Trentino equivalent exists. Maintainer decision (25/09/2026): use the feed with visible attribution to Trenitalia and the NAP, never relabel it as MIT, and remove it promptly if the publisher objects.
 - MOTIS v2.11.3 loads the NeTEx ZIP directly; no Lua script is needed.
+- The NAP file fetched on 25/09/2026 was newer than the Transitous mirror: valid 19/09–12/12/2026, 16,480 journeys.
+- **Stop ids are not stable across Trenitalia feed versions** (e.g. Rovereto moved from `railTRENITALIA` to `otherTRENITALIA`). Samples use coordinates; shared links with a Trenitalia origin may fail after an update with `UNKNOWN_ORIGIN`, which the UI must explain.
 - Check calendar coverage: the timetable changes on 13/12/2026 and a stale file may not cover the next 30 days.
 
 ## Identity and models
@@ -44,6 +46,8 @@ Original editorial files are kept separate from OSM-derived extracts. Any OSM-de
 
 ## Pipeline
 
+Implemented in `pipeline/` (D06a): `MOTIS_BIN=… npm run data:update` runs one pass, `npm run data:rollback` restores the previous snapshot. It needs `unzip`, `zip` and `osmium` on the host. Data layout under `data/pipeline/`: `state.json` (download state), `sources/<id>/` (files named by hash), `snapshots/<id>/` (MOTIS data, `manifest.json`, `report.json`) and the `active` symlink read by the app and MOTIS. Exit codes: 0 done or nothing to do, 1 failed with the active snapshot untouched, 2 large change awaiting review (`--accept-change`).
+
 Written in TypeScript and run by a scheduled job, separate from the processes serving users.
 
 1. Check the feeds every 6 hours with conditional requests where supported. Download only when needed; bounded timeouts and retries.
@@ -55,7 +59,7 @@ Written in TypeScript and run by a scheduled job, separate from the processes se
 
 OSM: weekly check, rebuild only after a change. Download the Geofabrik Nord-Est extract and clip it with `osmium extract --strategy complete_ways`; run `osmium check-refs` and block the snapshot if references are missing. Keep the clip generous; a tight crop can break walks. Destinations are limited to the imported walking coverage. The same extract feeds MOTIS geocoding.
 
-Rebuild the timetable window every day even if GTFS content has not changed. Reuse compatible geographic artefacts according to the pinned MOTIS release: do not re-download OSM when only the date advances.
+Rebuild the timetable window every day even if GTFS content has not changed. Never re-download OSM when only the date advances. Each snapshot is imported into a fresh directory for isolation, so MOTIS reprocesses the OSM clip; this takes about 6 s on the regional clip, which is cheaper than managing shared artefacts.
 
 Catalogue updates happen through pull requests on YAML files validated in CI. No public form for arbitrary coordinates or text in v0.1.
 

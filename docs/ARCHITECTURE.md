@@ -9,7 +9,7 @@
 | Routing | MOTIS v2.11.3, private service | Timetables, walking network and geocoding in one engine; already tested on timetables |
 | Geocoding | MOTIS built-in geocoding on the regional OSM extract | Search by place without public Nominatim or commercial APIs |
 | Maps | MapLibre GL JS, Protomaps basemap as a regional PMTiles file served by Caddy | One static file, no tile server, no external requests |
-| Pipeline | TypeScript on Node; GTFS validator and osmium-tool as pinned containers or packages | Same language as the app; external tools stay isolated |
+| Pipeline | TypeScript run directly by Node 24; `osmium`, `zip`/`unzip` on the host; MobilityData GTFS validator still to add in D06b | Same language as the app; external tools stay isolated |
 | Persistence | Immutable snapshots, JSON/YAML and files on disk | No user data to manage; small catalogue |
 | Cache | In-memory LRU, max 64 MiB, TTL 15 min | Avoids repeated searches without an extra service |
 | Operations | Docker Compose and Caddy | One server, HTTPS and understandable updates |

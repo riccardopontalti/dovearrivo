@@ -12,7 +12,7 @@
     "C08": "src/lib/domain/time.spec.ts",
     "C09": "src/lib/domain/outcome.spec.ts",
     "C10": "pending: MOTIS integration test with OSM (D04)",
-    "C11": "pending: pipeline test (D06)"
+    "C11": "pipeline/lib/plan.spec.ts"
   },
   "timezone": "Europe/Rome",
   "timeUnit": "seconds unless a field ends with Minutes",
@@ -101,7 +101,7 @@
       "name": "Window rollover with unchanged GTFS",
       "evidence": "Pipeline case specified, not executed",
       "given": {"newLocalDay": true, "gtfsHashUnchanged": true, "calendarStillValid": true},
-      "expect": {"rollingTimetableRebuilt": true, "firstImportedDay": "yesterday", "lastImportedDay": "today+30", "sourceRedownloadRequired": false, "osmRebuildRequiredIfCompatibleArtifactsExist": false}
+      "expect": {"rollingTimetableRebuilt": true, "firstImportedDay": "yesterday", "lastImportedDay": "today+30", "sourceRedownloadRequired": false, "osmRebuildRequiredIfCompatibleArtifactsExist": false, "note": "D06a: OSM is never re-downloaded, but each snapshot directory reprocesses the clip (about 6 s) for isolation."}
     }
   ]
 }

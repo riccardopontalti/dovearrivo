@@ -14,12 +14,14 @@
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
 		"gen:api": "openapi-typescript spec/api.openapi.yaml -o src/lib/api/types.gen.ts && node scripts/gen-schemas.ts",
-		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json && tsc -p tsconfig.pipeline.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"test:unit": "vitest --project server",
 		"test": "npm run test:unit -- --run",
 		"engine:fixtures": "scripts/engine-fixtures.sh",
-		"test:engine": "MOTIS_URL=${MOTIS_URL:-http://127.0.0.1:8090} vitest --run --project engine"
+		"test:engine": "MOTIS_URL=${MOTIS_URL:-http://127.0.0.1:8090} vitest --run --project engine",
+		"data:update": "node pipeline/run.ts",
+		"data:rollback": "node pipeline/rollback.ts"
 	},
 	"dependencies": {
 		"ajv": "8.20.0",

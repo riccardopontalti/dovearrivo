@@ -13,10 +13,12 @@ No GPU requirement. No inference cost.
 Each snapshot includes the MOTIS index, OSM data, catalogue, stops and manifest. A search always uses a single snapshot.
 
 v0.1 uses a short declared maintenance window at night:
-1. Build the new snapshot in a staging directory while the current one serves traffic.
-2. Run the checks from [DATA](DATA.md).
-3. Stop new searches with a maintenance response, switch MOTIS and application to the new snapshot, restart, run smoke checks.
-4. If checks fail, restart on the previous snapshot.
+1. The pipeline builds the new snapshot in `data/pipeline/snapshots/` while the current one serves traffic.
+2. It runs the checks from [DATA](DATA.md), including sample searches on a private MOTIS instance.
+3. On success it switches the `active` symlink atomically and runs `PROMOTE_HOOK`, which restarts MOTIS on `active/motis` (a few seconds of 503 with `Retry-After`). The app re-reads `active/manifest.json` on each request.
+4. If the new snapshot misbehaves in production, `npm run data:rollback` restores the previous one; run the hook again.
+
+Schedule: every 6 hours (feeds are checked; the snapshot is rebuilt only on a new local day or a changed source).
 
 Do not just swap a symlink while a process keeps reading an old memory map. Zero-downtime switching with two MOTIS instances comes after launch, if memory allows.
 
