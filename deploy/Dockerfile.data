@@ -1,0 +1,35 @@
+# Engine and data jobs: MOTIS (server and import), the TypeScript pipeline, osmium,
+# the MobilityData GTFS validator and the pmtiles CLI. Every download is checksum-pinned.
+FROM node:24.21.0-trixie-slim@sha256:8ec5d7557396cfe32d21c3f9c13072355ceab22b584578ca4bb28af31120cffe
+
+RUN apt-get update \
+	&& apt-get install -y --no-install-recommends ca-certificates curl bzip2 zip unzip osmium-tool default-jre-headless \
+	&& rm -rf /var/lib/apt/lists/*
+
+ARG MOTIS_VERSION=2.11.3
+ARG MOTIS_SHA256=0ffc7fc0633049edbcf88170ac037d2665ceaf1f0884a00b15f6c2b81313c825
+RUN curl -fsSL -o /tmp/motis.tar.bz2 "https://github.com/motis-project/motis/releases/download/v${MOTIS_VERSION}/motis-linux-amd64.tar.bz2" \
+	&& echo "${MOTIS_SHA256}  /tmp/motis.tar.bz2" | sha256sum -c - \
+	&& mkdir -p /opt/motis && tar -xjf /tmp/motis.tar.bz2 -C /opt/motis && rm /tmp/motis.tar.bz2
+
+ARG PMTILES_VERSION=1.31.2
+ARG PMTILES_SHA256=3ed7dbf4ec2e6dfe5e25b6f70d1ffc932729f93c86db353bf514dd71010a312f
+RUN curl -fsSL -o /tmp/pmtiles.tgz "https://github.com/protomaps/go-pmtiles/releases/download/v${PMTILES_VERSION}/go-pmtiles_${PMTILES_VERSION}_Linux_x86_64.tar.gz" \
+	&& echo "${PMTILES_SHA256}  /tmp/pmtiles.tgz" | sha256sum -c - \
+	&& tar -xzf /tmp/pmtiles.tgz -C /usr/local/bin pmtiles && rm /tmp/pmtiles.tgz
+
+ARG VALIDATOR_VERSION=8.0.1
+ARG VALIDATOR_SHA256=19293ddd9b6f954f216d4f12054bd8a3232921751c4484339e339764a91000e2
+RUN curl -fsSL -o /opt/gtfs-validator.jar "https://github.com/MobilityData/gtfs-validator/releases/download/v${VALIDATOR_VERSION}/gtfs-validator-${VALIDATOR_VERSION}-cli.jar" \
+	&& echo "${VALIDATOR_SHA256}  /opt/gtfs-validator.jar" | sha256sum -c -
+
+WORKDIR /app
+COPY package.json package-lock.json .npmrc ./
+RUN npm ci --omit=dev --ignore-scripts
+COPY pipeline ./pipeline
+COPY src/lib/domain/time.ts ./src/lib/domain/time.ts
+COPY config ./config
+COPY scripts ./scripts
+
+ENV MOTIS_BIN=/opt/motis/motis GTFS_VALIDATOR_JAR=/opt/gtfs-validator.jar BASEMAP_DIR=/data/basemap
+USER node

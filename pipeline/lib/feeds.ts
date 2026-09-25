@@ -83,6 +83,7 @@ export interface FeedReport {
 	serviceTo: string | null;
 	feedVersion?: string;
 	uncompressedBytes: number;
+	validator?: { blocking: string[]; waived: string[]; warnings: number; infos: number };
 }
 
 function unzipList(zip: string): { names: string[]; bytes: number } {

@@ -30,7 +30,7 @@ cp "$ASSETS/fonts/OFL.txt" "$DIR/fonts/"
 cp -R "$ASSETS/sprites" "$DIR/sprites"
 mv "$TMP/basemap.pmtiles" "$DIR/basemap.pmtiles"
 
-SHA=$(shasum -a 256 "$DIR/basemap.pmtiles" | cut -d' ' -f1)
+if command -v sha256sum > /dev/null; then SHA=$(sha256sum "$DIR/basemap.pmtiles" | cut -d' ' -f1); else SHA=$(shasum -a 256 "$DIR/basemap.pmtiles" | cut -d' ' -f1); fi
 cat > "$DIR/basemap.json" <<JSON
 {
 	"version": "$BUILD-${SHA:0:12}",

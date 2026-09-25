@@ -73,6 +73,9 @@ updates:
   osm_check_days: 7
   unverified_warning_hours: 72
   unverified_suspend_days: 7
+# MobilityData GTFS validator (run when GTFS_VALIDATOR_JAR is set). ERROR notices block a
+# snapshot unless waived here with a precise scope and a reason; warnings are recorded.
+validator_waivers: []
 samples:
   # Checked on every new snapshot for tomorrow 06:00-22:00; a failure blocks promotion.
   - name: Trento Autostaz. Dante -> Levico Terme Autostazione (bus)

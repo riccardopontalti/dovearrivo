@@ -21,6 +21,7 @@ import { inspectGtfs, inspectNetex, type FeedReport } from './lib/feeds.ts';
 import { motisConfig, readMetrics, run, runSamples, withServer, type SampleResult } from './lib/motis.ts';
 import { availableTo, decideRebuild, metricDrift, snapshotLimitations, timetableWindow, type DatasetMetrics, type Localized } from './lib/plan.ts';
 import { Store, writeJsonAtomic, type PipelineState } from './lib/store.ts';
+import { runValidator, validatorVerdict } from './lib/validator.ts';
 
 const NOTICE_URL = 'https://github.com/riccardopontalti/dovearrivo/blob/main/NOTICE.md';
 const SAMPLE_PORT = 8095;
@@ -154,6 +155,25 @@ async function pipeline(config: ReturnType<typeof loadConfig>, bin: string, stor
 			await store.writeState(state);
 			log(`${source.id} is not usable; the active snapshot stays in place`);
 			return 1;
+		}
+		const jar = process.env.GTFS_VALIDATOR_JAR;
+		if (jar && source.kind === 'gtfs-static') {
+			try {
+				const out = store.path('validation', source.id, fetched.state.sha256!.slice(0, 16));
+				const verdict = validatorVerdict(source.id, await runValidator(jar, zip, out), config.validator_waivers ?? []);
+				report.validator = verdict;
+				log(`${source.id}: validator ${verdict.blocking.length} blocking, ${verdict.waived.length} waived, ${verdict.warnings} warnings`);
+				if (verdict.blocking.length) {
+					log(`${source.id} has validator errors: ${verdict.blocking.join(', ')}; the active snapshot stays in place`);
+					await store.writeState(state);
+					return 1;
+				}
+			} catch (error) {
+				log(`validator failed for ${source.id}: ${String(error)}; the active snapshot stays in place`);
+				return 1;
+			}
+		} else if (source.kind === 'gtfs-static') {
+			log(`${source.id}: GTFS validator skipped (GTFS_VALIDATOR_JAR not set)`);
 		}
 		inputs[source.id] = { zip, report, state: fetched.state, source };
 	}

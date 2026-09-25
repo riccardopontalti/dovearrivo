@@ -37,6 +37,7 @@ export interface PipelineConfig {
 	transit: TransitSource[];
 	street: StreetSource;
 	samples: Sample[];
+	validator_waivers?: Array<{ source: string; code: string; reason: string }>;
 	updates: { osm_check_days: number };
 	limits: {
 		download_timeout_seconds: number;

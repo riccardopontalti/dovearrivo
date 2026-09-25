@@ -1,0 +1,8 @@
+.git
+node_modules
+build
+.svelte-kit
+.engine
+data
+test-results
+playwright-report

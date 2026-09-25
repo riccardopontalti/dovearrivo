@@ -58,6 +58,12 @@ export class Store {
 		state.previous = state.previous.filter((p) => p !== id).slice(0, Math.max(0, keep - 1));
 		await this.writeState(state);
 		await this.prune(state);
+		await this.markPromoted(id);
+	}
+
+	/** Tells the host (deploy/update.sh) that MOTIS must restart on the new active snapshot. */
+	async markPromoted(id: string): Promise<void> {
+		await writeFile(this.path('promoted'), `${id}\n`);
 	}
 
 	/** Makes the most recent previous snapshot active again. */
@@ -68,6 +74,7 @@ export class Store {
 		await switchLink(this.path('active'), join('snapshots', target));
 		state.previous = [...(current ? [current] : []), ...state.previous.slice(1)];
 		await this.writeState(state);
+		await this.markPromoted(target);
 		return target;
 	}
 

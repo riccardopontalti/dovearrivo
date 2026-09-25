@@ -51,6 +51,7 @@ Details in [DELIVERY](docs/DELIVERY.md).
 | [Data](docs/DATA.md) | Sources, coverage and updates |
 | [Delivery](docs/DELIVERY.md) | Tickets, tests and release criteria |
 | [Operations](docs/OPERATIONS.md) | Hosting and maintenance |
+| [Deploy](docs/DEPLOY.md) | Step-by-step server setup |
 | [Sources and evidence](docs/SOURCES.md) | Evidence, assumptions and open points |
 | [API contract](spec/api.openapi.yaml) | Interface between UI and backend |
 | [AGENTS.md](AGENTS.md) | Instructions for coding agents |

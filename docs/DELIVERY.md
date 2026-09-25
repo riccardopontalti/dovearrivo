@@ -29,6 +29,8 @@ Four phases, about 6 weeks for one person with coding agents and human review. A
 
 **D10 status (25/09/2026): done** — `GET /api/v1/reachability` wraps MOTIS one-to-all (limit raised to 240 min in the generated config) and returns reachable stops with arrival minutes, waiting included. `/reachability` shows them on the self-hosted map in five ordinal time bands (one-hue blue ramps validated for light and dark surfaces with the dataviz checks), with counts per band, hover tooltips, a table alternative and an explicit "preview, not a trip" note. A unit test documents why this semantics never filters proposals (the C01 bus is outside a 60-minute preview but valid as a trip). Real data: from Trento Autostaz. Dante at 09:00, 1,839 stops within 2 h, 40 ms.
 
+**D06b preparation (25/09/2026): ready, not deployed** — `deploy/`: pinned app and data images (MOTIS, pipeline, osmium, GTFS validator 8.0.1, pmtiles, all checksum-verified), Compose with Caddy (HTTPS, basemap served with byte ranges, no access log), a systemd timer every 6 hours that restarts MOTIS only after a promotion, and the runbook in [DEPLOY](DEPLOY.md). CI builds both images. The MobilityData validator now runs in the pipeline: ERROR notices block unless waived with scope and reason in `config/sources.yaml`; on 25/09 the TT feeds had 0 errors, 36 and 196 warnings. Waiting for: the VPS.
+
 D01 decides whether Trenitalia enters the pilot. If the feed is stale, its licence is unclear or memory exceeds the server, record the reason and apply the partial-rail rule in [PRODUCT](PRODUCT.md).
 
 ## Phase 2 — Walking skeleton online (weeks 2–3)

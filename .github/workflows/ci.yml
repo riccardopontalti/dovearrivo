@@ -62,3 +62,16 @@ jobs:
       - run: npm ci
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
+
+  docker:
+    # Builds the production images and checks the Compose file; nothing is pushed.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - run: cp deploy/.env.example deploy/.env && docker compose -f deploy/compose.yml config --quiet
+      - run: docker build -f deploy/Dockerfile.app -t dovearrivo-app:ci .
+      - run: docker build -f deploy/Dockerfile.data -t dovearrivo-data:ci .
+      - name: Tools inside the data image
+        run: |
+          docker run --rm dovearrivo-data:ci sh -c '/opt/motis/motis --version && osmium --version | head -1 && pmtiles version && java -version 2>&1 | head -1 && node --version'

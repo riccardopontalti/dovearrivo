@@ -1,0 +1,65 @@
+# Production stack on one server. Run from this directory with a `.env` next to it
+# (see .env.example). Jobs (pipeline, basemap) use the `jobs` profile and a systemd timer.
+name: dovearrivo
+
+services:
+  caddy:
+    image: caddy:2.11.4-alpine@sha256:6aeddd44c3078b0f9a35206472a11420648a79c184603ef95957d0a20044cb2b
+    ports: ['80:80', '443:443', '443:443/udp']
+    environment:
+      DOMAIN: ${DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ../data/basemap:/srv/basemap:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on: [app]
+    restart: unless-stopped
+
+  app:
+    build: { context: .., dockerfile: deploy/Dockerfile.app }
+    image: dovearrivo-app:local
+    environment:
+      ORIGIN: https://${DOMAIN}
+      ADDRESS_HEADER: X-Forwarded-For
+      XFF_DEPTH: '1'
+      DOVEARRIVO_BACKEND: motis
+      MOTIS_URL: http://motis:8080
+      DOVEARRIVO_MANIFEST: /data/pipeline/active/manifest.json
+      DOVEARRIVO_BASEMAP_DIR: /data/basemap
+    volumes:
+      - ../data:/data:ro
+    depends_on: [motis]
+    mem_limit: 512m
+    restart: unless-stopped
+
+  motis:
+    build: { context: .., dockerfile: deploy/Dockerfile.data }
+    image: dovearrivo-data:local
+    command: ['/opt/motis/motis', 'server', '-d', '/data/pipeline/active/motis']
+    volumes:
+      - ../data:/data
+    healthcheck:
+      test: ['CMD', 'curl', '-fsS', 'http://127.0.0.1:8080/api/v1/health']
+      interval: 30s
+      timeout: 5s
+    mem_limit: 2g
+    restart: unless-stopped
+
+  pipeline:
+    image: dovearrivo-data:local
+    profiles: [jobs]
+    command: ['node', 'pipeline/run.ts', '--data', '/data/pipeline']
+    volumes:
+      - ../data:/data
+
+  basemap:
+    image: dovearrivo-data:local
+    profiles: [jobs]
+    command: ['scripts/basemap.sh']
+    volumes:
+      - ../data:/data
+
+volumes:
+  caddy_data:
+  caddy_config:

@@ -1,0 +1,10 @@
+[Unit]
+Description=Run the DoveArrivo data pipeline every 6 hours
+
+[Timer]
+OnCalendar=*-*-* 02,08,14,20:15:00 Europe/Rome
+Persistent=true
+RandomizedDelaySec=10m
+
+[Install]
+WantedBy=timers.target

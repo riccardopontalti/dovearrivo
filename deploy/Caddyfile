@@ -1,0 +1,24 @@
+# HTTPS with automatic certificates. No access log: search URLs contain origins and times
+# (docs/OPERATIONS.md, "Privacy and measurement").
+{$DOMAIN} {
+	encode zstd gzip
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		-Server
+	}
+
+	# Basemap files are static; Caddy serves byte ranges for PMTiles.
+	handle_path /basemap/* {
+		root * /srv/basemap
+		header Cache-Control "public, max-age=86400"
+		file_server
+	}
+
+	handle {
+		reverse_proxy app:3000
+	}
+}
+
+www.{$DOMAIN} {
+	redir https://{$DOMAIN}{uri} permanent
+}
