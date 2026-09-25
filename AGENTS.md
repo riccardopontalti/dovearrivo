@@ -22,6 +22,15 @@ Read README, PRODUCT, ARCHITECTURE and ROUTING before writing code. Use DELIVERY
 - Keep attributions and provenance. Do not commit large datasets or binaries.
 - Do not describe as implemented anything that is still a specification.
 
+## Working agreements
+
+- Talk to the maintainer in Italian; keep code, docs and commits in English.
+- Commit and push only after `npm run check`, `npm test` and `npm run test:e2e` all exit 0 (gate on the exit code). Run `npm run test:engine` when touching the MOTIS adapter.
+- End commit messages with the `Co-Authored-By` trailer for AI agents: the project states openly that it is built with coding agents (README, "How this project is built").
+- Purchases, accounts, DNS changes, publishing and messages to third parties are the maintainer's: prepare them and ask.
+- Close each ticket with what works, the verification performed, the remaining limits, and a short "what I decided and why" for the maintainer.
+- Current state and next steps: [docs/STATUS.md](docs/STATUS.md).
+
 ## Method
 
 One ticket at a time: contract, implementation, check of the concrete risk, completion note. Prefer pure functions for filters and ranking. Use synthetic fixtures for edge cases and real data for integration.
