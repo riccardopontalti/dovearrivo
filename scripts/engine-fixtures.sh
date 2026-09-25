@@ -41,7 +41,7 @@ timetable:
       extend_calendar: false
 limits:
   plan_max_results: 128
-  plan_max_search_window_minutes: 960
+  plan_max_search_window_minutes: 1440
   routing_max_timeout_seconds: 3
 EOF
 
