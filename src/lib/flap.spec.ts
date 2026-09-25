@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { flapSequence, toFlaps } from './flap';
+import { flapSequence, splitName, toFlaps } from './flap';
 
 describe('toFlaps', () => {
 	it('uppercases, keeps Italian accents and fits the width', () => {
@@ -22,5 +22,13 @@ describe('flapSequence', () => {
 
 	it('is empty when the flap already shows the target', () => {
 		expect(flapSequence('7', '7')).toEqual([]);
+	});
+});
+
+describe('splitName', () => {
+	it('puts the place on the upper half of the blade and the spot on the lower one', () => {
+		expect(splitName('Riva del Garda – Rocca e lungolago')).toEqual({ title: 'Riva del Garda', sub: 'Rocca e lungolago' });
+		expect(splitName('Castel Beseno')).toEqual({ title: 'Castel Beseno', sub: '' });
+		expect(splitName('Levico Terme - lungolago')).toEqual({ title: 'Levico Terme', sub: 'lungolago' });
 	});
 });

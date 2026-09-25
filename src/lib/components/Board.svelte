@@ -1,17 +1,22 @@
 <script lang="ts">
 	// Home page departures board: real trips with a way back from Trento in the next hours
-	// (/board), on mechanical split flaps. Each row opens the full search for that trip.
-	// The flaps are visual; every row carries its content as text for assistive technology.
+	// (/board). Times are split flaps; each destination is one wide blade, as on Solari
+	// boards, with the place on the upper half and the spot on the lower one, so names are
+	// never cut. Each row opens the full search for that trip. The flaps are visual: every
+	// row carries its content as text for assistive technology.
 	import { onMount } from 'svelte';
+	import { splitName } from '$lib/flap';
 	import { clock } from '$lib/format';
 	import { fill, type Messages } from '$lib/i18n';
 	import { toParams } from '$lib/search-form';
 	import BlankFlaps from './flap/BlankFlaps.svelte';
+	import FlapBlade from './flap/FlapBlade.svelte';
 	import FlapText from './flap/FlapText.svelte';
 
 	interface Row {
 		id: string;
 		name: string;
+		category: string;
 		depart: string;
 		arrive: string;
 		leave: string;
@@ -30,7 +35,7 @@
 
 	let { t, locale }: { t: Messages; locale: 'it' | 'en' } = $props();
 
-	const ROWS = 8;
+	const ROWS = 7;
 	let el: HTMLElement;
 	let board = $state<BoardData | null>(null);
 	let status = $state<'loading' | 'ready' | 'unavailable'>('loading');
@@ -40,31 +45,29 @@
 	// Flaps exist only in the browser; the server sends the empty board.
 	let mounted = $state(false);
 	let now = $state('');
-	let size = $state({ mode: 'wide' as 'wide' | 'medium' | 'narrow', cell: 26, name: 22 });
+	let size = $state({ mode: 'wide' as 'wide' | 'medium' | 'narrow', cell: 26, title: 20 });
 
 	const slots = $derived(Array.from({ length: ROWS }, (_, i) => (live ? (board?.rows[i] ?? null) : null)));
 	const isTomorrow = $derived(!!board && board.date > new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Rome' }).format(new Date()));
 	const title = $derived(
-		`${fill(t.boardTitle, { origin: board?.origin.name ?? 'Trento' })}${isTomorrow ? ` · ${t.boardTomorrow}` : ''}`
+		`${fill(size.mode === 'narrow' ? t.boardTitleShort : t.boardTitle, { origin: board?.origin.name ?? 'Trento' })}${isTomorrow ? ` · ${t.boardTomorrow}` : ''}`
 	);
-	const shortTitle = $derived(fill(t.boardTitleShort, { origin: board?.origin.name ?? 'Trento' }));
 	const message = $derived(
 		status === 'loading' ? t.boardLoading : status === 'unavailable' ? t.boardUnavailable : board && board.rows.length === 0 ? t.boardEmpty : ''
 	);
-
 	// Before the board is in view it shows the loading line, still.
 	const visualMessage = $derived(live ? message : t.boardLoading);
 
+	const kind = (c: string) => (t as Record<string, string>)[`kind_${c}`] ?? '';
+	function face(row: Row) {
+		const { title, sub } = splitName(row.name);
+		return { title, sub: sub || kind(row.category) };
+	}
+	const pool = $derived(board?.rows.map(face) ?? []);
+
 	function href(row: Row): string {
 		if (!board) return '/';
-		const form = {
-			from: board.origin.from,
-			fromQuery: board.origin.name,
-			date: board.date,
-			start: board.start,
-			end: board.end,
-			...board.limits
-		};
+		const form = { from: board.origin.from, fromQuery: board.origin.name, date: board.date, start: board.start, end: board.end, ...board.limits };
 		return `/?${toParams(form, locale)}#card-${row.id}`;
 	}
 
@@ -74,20 +77,19 @@
 	}
 
 	function measure() {
-		const w = el.clientWidth - 2 * (el.clientWidth < 560 ? 14 : 28);
-		const gap = 2;
+		const w = el.clientWidth - 2 * (el.clientWidth < 560 ? 14 : 26);
 		if (w >= 860) {
-			const name = w >= 1150 ? 24 : 18;
-			const cells = 20 + name + 4;
-			size = { mode: 'wide', cell: Math.min(34, Math.floor(w / cells) - gap), name };
-		} else if (w >= 560) {
-			// Leaves, destination, return: the arrival time is in the row's text and the trip.
-			const name = w >= 630 ? 20 : 16;
-			const cells = 10 + name + 2;
-			size = { mode: 'medium', cell: Math.min(30, Math.floor(w / cells) - gap), name };
+			// Leaves · destination · arrives · return · backup
+			const cell = Math.max(20, Math.min(30, Math.floor(w / 46) - 2));
+			size = { mode: 'wide', cell, title: Math.floor(w / (cell + 2)) - 7 };
+		} else if (w >= 520) {
+			// Leaves · destination · return
+			const cell = Math.max(18, Math.min(26, Math.floor(w / 30) - 2));
+			size = { mode: 'medium', cell, title: Math.floor(w / (cell + 2)) - 7 };
 		} else {
-			const cell = 17;
-			size = { mode: 'narrow', cell, name: Math.max(10, Math.floor(w / (cell + gap))) };
+			// Destination on its own line, times below.
+			const cell = 18;
+			size = { mode: 'narrow', cell, title: Math.floor(w / (cell + 2)) - 6 };
 		}
 	}
 
@@ -136,16 +138,12 @@
 	aria-labelledby="board-title"
 	aria-busy={status === 'loading'}
 	bind:this={el}
-	style="--cell-w:{size.cell}px;--cell-h:{Math.round(size.cell * 1.5)}px;--fs:{Math.round(size.cell * 1.18)}px"
+	style="--cell-w:{size.cell}px;--cell-h:{Math.round(size.cell * 1.5)}px;--fs:{Math.round(size.cell * 1.18)}px;--blade-h:{size.mode === 'narrow' ? 54 : Math.max(58, Math.round(size.cell * 2.5))}px"
 >
 	<header class="head">
 		<h2 id="board-title">
 			<span class="visually-hidden">{title}</span>
-			{#if mounted}
-				<FlapText text={size.mode === 'narrow' ? shortTitle : title} length={size.mode === 'narrow' ? size.name - 6 : size.mode === 'wide' ? size.name + 11 : size.name + 5} still />
-			{:else}
-				<BlankFlaps length={size.name + 11} />
-			{/if}
+			{#if mounted}<FlapText text={title} length={size.title} still />{:else}<BlankFlaps length={size.title} />{/if}
 		</h2>
 		<p class="clock">
 			<span class="visually-hidden">{t.boardClock} {now}</span>
@@ -155,11 +153,11 @@
 
 	{#if size.mode !== 'narrow'}
 		<div class="cols" aria-hidden="true">
-			<span style="--n:5">{t.colTime}</span>
-			<span style="--n:{size.name}">{t.colDest}</span>
-			{#if size.mode === 'wide'}<span style="--n:5">{t.colArrive}</span>{/if}
-			<span style="--n:5">{t.colLeave}</span>
-			{#if size.mode === 'wide'}<span style="--n:5">{t.colBackup}</span>{/if}
+			<span class="c-time">{t.colTime}</span>
+			<span class="c-dest">{t.colDest}</span>
+			{#if size.mode === 'wide'}<span class="c-time">{t.colArrive}</span>{/if}
+			<span class="c-time">{t.colLeave}</span>
+			{#if size.mode === 'wide'}<span class="c-time">{t.colBackup}</span>{/if}
 		</div>
 	{/if}
 
@@ -167,35 +165,48 @@
 		{#each slots as row, i (row?.id ?? `empty-${i}`)}
 			<li>
 				{#if row}
+					{@const f = face(row)}
 					<a class="row" href={href(row)} data-sveltekit-preload-data="off">
 						<span class="visually-hidden">{label(row)}</span>
 						{#if size.mode === 'narrow'}
-							<span class="line name"><FlapText text={row.name} length={size.name} delay={i * 110} stagger={28} {still} /></span>
-							<span class="line sub">
-								<span class="tag" aria-hidden="true">{t.colTime}</span>
-								<span class="time"><FlapText text={row.depart} length={5} delay={i * 110 + 250} {still} /></span>
-								<span class="tag" aria-hidden="true">{t.colLeave}</span>
-								<span class="time"><FlapText text={row.leave} length={5} delay={i * 110 + 400} {still} /></span>
+							<FlapBlade title={f.title} sub={f.sub} {pool} delay={i * 140} {still} />
+							<span class="sub" aria-hidden="true">
+								<span class="tag">{t.colTime}</span>
+								<span class="time"><FlapText text={row.depart} length={5} delay={i * 140 + 300} {still} /></span>
+								<span class="tag">{t.colLeave}</span>
+								<span class="time"><FlapText text={row.leave} length={5} delay={i * 140 + 420} {still} /></span>
 							</span>
 						{:else}
-							<span class="time"><FlapText text={row.depart} length={5} delay={i * 110} {still} /></span>
-							<FlapText text={row.name} length={size.name} delay={i * 110 + 120} stagger={28} {still} />
+							<span class="time"><FlapText text={row.depart} length={5} delay={i * 140} {still} /></span>
+							<FlapBlade title={f.title} sub={f.sub} {pool} delay={i * 140 + 120} {still} />
 							{#if size.mode === 'wide'}
-								<span class="time"><FlapText text={row.arrive} length={5} delay={i * 110 + 300} {still} /></span>
+								<span class="time"><FlapText text={row.arrive} length={5} delay={i * 140 + 260} {still} /></span>
 							{/if}
-							<span class="time"><FlapText text={row.leave} length={5} delay={i * 110 + 380} {still} /></span>
+							<span class="time"><FlapText text={row.leave} length={5} delay={i * 140 + 340} {still} /></span>
 							{#if size.mode === 'wide'}
-								<span class="time"><FlapText text={row.backup ?? '-'} length={5} delay={i * 110 + 460} {still} /></span>
+								<span class="time"><FlapText text={row.backup ?? '-'} length={5} delay={i * 140 + 420} {still} /></span>
 							{/if}
 						{/if}
 						<span class="go" aria-hidden="true">→</span>
 					</a>
 				{:else}
 					<div class="row blank" aria-hidden="true">
-						{#if mounted && i === 0 && visualMessage}
-							<FlapText text={visualMessage} length={size.mode === 'narrow' ? size.name : size.mode === 'wide' ? size.name + 20 : size.name + 10} stagger={30} still={still || !live} />
+						{#if size.mode === 'narrow'}
+							{#if mounted && i === 0 && visualMessage}
+								<FlapBlade title={visualMessage} sub="" still={still || !live} />
+							{:else}
+								<span class="blank-blade"></span>
+							{/if}
 						{:else}
-							<BlankFlaps length={size.mode === 'narrow' ? size.name : size.mode === 'wide' ? size.name + 24 : size.name + 12} />
+							<BlankFlaps length={5} />
+							{#if mounted && i === 0 && visualMessage}
+								<FlapBlade title={visualMessage} sub="" still={still || !live} />
+							{:else}
+								<span class="blank-blade"></span>
+							{/if}
+							{#if size.mode === 'wide'}<BlankFlaps length={5} />{/if}
+							<BlankFlaps length={5} />
+							{#if size.mode === 'wide'}<BlankFlaps length={5} />{/if}
 						{/if}
 					</div>
 				{/if}
@@ -215,11 +226,11 @@
 
 <style>
 	.board {
-		--gap: 2px;
+		--time-w: calc(5 * (var(--cell-w) + 2px) - 2px);
 		position: relative;
 		background: var(--board);
 		color: var(--flap-ink);
-		padding: 22px 28px 26px;
+		padding: 20px 26px 24px;
 		border-radius: 10px;
 		box-shadow:
 			inset 0 0 0 1px rgb(255 255 255 / 0.06),
@@ -231,7 +242,7 @@
 		overflow: hidden;
 	}
 	.board.narrow {
-		padding: 16px 14px 18px;
+		padding: 14px 14px 16px;
 	}
 	/* Screws in the corners, like a real board. */
 	.board::before {
@@ -272,15 +283,19 @@
 		text-transform: uppercase;
 		color: #8a8780;
 	}
-	.cols span {
-		width: calc(var(--n) * (var(--cell-w) + var(--gap)) - var(--gap));
+	.c-time {
+		width: var(--time-w);
+		flex: none;
+	}
+	.c-dest {
+		flex: 1;
 	}
 	.rows {
 		list-style: none;
 		margin: 0;
 		padding: 0;
 		display: grid;
-		gap: 6px;
+		gap: 8px;
 	}
 	.row {
 		position: relative;
@@ -292,12 +307,29 @@
 		border-radius: 4px;
 		outline-offset: 4px;
 	}
+	.row > .time,
+	.row > :global(.flaps),
+	.row > :global(.blank) {
+		flex: none;
+	}
+	.blank-blade {
+		flex: 1;
+		height: var(--blade-h);
+		border-radius: 4px;
+		background:
+			linear-gradient(transparent calc(50% - 0.5px), rgb(0 0 0 / 0.9) calc(50% - 0.5px) calc(50% + 0.5px), transparent calc(50% + 0.5px)),
+			var(--flap);
+	}
 	.narrow .row {
 		flex-direction: column;
-		align-items: flex-start;
+		align-items: stretch;
 		gap: 6px;
-		padding-bottom: 8px;
+		padding-bottom: 10px;
 		border-bottom: 1px solid #262626;
+	}
+	.narrow .row > :global(.blade),
+	.narrow .blank-blade {
+		flex: none;
 	}
 	.narrow li:last-child .row {
 		border-bottom: 0;
@@ -309,9 +341,9 @@
 		display: flex;
 		align-items: center;
 		gap: 8px;
-		--cell-w: 14px;
-		--cell-h: 21px;
-		font-size: 17px;
+		--cell-w: 15px;
+		--cell-h: 22px;
+		font-size: 18px;
 	}
 	.tag {
 		font-family: var(--font-mono);
@@ -322,7 +354,7 @@
 	}
 	.go {
 		position: absolute;
-		right: -22px;
+		right: -20px;
 		top: 50%;
 		transform: translate(-6px, -50%);
 		opacity: 0;
@@ -338,14 +370,14 @@
 		transform: translate(0, -50%);
 	}
 	.row:hover :global(.half) {
-		background: #262626;
+		background: #282828;
 	}
 	.row:focus-visible {
 		outline: 3px solid var(--signal);
 	}
 	.narrow .go {
-		right: 0;
-		top: 12px;
+		right: 6px;
+		top: 26px;
 	}
 	.note {
 		margin: 0.9rem 0 0;

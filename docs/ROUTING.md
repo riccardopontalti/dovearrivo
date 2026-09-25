@@ -57,6 +57,10 @@ The adapter owns units and serialisation: WALK is a mode; FOOT is a profile.
 
 Walking parameters limit single access/egress segments; also check the sum of the WALK segments of the leg. Walking durations may include transfer margins: in v0.1 use a conservative estimate, explained in the filter help. Do not derive distances from speed.
 
+## Destinations you are already at
+
+A destination whose entrance is less than 3 km in a straight line from the starting point is not proposed: from Pergine station, "Pergine Valsugana – centro storico" is a walk, not a day trip by public transport. With a point origin the destination is not even sent to the engine; with a stop origin the check uses the start of the outbound journey. The destination still counts as evaluated, so the search stays complete. Code: `src/lib/domain/nearby.ts`.
+
 ## Multiple feeds and rail
 
 TT urban, TT extra-urban and Trenitalia are imported as separate datasets with separate prefixes (`tte`, `ttu`, `trenitalia`). Stops are not merged across sources (`merge_dupes_inter_src: false`); bus–train transfers at stations rely on MOTIS footpaths computed on OSM. D01 must verify at least one real bus–train transfer (e.g. at Trento or Pergine station) and that a station served by both feeds does not produce implausible transfer times.

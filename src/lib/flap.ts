@@ -25,3 +25,9 @@ export function flapSequence(from: string, to: string, max = 8): string[] {
 	const start = (b - steps + FLAP_CHARS.length) % FLAP_CHARS.length;
 	return Array.from({ length: steps }, (_, i) => FLAP_CHARS[(start + i + 1) % FLAP_CHARS.length]);
 }
+
+/** "Riva del Garda – Rocca e lungolago" → place and spot, for a destination blade. */
+export function splitName(name: string): { title: string; sub: string } {
+	const m = /^(.+?)\s+[–—-]\s+(.+)$/.exec(name.trim());
+	return m ? { title: m[1], sub: m[2] } : { title: name.trim(), sub: '' };
+}

@@ -8,7 +8,8 @@ import type {
 	Stop
 } from '$lib/api/types';
 import { insideBbox, originOf } from '$lib/domain/origin';
-import { summarize } from '$lib/domain/outcome';
+import { alreadyThere, proposalOrigin } from '$lib/domain/nearby';
+import { summarize, type DestinationOutcome } from '$lib/domain/outcome';
 import { formatInstant, localDate } from '$lib/domain/time';
 import type { Backend } from '../backend';
 import { LruCache } from '../cache';
@@ -120,13 +121,26 @@ export function createMotisBackend(options: MotisBackendOptions): Backend {
 			try {
 				const ctx = { client: options.client, limiter, request, signal: controller.signal };
 				outcomes = await Promise.all(
-					entries.map((e) => evaluateDestination(ctx, toDestination(e)))
+					entries.map((e) =>
+						// From a point we know the distance already: no need to ask the engine.
+						origin.kind === 'point' && alreadyThere(origin.point, e.entrance)
+							? Promise.resolve<DestinationOutcome>({ destinationId: e.id, kind: 'evaluated', proposal: null })
+							: evaluateDestination(ctx, toDestination(e))
+					)
 				);
 			} catch (error) {
 				controller.abort(error);
 				throw error;
 			} finally {
 				clearTimeout(timer);
+			}
+
+			// A destination next to the starting point is not a trip: no proposal for it.
+			for (const o of outcomes) {
+				if (o.kind !== 'evaluated' || !o.proposal) continue;
+				const entry = entries.find((e) => e.id === o.destinationId);
+				const start = proposalOrigin(o.proposal);
+				if (entry && start && alreadyThere(start, entry.entrance)) o.proposal = null;
 			}
 
 			const summary = summarize(

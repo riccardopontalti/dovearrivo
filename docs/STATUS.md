@@ -1,6 +1,6 @@
 # Project status and handoff
 
-Last updated: 25/09/2026. Read this after README and AGENTS.md when picking up the work in a new session.
+Last updated: 25/09/2026 (evening). Read this after README and AGENTS.md when picking up the work in a new session.
 
 ## Done
 
@@ -19,6 +19,7 @@ Last updated: 25/09/2026. Read this after README and AGENTS.md when picking up t
 | D10 | Reachability preview map (`/reachability`) |
 | D11 prep | 19 draft destinations from OSM with provenance ([D11-candidates.md](../research/D11-candidates.md)) |
 | D06b | Server online in preview mode at https://dovearrivo.it; deploy from `main` after green CI |
+| Routing fix | Destinations less than 3 km from the start are not proposed ("you are already there"), see ROUTING.md |
 | D12a v2 | "Tabellone" design (v1 "Alpenglow" rejected): departures board from `/board`, reach map scrubbed by scroll from `/bloom`, kinetic headline, tickets, theme switch, new brand; see [DESIGN-BRIEF.md](DESIGN-BRIEF.md) |
 
 ## Waiting for the maintainer
@@ -30,7 +31,7 @@ Last updated: 25/09/2026. Read this after README and AGENTS.md when picking up t
 ## Next
 
 1. **D12a — iterate** on the maintainer's feedback; measure Lighthouse on the live home page (target ≥ 90 on mobile).
-2. **D11 — publish** verified destinations.
+2. **Content phase** (maintainer's priority after design): many interesting destinations and points of interest with useful information, from open sources with licences; verification workflow; then D11 publication.
 3. **D12 — beta** with about 10 people, then launch (README GIF, live link, article).
 
 ## Things that bit us (keep them in mind)

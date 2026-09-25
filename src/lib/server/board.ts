@@ -6,7 +6,7 @@ import { formatInstant, localDate, localTime, localToMillis } from '$lib/domain/
 import { clock } from '$lib/format';
 import { bloomDeparture, type BloomOrigin } from './bloom';
 
-export const BOARD_ROWS = 8;
+export const BOARD_ROWS = 7;
 export const BOARD_LIMITS = { maxJourneyMinutes: 90, minStayMinutes: 60, maxWalkMinutes: 15, maxTransfers: 1 } as const;
 
 export interface BoardWindow {

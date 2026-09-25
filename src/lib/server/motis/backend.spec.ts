@@ -162,6 +162,24 @@ describe('MOTIS backend search', () => {
 		});
 	});
 
+	it('proposes no destination next to the starting point, and does not route to it', async () => {
+		const { backend: b, calls } = backend(regular);
+		const { originStopId: _, ...rest } = request();
+		// 300 m from the entrance of lake-a (46.1, 11.2): you are already there.
+		const r = await b.search({ ...rest, originPoint: { lat: 46.1027, lon: 11.2 }, originName: 'Lago A' });
+		expect(r.proposals.map((p) => p.destinationId)).toEqual(['lake-b']);
+		expect(r).toMatchObject({ status: 'complete', catalogCount: 2, evaluatedCount: 2 });
+		expect(calls.some((q) => (q.get('toPlace') ?? '').startsWith('46.1,'))).toBe(false);
+	});
+
+	it('also leaves out a nearby destination when the search starts from a stop', async () => {
+		// The fake engine's stops are at (46, 11): put a destination 1 km away.
+		const near = parseCatalogue(entry('near', 'published', 46.009).replace('lon: 11.2', 'lon: 11') + entry('far', 'published', 46.2));
+		const { backend: b } = backend(regular, { catalogue: async () => near });
+		const r = await b.search(request());
+		expect(r.proposals.map((p) => p.destinationId)).toEqual(['far']);
+	});
+
 	it('maps geocoding results to contract place matches', () => {
 		const address = toPlaceMatch({
 			type: 'ADDRESS',
