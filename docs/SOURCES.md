@@ -39,7 +39,7 @@ Related products: [Zuugle](https://www.zuugle.it) ([source, AGPL](https://github
 - Results outside the requested day observed: hence the independent time filter.
 - Regional OSM extract downloaded; size and hash recorded.
 - Pre-development review (25/09/2026): Transitous configures Trenitalia NeTEx and STA GTFS for MOTIS; the Trenitalia mirror responded with last modification 27/05/2026; Zuugle lists Trento, Bolzano and Merano as departure cities.
-- Domain `dovearrivo.it` purchased by the maintainer on 25/09/2026.
+- Domain `dovearrivo.it` purchased by the maintainer on 25/09/2026 at OVHcloud (DNS managed there).
 
 - D01 (25/09/2026): full import with TT, Trenitalia and OSM on MOTIS v2.11.3; real outbound and return with bus–train transfers; synthetic C01/C02 reproduced. Details in [D01-engine-proof.md](../research/D01-engine-proof.md).
 
