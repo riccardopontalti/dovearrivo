@@ -58,7 +58,7 @@
 				/></svg
 			>
 			<span class="summary-value">{summary}</span>
-			<span class="summary-edit">{t.whenAndFilters}</span>
+			<span class="summary-edit"><span class="edit-label">{t.whenAndFilters}</span></span>
 		</summary>
 
 		<div class="when-body">
@@ -138,12 +138,12 @@
 <style>
 	.search {
 		display: grid;
-		gap: 0.85rem;
+		gap: 1rem;
 	}
 	.when {
-		border: 1px solid var(--border);
-		border-radius: 12px;
-		background: color-mix(in srgb, var(--surface) 60%, transparent);
+		border: 1.5px solid var(--rule);
+		border-radius: var(--radius);
+		background: var(--surface);
 	}
 	.when > summary {
 		display: flex;
@@ -153,41 +153,49 @@
 		padding: 0 0.85rem;
 		cursor: pointer;
 		list-style: none;
-		border-radius: 12px;
 	}
 	.when > summary::-webkit-details-marker {
 		display: none;
 	}
 	.summary-value {
+		white-space: nowrap;
+		font-family: var(--font-mono);
+		font-size: 0.9rem;
 		font-weight: 600;
 		font-variant-numeric: tabular-nums;
 	}
 	.summary-edit {
 		margin-left: auto;
-		color: var(--accent);
-		font-size: 0.9rem;
-		font-weight: 600;
 		display: inline-flex;
 		align-items: center;
-		gap: 0.3rem;
+		gap: 0.4rem;
+		font-family: var(--font-mono);
+		font-size: 0.72rem;
+		font-weight: 600;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
 	}
 	.summary-edit::after {
-		content: '';
-		width: 0.45rem;
-		height: 0.45rem;
-		border-right: 2px solid currentColor;
-		border-bottom: 2px solid currentColor;
-		transform: rotate(45deg) translateY(-2px);
-		transition: transform 200ms var(--ease);
+		content: '+';
+		display: inline-grid;
+		place-items: center;
+		width: 1.3rem;
+		height: 1.3rem;
+		border: 1.5px solid currentColor;
+		border-radius: 50%;
+		font-size: 0.9rem;
+		line-height: 1;
+		transition: transform 250ms var(--ease);
 	}
 	.when[open] .summary-edit::after {
-		transform: rotate(225deg) translateY(-2px);
+		transform: rotate(45deg);
 	}
 	.when-body {
 		display: grid;
-		gap: 0.85rem;
-		padding: 0.25rem 0.85rem 0.9rem;
-		animation: open 250ms var(--ease);
+		gap: 1rem;
+		padding: 0.5rem 0.85rem 1rem;
+		border-top: 1px solid var(--hair);
+		animation: open 300ms var(--ease);
 	}
 	.days {
 		display: flex;
@@ -195,23 +203,27 @@
 		gap: 0.4rem;
 	}
 	.chip {
-		min-height: 44px;
-		padding: 0 0.95rem;
+		min-height: 40px;
+		min-width: 44px;
+		padding: 0 0.9rem;
 		border-radius: 999px;
-		border: 1px solid var(--border);
-		background: var(--bg);
-		color: var(--text);
+		border: 1.5px solid var(--rule);
+		background: transparent;
+		color: var(--ink);
 		font: inherit;
-		font-weight: 500;
+		font-size: 0.92rem;
+		font-weight: 600;
 		cursor: pointer;
 		transition:
 			background-color 150ms var(--ease),
-			border-color 150ms var(--ease);
+			color 150ms var(--ease);
+	}
+	.chip:hover {
+		background: var(--surface-2);
 	}
 	.chip[aria-pressed='true'] {
-		background: var(--accent-soft);
-		border-color: var(--accent);
-		font-weight: 650;
+		background: var(--ink);
+		color: var(--paper);
 	}
 	.row {
 		display: grid;
@@ -226,59 +238,86 @@
 		grid-template-columns: 1fr 1fr;
 	}
 	fieldset {
-		border: 1px solid var(--border);
-		border-radius: 10px;
+		border: 0;
+		border-top: 1px solid var(--hair);
 		margin: 0;
-		padding: 0.5rem 0.75rem 0.75rem;
+		padding: 0.75rem 0 0;
 	}
 	legend {
-		padding: 0 0.25rem;
+		padding: 0 0.4rem 0 0;
+		font-family: var(--font-mono);
+		font-size: 0.72rem;
+		font-weight: 600;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
 		color: var(--muted);
 	}
 	.go {
+		position: relative;
 		display: inline-flex;
 		align-items: center;
-		justify-content: center;
+		justify-content: space-between;
 		gap: 0.5rem;
-		min-height: 52px;
-		border: 0;
-		border-radius: 14px;
-		background: var(--glow);
-		color: var(--on-glow);
+		min-height: 60px;
+		padding: 0 1.25rem;
+		border: 1.5px solid #111;
+		border-radius: var(--radius);
+		background: var(--signal);
+		color: #111;
 		font: inherit;
-		font-size: 1.08rem;
-		font-weight: 700;
+		font-size: 1.35rem;
+		font-weight: 800;
+		font-stretch: 85%;
+		letter-spacing: -0.01em;
 		cursor: pointer;
-		box-shadow:
-			0 10px 30px -10px rgb(255 154 98 / 0.7),
-			inset 0 1px 0 rgb(255 255 255 / 0.4);
-		transition:
-			transform 150ms var(--ease),
-			box-shadow 150ms var(--ease),
-			filter 150ms var(--ease);
+		overflow: hidden;
+		isolation: isolate;
+		transition: color 250ms var(--ease);
+	}
+	/* Ink fills the button from the left on hover. */
+	.go::before {
+		content: '';
+		position: absolute;
+		inset: 0;
+		z-index: -1;
+		background: #111;
+		transform: scaleX(0);
+		transform-origin: left;
+		transition: transform 350ms var(--ease);
 	}
 	.go:hover {
-		transform: translateY(-1px);
-		filter: brightness(1.05);
-		box-shadow:
-			0 14px 34px -10px rgb(255 154 98 / 0.85),
-			inset 0 1px 0 rgb(255 255 255 / 0.4);
+		color: var(--signal);
 	}
-	.go:active {
-		transform: translateY(0);
-	}
-	.go:disabled {
-		opacity: 0.8;
-		cursor: progress;
-		transform: none;
+	.go:hover::before {
+		transform: scaleX(1);
 	}
 	.go svg {
-		transition: transform 200ms var(--ease);
+		width: 28px;
+		height: 28px;
+		transition: transform 300ms var(--ease);
 	}
 	.go:hover svg {
-		transform: translateX(3px);
+		transform: translateX(4px);
+	}
+	.go:disabled {
+		cursor: progress;
 	}
 	@media (max-width: 460px) {
+		.when > summary > svg {
+			display: none;
+		}
+		.summary-value {
+			font-size: 0.82rem;
+		}
+		/* The label stays for screen readers; the + says it on small screens. */
+		.edit-label {
+			position: absolute;
+			width: 1px;
+			height: 1px;
+			overflow: hidden;
+			clip-path: inset(50%);
+			white-space: nowrap;
+		}
 		.three {
 			grid-template-columns: 1fr 1fr;
 		}
@@ -292,7 +331,7 @@
 	@keyframes open {
 		from {
 			opacity: 0;
-			transform: translateY(-4px);
+			transform: translateY(-6px);
 		}
 	}
 </style>

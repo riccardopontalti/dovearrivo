@@ -1,15 +1,15 @@
 <script lang="ts">
-	// Results map, loaded after the list: every proposed destination, and the outbound and
-	// return of the chosen one drawn from the engine's geometry. Choosing a card flies here;
-	// choosing a point on the map selects its card. Without WebGL or basemap the list stays
-	// the reference and the panel says so.
+	// Results map, loaded after the list: every proposed destination, and the outbound (ink)
+	// and return (signal yellow, ink edge) of the chosen one, drawn from the engine's
+	// geometry. Choosing a card flies here; choosing a point selects its card. The map is
+	// rebuilt when the theme changes. Without WebGL or basemap the list stays the reference.
 	import { onMount } from 'svelte';
 	import type { Map as MapLibreMap } from 'maplibre-gl';
 	import type { Destination, Proposal } from '$lib/api/types';
 	import { decodePolyline } from '$lib/geo/polyline';
 	import type { Messages } from '$lib/i18n';
 	import { boundsOf, createBasemapMap } from '$lib/map/basemap';
-	import Backdrop from './Backdrop.svelte';
+	import { effectiveTheme } from '$lib/theme';
 
 	let {
 		proposals,
@@ -27,8 +27,7 @@
 		onpick: (id: string) => void;
 	} = $props();
 
-	const OUT = '#2bb3a3';
-	const BACK = '#ff9a62';
+	const SIGNAL = '#ffc700';
 
 	let container: HTMLDivElement;
 	let state = $state<'loading' | 'ready' | 'unavailable'>('loading');
@@ -93,11 +92,10 @@
 		const bounds = boundsOf(coords);
 		if (!bounds) return;
 		const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-		const wide = container.clientWidth > 700;
 		map.fitBounds(bounds, {
-			padding: wide ? 80 : 48,
+			padding: container.clientWidth > 700 ? 90 : 48,
 			maxZoom: 13.5,
-			duration: animate && !reduced ? 1400 : 0,
+			duration: animate && !reduced ? 1600 : 0,
 			essential: false
 		});
 	}
@@ -115,90 +113,105 @@
 		frame(true);
 	});
 
+	async function build(): Promise<void> {
+		const dark = effectiveTheme() === 'dark';
+		const ink = dark ? '#ede9df' : '#111111';
+		const paper = dark ? '#111110' : '#ede9df';
+		const coords = points().features.map((f) => f.geometry.coordinates as [number, number]);
+		const o = origin();
+		if (o) coords.push(o);
+		const { map: instance } = await createBasemapMap(container, locale, { bounds: boundsOf(coords), fitBoundsOptions: { padding: 60, maxZoom: 12 } }, 'paper');
+		map = instance;
+		instance.on('load', () => {
+			instance.addSource('route', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+			instance.addSource('dests', { type: 'geojson', data: points() });
+			if (o) instance.addSource('origin', { type: 'geojson', data: { type: 'Feature', properties: {}, geometry: { type: 'Point', coordinates: o } } });
+			// Return first, so the outbound draws above it where they share a road.
+			instance.addLayer({
+				id: 'route-edge',
+				type: 'line',
+				source: 'route',
+				filter: ['all', ['==', ['get', 'direction'], 'inbound'], ['!', ['get', 'walk']]],
+				layout: { 'line-cap': 'round', 'line-join': 'round' },
+				paint: { 'line-color': dark ? '#111110' : '#111111', 'line-width': 9 }
+			});
+			instance.addLayer({
+				id: 'route',
+				type: 'line',
+				source: 'route',
+				layout: { 'line-cap': 'round', 'line-join': 'round' },
+				paint: {
+					'line-color': ['case', ['==', ['get', 'direction'], 'outbound'], ink, SIGNAL],
+					'line-width': ['case', ['get', 'walk'], 2.5, ['==', ['get', 'direction'], 'outbound'], 3.5, 6],
+					'line-dasharray': ['case', ['get', 'walk'], ['literal', [1, 1.6]], ['literal', [1, 0]]]
+				}
+			});
+			instance.addLayer({
+				id: 'dests',
+				type: 'circle',
+				source: 'dests',
+				paint: {
+					'circle-radius': ['case', ['get', 'selected'], 10, 6],
+					'circle-color': ['case', ['get', 'selected'], SIGNAL, paper],
+					'circle-stroke-color': ink,
+					'circle-stroke-width': 2.5
+				}
+			});
+			instance.addLayer({
+				id: 'dest-labels',
+				type: 'symbol',
+				source: 'dests',
+				layout: {
+					'text-field': ['get', 'name'],
+					'text-font': ['Noto Sans Medium'],
+					'text-size': ['case', ['get', 'selected'], 15, 12],
+					'text-offset': [0, 1.3],
+					'text-anchor': 'top',
+					'text-max-width': 10,
+					'text-optional': true
+				},
+				paint: { 'text-color': ink, 'text-halo-color': paper, 'text-halo-width': 2 }
+			});
+			if (o) {
+				instance.addLayer({
+					id: 'origin',
+					type: 'circle',
+					source: 'origin',
+					paint: { 'circle-radius': 8, 'circle-color': ink, 'circle-stroke-color': paper, 'circle-stroke-width': 3 }
+				});
+			}
+			instance.on('click', 'dests', (e) => {
+				const id = e.features?.[0]?.properties?.id;
+				if (typeof id === 'string') onpick(id);
+			});
+			instance.on('mouseenter', 'dests', () => (instance.getCanvas().style.cursor = 'pointer'));
+			instance.on('mouseleave', 'dests', () => (instance.getCanvas().style.cursor = ''));
+			state = 'ready';
+		});
+		instance.on('error', () => {
+			if (state === 'loading') state = 'unavailable';
+		});
+	}
+
 	onMount(() => {
 		let cancelled = false;
-		(async () => {
-			try {
-				const coords = points().features.map((f) => f.geometry.coordinates as [number, number]);
-				const o = origin();
-				if (o) coords.push(o);
-				const { map: instance } = await createBasemapMap(container, locale, { bounds: boundsOf(coords), fitBoundsOptions: { padding: 60, maxZoom: 12 } }, 'dusk');
-				if (cancelled) return instance.remove();
-				map = instance;
-				instance.on('load', () => {
-					instance.addSource('route', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
-					instance.addSource('dests', { type: 'geojson', data: points() });
-					if (o) instance.addSource('origin', { type: 'geojson', data: { type: 'Feature', properties: {}, geometry: { type: 'Point', coordinates: o } } });
-					instance.addLayer({
-						id: 'route-glow',
-						type: 'line',
-						source: 'route',
-						filter: ['!', ['get', 'walk']],
-						layout: { 'line-cap': 'round', 'line-join': 'round' },
-						paint: { 'line-color': ['case', ['==', ['get', 'direction'], 'outbound'], OUT, BACK], 'line-width': 12, 'line-opacity': 0.18, 'line-blur': 6 }
-					});
-					instance.addLayer({
-						id: 'route',
-						type: 'line',
-						source: 'route',
-						layout: { 'line-cap': 'round', 'line-join': 'round' },
-						paint: {
-							'line-color': ['case', ['==', ['get', 'direction'], 'outbound'], OUT, BACK],
-							'line-width': ['case', ['get', 'walk'], 2.5, 4.5],
-							'line-dasharray': ['case', ['get', 'walk'], ['literal', [1, 1.6]], ['literal', [1, 0]]]
-						}
-					});
-					instance.addLayer({
-						id: 'dests',
-						type: 'circle',
-						source: 'dests',
-						paint: {
-							'circle-radius': ['case', ['get', 'selected'], 9, 6],
-							'circle-color': ['case', ['get', 'selected'], BACK, '#f6f4ef'],
-							'circle-stroke-color': '#0f1b2d',
-							'circle-stroke-width': 2.5
-						}
-					});
-					instance.addLayer({
-						id: 'dest-labels',
-						type: 'symbol',
-						source: 'dests',
-						layout: {
-							'text-field': ['get', 'name'],
-							'text-font': ['Noto Sans Medium'],
-							'text-size': ['case', ['get', 'selected'], 14, 12],
-							'text-offset': [0, 1.2],
-							'text-anchor': 'top',
-							'text-max-width': 10,
-							'text-optional': true
-						},
-						paint: { 'text-color': '#f6f4ef', 'text-halo-color': '#0f1b2d', 'text-halo-width': 1.6 }
-					});
-					if (o) {
-						instance.addLayer({
-							id: 'origin',
-							type: 'circle',
-							source: 'origin',
-							paint: { 'circle-radius': 7, 'circle-color': '#0f1b2d', 'circle-stroke-color': OUT, 'circle-stroke-width': 3 }
-						});
-					}
-					instance.on('click', 'dests', (e) => {
-						const id = e.features?.[0]?.properties?.id;
-						if (typeof id === 'string') onpick(id);
-					});
-					instance.on('mouseenter', 'dests', () => (instance.getCanvas().style.cursor = 'pointer'));
-					instance.on('mouseleave', 'dests', () => (instance.getCanvas().style.cursor = ''));
-					state = 'ready';
-				});
-				instance.on('error', () => {
-					if (state === 'loading') state = 'unavailable';
-				});
-			} catch {
+		const start = () =>
+			build().catch(() => {
 				if (!cancelled) state = 'unavailable';
-			}
-		})();
+			});
+		start();
+		// Rebuild with the other palette when the theme changes.
+		const themeWatch = new MutationObserver(() => {
+			if (state === 'unavailable') return;
+			map?.remove();
+			map = undefined;
+			state = 'loading';
+			start();
+		});
+		themeWatch.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 		return () => {
 			cancelled = true;
+			themeWatch.disconnect();
 			map?.remove();
 			map = undefined;
 		};
@@ -206,7 +219,6 @@
 </script>
 
 <div class="wrap" class:ready={state === 'ready'}>
-	<Backdrop />
 	<div class="map" bind:this={container} role="img" aria-label={t.resultsMapLabel} hidden={state === 'unavailable'}></div>
 	{#if state === 'unavailable'}
 		<p class="note">{t.mapUnavailable}</p>
@@ -225,7 +237,11 @@
 		width: 100%;
 		height: 100%;
 		overflow: hidden;
-		background: var(--night);
+		background: var(--paper);
+		background-image:
+			linear-gradient(var(--hair) 1px, transparent 1px),
+			linear-gradient(90deg, var(--hair) 1px, transparent 1px);
+		background-size: 48px 48px;
 	}
 	.map {
 		position: absolute;
@@ -244,12 +260,11 @@
 		margin: 0;
 		max-width: 28rem;
 		padding: 0.75rem 1rem;
-		border-radius: 12px;
-		background: rgb(15 27 45 / 0.8);
-		border: 1px solid rgb(255 255 255 / 0.12);
-		color: var(--snow);
+		border: 1.5px solid var(--rule);
+		border-radius: var(--radius);
+		background: var(--surface);
 		font-size: 0.92rem;
-		backdrop-filter: blur(8px);
+		box-shadow: 5px 5px 0 var(--ink);
 	}
 	.legend {
 		position: absolute;
@@ -259,28 +274,32 @@
 		gap: 0.3rem 0.9rem;
 		flex-wrap: wrap;
 		margin: 0;
-		padding: 0.4rem 0.75rem;
+		padding: 0.45rem 0.8rem;
 		list-style: none;
+		border: 1.5px solid var(--rule);
 		border-radius: 999px;
-		background: rgb(15 27 45 / 0.8);
-		color: var(--snow);
-		font-size: 0.8rem;
+		background: var(--surface);
+		font-family: var(--font-mono);
+		font-size: 0.72rem;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
 	}
 	.swatch {
 		display: inline-block;
-		width: 1.2rem;
-		height: 0.28rem;
-		border-radius: 2px;
+		width: 1.3rem;
+		height: 0.35rem;
 		margin-right: 0.35rem;
 		vertical-align: middle;
 	}
 	.out {
-		background: #2bb3a3;
+		background: var(--ink);
 	}
 	.back {
-		background: #ff9a62;
+		height: 0.5rem;
+		background: var(--signal);
+		box-shadow: inset 0 0 0 1.5px #111;
 	}
 	.walk {
-		background: repeating-linear-gradient(90deg, #c9d3de 0 3px, transparent 3px 6px);
+		background: repeating-linear-gradient(90deg, var(--ink) 0 3px, transparent 3px 6px);
 	}
 </style>

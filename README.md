@@ -72,7 +72,7 @@ Details in [DELIVERY](docs/DELIVERY.md).
 - **D07 — maps: done.** Self-hosted regional basemap (Protomaps PMTiles, local fonts), itinerary map with both legs, share link; no request leaves our server.
 - **D10 — reachability preview: done.** Map of every stop you can reach by a given time, coloured by arrival band, with a table alternative.
 - **D06b — deployment: preview online.** Automatic deploy from `main` to the server, in preview mode (draft destinations, banner, `noindex`).
-- **D12a — visual design: first version.** "Alpenglow" home page with a bloom of the stops really reachable from Trento, day ribbon on every proposal, results map with fly-to, phone sheet, self-hosted fonts.
+- **D12a — visual design: in review.** "Tabellone": a split-flap departures board of the real trips with a way back from Trento, a reach map driven by scrolling, results as tickets with the day ribbon, light and dark themes with a switch.
 - **Next:** iterate D12a with the maintainer, then D11 (publish verified destinations) and D12 (beta).
 
 ## Local development

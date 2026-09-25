@@ -20,15 +20,47 @@ test('the day ribbon shows outbound, stay and return inside the chosen window', 
 	await expect(card).toContainText('Nessun rientro successivo trovato');
 });
 
-test('the home bloom replays reachability data and states it in text', async ({ page, baseURL }) => {
+test('the departures board lists real trips with their way back and links to them', async ({ page, baseURL }) => {
 	const external: string[] = [];
 	page.on('request', (r) => {
 		if (!r.url().startsWith(baseURL!) && !r.url().startsWith('data:')) external.push(r.url());
 	});
-	// The endpoint answers with real one-to-all data from the backend (mock: stop A).
-	const real = await (await page.request.get('/bloom')).json();
-	expect(real.origin?.name ?? real.unavailable).toBeTruthy();
+	// The endpoint runs the real search (mock backend here) for the next hours.
+	const real = await (await page.request.get('/board')).json();
+	expect(real.start).toMatch(/^\d{2}:00$/);
 
+	await page.emulateMedia({ reducedMotion: 'reduce' });
+	await page.route('**/board?*', (route) =>
+		route.fulfill({
+			json: {
+				origin: { name: 'Trento', from: '46.0719,11.1194' },
+				date: romeToday(),
+				start: '14:00',
+				end: '22:00',
+				partial: false,
+				dataVersion: 'test',
+				limits: { maxJourneyMinutes: 90, minStayMinutes: 60, maxWalkMinutes: 15, maxTransfers: 1 },
+				rows: [
+					{ id: 'levico', name: 'Levico Terme – lungolago', category: 'lake', depart: '14:12', arrive: '14:41', leave: '19:47', home: '20:16', backup: '20:47' }
+				]
+			}
+		})
+	);
+	await page.goto('/');
+	// The flaps spin when the board comes into view.
+	await page.getByRole('region', { name: 'Partenze da Trento' }).scrollIntoViewIfNeeded();
+	const row = page.getByRole('link', { name: /Levico Terme – lungolago: parti alle 14:12, arrivi alle 14:41, riparti alle 19:47 e sei di ritorno alle 20:16\. Rientro di riserva alle 20:47\./ });
+	await expect(row).toBeVisible();
+	await expect(row).toHaveAttribute('href', /from=46\.0719%2C11\.1194.*start=14%3A00.*end=22%3A00.*#card-levico$/);
+	await expect(page.getByText('si parte dalle 14:00, si torna entro le 22:00')).toBeVisible();
+	await page.locator('summary', { hasText: 'Quando e filtri' }).click();
+	await settle(page);
+	expect((await new AxeBuilder({ page }).withTags(WCAG).analyze()).violations).toEqual([]);
+	// Fonts, illustrations and data all come from our server.
+	expect(external).toEqual([]);
+});
+
+test('the reach map replays reachability data and states it in text', async ({ page }) => {
 	await page.emulateMedia({ reducedMotion: 'reduce' });
 	await page.route('**/bloom', (route) =>
 		route.fulfill({
@@ -42,19 +74,29 @@ test('the home bloom replays reachability data and states it in text', async ({ 
 		})
 	);
 	await page.goto('/');
-	await expect(page.getByText('Da Trento, partendo oggi alle 14:00: 3 fermate raggiungibili entro 90 minuti.')).toBeVisible();
-	// Reduced motion: the final state at once, no replay.
-	await expect(page.getByText('14:00 → 15:30')).toBeVisible();
-	await page.getByText('Quando e filtri').click();
+	const section = page.getByRole('region', { name: 'Fin dove arrivi in 90 minuti' });
+	await section.scrollIntoViewIfNeeded();
+	// Reduced motion: the final state at once, no scroll scrubbing.
+	await expect(section).toContainText('entro 90 min');
+	await expect(section).toContainText('3 fermate');
+	await expect(section).toContainText('Da Trento, partendo oggi alle 14:00: 3 fermate raggiungibili entro 90 minuti.');
+});
+
+test('the theme switch changes the theme and the choice survives a reload', async ({ page }) => {
+	await page.goto('/');
+	await page.getByRole('button', { name: 'Passa al tema scuro' }).click();
+	await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+	await page.reload();
+	// Rendered by the server from the cookie: no flash of the other theme.
+	await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+	await expect(page.getByRole('button', { name: 'Passa al tema chiaro' })).toBeVisible();
 	await settle(page);
 	expect((await new AxeBuilder({ page }).withTags(WCAG).analyze()).violations).toEqual([]);
-	// Fonts, illustration and data all come from our server.
-	expect(external).toEqual([]);
 });
 
 test('quick day choices set the date and the summary follows', async ({ page }) => {
 	await page.goto('/');
-	await page.getByText('Quando e filtri').click();
+	await page.locator('summary', { hasText: 'Quando e filtri' }).click();
 	const today = romeToday();
 	await page.getByRole('button', { name: 'Oggi' }).click();
 	await expect(page.getByLabel('Giorno', { exact: true })).toHaveValue(today);

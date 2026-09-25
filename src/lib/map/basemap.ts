@@ -1,6 +1,7 @@
 // Loads MapLibre with the self-hosted basemap (/basemap: PMTiles, fonts, sprites).
 // Throws when the basemap or WebGL is unavailable so callers can show a text fallback.
 import type { Map as MapLibreMap, MapOptions } from 'maplibre-gl';
+import { effectiveTheme } from '$lib/theme';
 
 export type MapLibre = typeof import('maplibre-gl');
 
@@ -12,25 +13,42 @@ function webglAvailable(): boolean {
 	}
 }
 
-/** Night-blue variant of the dark flavour used by the results map (DESIGN-BRIEF, "Alpenglow"). */
-const DUSK = {
-	background: '#0f1b2d',
-	earth: '#15243a',
-	water: '#0a2c44',
-	wood_a: '#172a40',
-	wood_b: '#182c42',
-	park_a: '#17293f',
-	park_b: '#182b41',
-	scrub_a: '#17283e',
-	scrub_b: '#17283e',
-	glacier: '#1f3350',
-	boundaries: '#3a4d6b',
-	city_label: '#e6e9ee',
-	city_label_halo: '#0f1b2d',
-	subplace_label: '#a7b1bf',
-	subplace_label_halo: '#0f1b2d',
-	state_label: '#8795a8',
-	state_label_halo: '#0f1b2d'
+/** Paper and ink variants for the results map (DESIGN-BRIEF, "Tabellone"). */
+const PAPER = {
+	light: {
+		background: '#ede9df',
+		earth: '#ede9df',
+		water: '#c7d3d6',
+		wood_a: '#dfdfcf',
+		wood_b: '#dcdccb',
+		park_a: '#e0e0cf',
+		park_b: '#dddccb',
+		scrub_a: '#e2e0d1',
+		scrub_b: '#e2e0d1',
+		glacier: '#f7f5ef',
+		boundaries: '#9b978d',
+		city_label: '#111111',
+		city_label_halo: '#ede9df',
+		subplace_label: '#56544e',
+		subplace_label_halo: '#ede9df'
+	},
+	dark: {
+		background: '#111110',
+		earth: '#161615',
+		water: '#1f2a2d',
+		wood_a: '#1b1c18',
+		wood_b: '#1c1d19',
+		park_a: '#1b1c18',
+		park_b: '#1c1d19',
+		scrub_a: '#191a17',
+		scrub_b: '#191a17',
+		glacier: '#23231f',
+		boundaries: '#4a4842',
+		city_label: '#ede9df',
+		city_label_halo: '#111110',
+		subplace_label: '#a9a59b',
+		subplace_label_halo: '#111110'
+	}
 };
 
 export interface BasemapMap {
@@ -42,7 +60,7 @@ export async function createBasemapMap(
 	container: HTMLElement,
 	locale: 'it' | 'en',
 	options: Omit<MapOptions, 'container' | 'style'>,
-	look: 'auto' | 'dusk' = 'auto'
+	look: 'auto' | 'paper' = 'auto'
 ): Promise<BasemapMap> {
 	const meta = await fetch('/basemap/basemap.json');
 	if (!meta.ok || !webglAvailable()) throw new Error('basemap unavailable');
@@ -62,8 +80,8 @@ export async function createBasemapMap(
 		w.__pmtilesProtocol = true;
 	}
 
-	const flavor = look === 'dusk' || matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-	const colors = look === 'dusk' ? { ...basemaps.namedFlavor('dark'), ...DUSK } : basemaps.namedFlavor(flavor);
+	const flavor = effectiveTheme();
+	const colors = look === 'paper' ? { ...basemaps.namedFlavor(flavor), ...PAPER[flavor] } : basemaps.namedFlavor(flavor);
 	const origin = location.origin;
 	const map = new ml.Map({
 		...options,

@@ -3,6 +3,8 @@ import adapter from '@sveltejs/adapter-node';
 import { sveltekit } from '@sveltejs/kit/vite';
 
 export default defineConfig({
+	// Fonts stay files: the CSP allows fonts only from our origin, not data: URIs.
+	build: { assetsInlineLimit: (file) => (file.endsWith('.woff2') ? false : undefined) },
 	plugins: [
 		sveltekit({
 			compilerOptions: {

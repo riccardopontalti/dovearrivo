@@ -19,12 +19,12 @@ Last updated: 25/09/2026. Read this after README and AGENTS.md when picking up t
 | D10 | Reachability preview map (`/reachability`) |
 | D11 prep | 19 draft destinations from OSM with provenance ([D11-candidates.md](../research/D11-candidates.md)) |
 | D06b | Server online in preview mode at https://dovearrivo.it; deploy from `main` after green CI |
-| D12a v1 | "Alpenglow" design: hero bloom from `/bloom`, search sheet, day ribbon, results map with fly-to, phone sheet, fonts; see the notes in [DESIGN-BRIEF.md](DESIGN-BRIEF.md) |
+| D12a v2 | "Tabellone" design (v1 "Alpenglow" rejected): departures board from `/board`, reach map scrubbed by scroll from `/bloom`, kinetic headline, tickets, theme switch, new brand; see [DESIGN-BRIEF.md](DESIGN-BRIEF.md) |
 
 ## Waiting for the maintainer
 
 - **Server**: OVHcloud VPS-1, Ubuntu 24.04, online. Every push to `main` with green CI deploys automatically ([DEPLOY.md](DEPLOY.md)) in preview mode (drafts visible, banner, noindex). Never ask for a private key in a chat or commit one.
-- **D12a feedback**: the maintainer tries each version on desktop and phone; iterate on what they report.
+- **D12a feedback**: the maintainer tries each version on desktop and phone; iterate on what they report. They rejected a dark, gradient-heavy first version as generic: keep the design specific to the product.
 - **Destination verification**: entrances and access of the drafts (checklist in D11-candidates.md). Only then `status: published`.
 
 ## Next

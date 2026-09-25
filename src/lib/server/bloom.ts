@@ -17,6 +17,11 @@ export interface BloomOrigin {
 /** Trento railway station forecourt (Piazza Dante); the walk to nearby stops is part of the query. */
 export const TRENTO: BloomOrigin = { from: '46.0719,11.1194', name: 'Trento', point: { lat: 46.0719, lon: 11.1194 } };
 
+/** Origin of the home page showcases: Trento, or stop A of the synthetic fixture on the mock. */
+export function showcaseOrigin(backendKind: string | undefined): BloomOrigin {
+	return (backendKind ?? 'mock') === 'motis' ? TRENTO : { from: 'syn_A', name: 'Origine sintetica A', point: { lat: 46.0, lon: 11.0 } };
+}
+
 export interface Bloom {
 	origin: BloomOrigin;
 	departAfter: string;

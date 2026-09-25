@@ -6,6 +6,7 @@
 	import type { Messages } from '$lib/i18n';
 	import { boundsOf, createBasemapMap } from '$lib/map/basemap';
 	import { BAND_COLORS, bandOf } from '$lib/reach-bands';
+	import { effectiveTheme } from '$lib/theme';
 
 	let {
 		result,
@@ -30,7 +31,7 @@
 				});
 				if (cancelled) return instance.remove();
 				map = instance;
-				const dark = matchMedia('(prefers-color-scheme: dark)').matches;
+				const dark = effectiveTheme() === 'dark';
 				const colors = dark ? BAND_COLORS.dark : BAND_COLORS.light;
 				const surface = getComputedStyle(container).getPropertyValue('--surface').trim() || '#ffffff';
 

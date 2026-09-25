@@ -39,7 +39,8 @@
 		padding-left: 0.6rem;
 	}
 	.back li {
-		border-left-color: var(--back);
+		border-left: 5px solid var(--back);
+		box-shadow: -1.5px 0 0 var(--back-edge);
 	}
 	li.walk {
 		border-left-style: dotted;

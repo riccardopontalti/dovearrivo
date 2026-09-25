@@ -1,51 +1,28 @@
-# D12a — Design brief: "Alpenglow"
+# D12a — Design brief: "Tabellone"
 
-The maintainer asked for a first screen with a strong "wow" on desktop and phone, an innovative but comfortable experience, beautiful colours and effects. This brief picks one direction so the work can start; iterate with the maintainer on screenshots.
+The maintainer asked for a first screen with a strong "wow" on desktop and phone, an innovative but comfortable experience, beautiful colours and effects. A first direction ("Alpenglow": dark dusk hero, glowing dots, glass panels) was rejected on 25/09/2026 as generic, "made with AI": dark theme only, navy and apricot, gradients, no real animation, no theme switch. The maintainer then chose this direction among three proposals.
 
 ## Idea
 
-The product answers *"where can I go with the time I have, and still get home?"*. The design makes **time and reach visible**: the first screen is a living map of Trentino where reachable places light up outward from where you are, like the evening glow (alpenglow) spreading over the mountains.
-
-## First screen (hero)
-
-- Full-bleed map with a soft terrain-like look (dark dusk tones), the Trentino valleys readable.
-- A real reachability "bloom": dots appear outward from Trento in time order (animated from `/api/v1/reachability`, data-true, never invented). On load it plays once; with `prefers-reduced-motion` it shows the final state.
-- Over it, one sentence and one field: "Dove arrivo oggi, e torno in tempo?" + the place picker + a single "Parti" button. Advanced filters stay one tap away.
-- Phone: map fills the screen, the search sits in a bottom sheet; results slide up as a draggable sheet.
-
-## Results
-
-- **Day ribbon**: each proposal shows a horizontal timeline of the chosen day (e.g. 08–20) with outbound, stay and return as segments and the backup return as a ghost segment. It explains the core value (the way home) at a glance.
-- Cards grouped visually by category (lake, town, castle, nature) with custom line-illustration icons, not stock photos.
-- Selecting a card flies the map to the destination and draws both legs (existing geometry), outbound and return in two distinct colours.
+The product answers *"where can I go with the time I have, and still get home?"*. The design borrows from the station: a **departures board** that lists, on mechanical split flaps, the real trips with a way back leaving from Trento in the next hours. Results are **tickets**. Paper, ink and one signal colour, like transport signage and printed timetables.
 
 ## Visual language
 
-- Palette (tokens, light and dark): night blue `#0f1b2d`, glacier teal `#2bb3a3`, alpenglow apricot `#ff9a62`, snow `#f6f4ef`, granite `#5a6472`. Validate data colours with the dataviz checks; text meets WCAG 2.2 AA.
-- Type: a characterful display face for headlines and a highly legible text face, both self-hosted under the SIL OFL (e.g. Fraunces or Bricolage Grotesque + Inter). No third-party font CDN.
-- Motion: 150–400 ms, eased; map fly-to, card reveal, ribbon draw. Nothing loops; everything respects reduced motion.
-- Imagery: SVG illustrations (mountain silhouettes, lake ripples) made for the project. Photos only with recorded free licences (e.g. Wikimedia Commons with attribution).
+- **Palette**: paper `#ede9df`, ink `#111111`, signal yellow `#ffc700`; board `#0e0e0e` with flaps `#1c1c1c`. Yellow is used only as a background under ink or outlined in ink (1.3:1 on paper otherwise). Muted text `#56544e` (6.2:1). Dark theme: paper and ink swap, the board stays black.
+- **Theme**: light by default, dark following the system, and a visible switch in the header. The choice is a cookie read by the server, so the page is rendered in the right theme from the first byte; the new theme grows as a circle from the button (View Transitions).
+- **Type**: Archivo (variable weight and width, OFL) for everything, heavy and condensed for headlines; JetBrains Mono (OFL) for times, labels and data. Self-hosted, Archivo preloaded.
+- **Brand**: the mark is one split-flap card, the upper flap with the way there (yellow arrow), the lower with the way back. The wordmark is Archivo black condensed with the flap hinge cut through the letters and a yellow arrow under "Arrivo". The mark flips on hover.
+- **Rules**: 1.5 px ink rules, hard offset shadows in ink, small radii. No gradients as decoration, no glass, no stock photos.
+
+## Screens
+
+- **Home**: kinetic headline (letters rise and unsqueeze, the last line wiped with yellow; the headline squeezes away on scroll), search form in an inked box; a yellow ticker with the catalogue destinations; the **departures board** (`/board`: real search from Trento, next hour to ten hours later, rows sorted by departure, each row opens that trip); "How it works"; **"How far you get in 90 minutes"**, a pinned section where scrolling runs the clock from 0 to 90 minutes and the reachable stops (`/bloom`, real one-to-all) appear in order; a giant wordmark.
+- **Results**: split view with a paper-style map (ink outbound, yellow return with ink edge) on desktop; on phones the list is a sheet over the map. Cards are tickets: yellow stub with departure and return times, perforation, day ribbon, a stamp for the backup return.
+- **Motion**: split flaps (3D, two halves, spinning through the preceding cards), kinetic type, scroll-driven animations (CSS `animation-timeline` where supported, static otherwise), stamp, map fly-to, theme circle. Only transforms and opacity after load: no layout shift. `prefers-reduced-motion` shows final states and no pinning.
 
 ## Constraints that stay
 
-- All assets self-hosted (CSP allows only `self`, `data:` and `blob:`); no external requests.
-- Works without JavaScript for search (the map is enhancement); keyboard and screen reader flows; 44 px targets.
-- Lighthouse performance on mobile ≥ 90 on the home page; the map and animation code load lazily.
-- Every text in Italian and English.
-- Existing unit, E2E and axe tests stay green; add E2E for the ribbon and the phone sheet.
-
-## Implementation notes (first version, 25/09/2026)
-
-What was built and the decisions taken while building it:
-
-- **The hero bloom is a canvas, not MapLibre.** Stops reachable from Trento station within 90 minutes (real one-to-all, `/bloom`) are drawn as glowing points in arrival order over an SVG dusk illustration. The stops trace the valleys, so no basemap is needed on the first screen: the home page loads no map library and stays light on phones. MapLibre is loaded only on the results map and the reachability page.
-- **Data-true caption.** The caption states origin, departure, number of stops and time limit, with a colour legend; the ticking clock is decorative. Departure: the next whole hour between 07:00 and 19:00, otherwise 08:00 of the next day. The endpoint caches one result per departure hour. Catalogue destinations appear as diamonds; drafts only in preview, as elsewhere.
-- **Bloom colours**: one-hue apricot ramp on the night surface, nearest brightest (`#ffe0b8`, `#ff9a62`, `#d0603c`), validated with the dataviz ordinal checks.
-- **Search**: one field and "Parti"; day, window and filters sit in a disclosure whose summary reflects the values. Quick day chips (today, tomorrow, the weekend within coverage) need JavaScript; the plain form works without it.
-- **Results**: desktop split view (list + sticky map); on phones the map stays behind and the list is a sheet that scrolls over it (native scrolling, with a handle button). "Show on map" flies to the destination and draws both legs from the engine geometry; legs without geometry are not drawn.
-- **Day ribbon** on every card, computed by `src/lib/ribbon.ts` from local clock times (correct on DST days), with the user's deadline marked.
-- **Category icons** are line drawings made for the project; category chips filter the list when more than one category is present.
-- **Fonts**: Fraunces (display) and Inter (text), OFL, bundled and preloaded; no font CDN.
-- **Motion**: entrance fades, ribbon draw, map fly-to, page cross-fade (View Transitions where supported). Nothing loops except the loading bar during a search; `prefers-reduced-motion` removes all of it.
-
-Not done yet: Lighthouse measurement on the live server, photos (none are used), dark/light variants of the category tint validated beyond AA text contrast.
+- All assets self-hosted (CSP allows only `self`, `data:` images and `blob:`); fonts are never inlined as `data:`.
+- Works without JavaScript for search (board, map and scroll section are enhancements); keyboard and screen reader flows (the board rows are links with the whole trip as text); 44 px targets.
+- Lighthouse on mobile ≥ 90 for performance on the home page: the board sends no flaps from the server (one CSS element per empty row) and starts spinning only when it enters the viewport.
+- Every text in Italian and English. Never invent data: the board and the reach map show only what the engine returned, or say that nothing is available.

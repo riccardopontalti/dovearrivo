@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { navigating, page } from '$app/state';
-	import Backdrop from '$lib/components/Backdrop.svelte';
+	import Board from '$lib/components/Board.svelte';
 	import CategoryIcon from '$lib/components/CategoryIcon.svelte';
-	import HeroBloom from '$lib/components/HeroBloom.svelte';
 	import ProposalCard from '$lib/components/ProposalCard.svelte';
+	import ReachScroll from '$lib/components/ReachScroll.svelte';
 	import ResultsMap from '$lib/components/ResultsMap.svelte';
 	import SearchForm from '$lib/components/SearchForm.svelte';
 	import SiteFooter from '$lib/components/SiteFooter.svelte';
@@ -24,6 +24,7 @@
 	});
 	const outcome = $derived(data.outcome);
 	const busy = $derived(navigating.to?.url.pathname === '/');
+	const destinationList = $derived(Object.values(data.destinations));
 
 	let from = $state('');
 	let query = $state('');
@@ -34,7 +35,12 @@
 
 	// Enhancements that need JavaScript: map selection, category filter, sheet handle.
 	let enhanced = $state(false);
-	onMount(() => (enhanced = true));
+	onMount(() => {
+		enhanced = true;
+		// A board row links to its card: select it.
+		const id = location.hash.startsWith('#card-') ? decodeURIComponent(location.hash.slice(6)) : '';
+		if (id && proposals.some((p) => p.destinationId === id)) selected = id;
+	});
 
 	const proposals = $derived(outcome?.kind === 'results' ? outcome.response.proposals : []);
 	let selected = $state<string | undefined>();
@@ -51,7 +57,6 @@
 	});
 	const visible = $derived(category === 'all' ? proposals : proposals.filter((p) => categoryOf(p.destinationId) === category));
 
-	let stage = $state<HTMLElement>();
 	let sheet = $state<HTMLElement>();
 	let sheetOpen = $state(false);
 	const phone = () => matchMedia('(max-width: 959px)').matches;
@@ -93,6 +98,7 @@
 
 	const found = (n: number, tt: Messages) => (n === 1 ? tt.foundOne : fill(tt.foundMany, { n }));
 	const categoryLabel = (c: string) => (t as Record<string, string>)[`cat_${c}`] ?? c;
+	const lines = $derived([t.heroLine1, t.heroLine2, t.heroLine3]);
 
 	// The shared link repeats the search: the recipient always sees current timetables.
 	let shared = $state(false);
@@ -123,51 +129,83 @@
 
 {#if !outcome}
 	<div class="home">
-		<section class="hero" aria-labelledby="hero-title">
-			<Backdrop />
-			<SiteHeader {t} locale={data.locale} {otherLocaleHref} overlay />
-			<div class="hero-grid">
-				<div class="pitch">
-					<p class="eyebrow">{t.heroEyebrow}</p>
-					<h1 id="hero-title">{t.heroTitle}</h1>
+		<SiteHeader {t} locale={data.locale} {otherLocaleHref} />
+		<main id="content">
+			<section class="hero" aria-labelledby="hero-title">
+				<p class="kicker"><span class="pulse" aria-hidden="true"></span>{t.heroKicker}</p>
+				<h1 id="hero-title">
+					<span class="visually-hidden">{lines.join(' ')}</span>
+					<span class="lines" aria-hidden="true">
+						{#each lines as line, l (l)}
+							<span class="line" class:mark={l === 2}>
+								<span class="inner">
+									{#each line.split(' ') as word, w (w)}<span class="word">{#each [...word] as ch, i (i)}<span class="ch" style="--i:{l * 7 + w * 3 + i}">{ch}</span>{/each}</span>{' '}{/each}
+								</span>
+							</span>
+						{/each}
+					</span>
+				</h1>
+				<div class="side">
 					<p class="lead">{t.heroLead}</p>
+					<div class="panel">
+						{#if data.mock}<p class="notice">{t.mockNotice}</p>{/if}
+						<SearchForm {t} locale={data.locale} form={data.form} status={data.status} {busy} bind:from bind:query />
+					</div>
 				</div>
-				<div class="stage" bind:this={stage}></div>
-				<div class="panel" id="content">
-					{#if data.mock}<p class="notice">{t.mockNotice}</p>{/if}
-					<SearchForm {t} locale={data.locale} form={data.form} status={data.status} {busy} bind:from bind:query />
-				</div>
-				<div class="bloom-caption">
-					<HeroBloom {t} locale={data.locale} destinations={Object.values(data.destinations)} {stage} />
-				</div>
-			</div>
-		</section>
+			</section>
 
-		<section class="how" aria-labelledby="how-title">
-			<h2 id="how-title">{t.howTitle}</h2>
-			<ol>
-				<li>
-					<span class="step" aria-hidden="true">01</span>
-					<h3>{t.how1Title}</h3>
-					<p>{t.how1Text}</p>
-				</li>
-				<li>
-					<span class="step" aria-hidden="true">02</span>
-					<h3>{t.how2Title}</h3>
-					<p>{t.how2Text}</p>
-				</li>
-				<li>
-					<span class="step" aria-hidden="true">03</span>
-					<h3>{t.how3Title}</h3>
-					<p>{t.how3Text}</p>
-				</li>
-			</ol>
-			<p class="data-line">
-				{t.howData}
-				<a href="/reachability?{toParams({ ...data.form, from, fromQuery: query }, data.locale)}">{t.reachLink}</a>
-			</p>
-			<SiteFooter {t} locale={data.locale} />
-		</section>
+			{#if destinationList.length}
+				<div class="ticker">
+					<p class="visually-hidden">{t.tickerLabel}: {destinationList.map((d) => d.name).join(', ')}</p>
+					<div class="track" aria-hidden="true">
+						{#each [0, 1] as copy (copy)}
+							<span class="run">
+								{#each destinationList as d (d.id)}
+									<span class="stop"><CategoryIcon category={d.category} size={22} />{d.name}</span>
+								{/each}
+							</span>
+						{/each}
+					</div>
+				</div>
+			{/if}
+
+			<section class="board-section">
+				<Board {t} locale={data.locale} />
+			</section>
+
+			<section class="how" aria-labelledby="how-title">
+				<h2 id="how-title">{t.howTitle}</h2>
+				<ol>
+					<li>
+						<span class="num" aria-hidden="true">01</span>
+						<h3>{t.how1Title}</h3>
+						<p>{t.how1Text}</p>
+					</li>
+					<li>
+						<span class="num" aria-hidden="true">02</span>
+						<h3>{t.how2Title}</h3>
+						<p>{t.how2Text}</p>
+					</li>
+					<li>
+						<span class="num" aria-hidden="true">03</span>
+						<h3>{t.how3Title}</h3>
+						<p>{t.how3Text}</p>
+					</li>
+				</ol>
+				<p class="data-line">{t.howData}</p>
+			</section>
+
+			<ReachScroll {t} locale={data.locale} destinations={destinationList} />
+
+			<footer class="outro">
+				<p class="wordmark" aria-hidden="true">
+					{#each [...t.appName] as ch, i (i)}<span style="--i:{i}">{ch}</span>{/each}
+				</p>
+				<div class="outro-links">
+					<SiteFooter {t} locale={data.locale} />
+				</div>
+			</footer>
+		</main>
 	</div>
 {:else}
 	<div class="results-page" class:with-map={proposals.length > 0}>
@@ -240,7 +278,7 @@
 								<p class="muted">{t.noProposalsHelp}</p>
 							</div>
 						{:else}
-							<p class="muted found">{found(r.proposals.length, t)}. {t.rankingHelp}</p>
+							<p class="found">{found(r.proposals.length, t)}. <span class="muted">{t.rankingHelp}</span></p>
 							{#if enhanced && categories.length > 1}
 								<div class="filters" role="group" aria-label={t.categoryFilter}>
 									<button type="button" class="chip" aria-pressed={category === 'all'} onclick={() => (category = 'all')}>
@@ -293,30 +331,34 @@
 	.progress {
 		position: fixed;
 		inset: 0 0 auto;
-		height: 3px;
+		height: 4px;
 		z-index: 100;
-		background: linear-gradient(90deg, transparent, var(--apricot), var(--teal), transparent);
-		background-size: 50% 100%;
-		background-repeat: no-repeat;
-		animation: progress 1100ms var(--ease) infinite;
+		background: var(--signal);
+		transform-origin: left;
+		animation: progress 1400ms var(--ease-in-out) infinite;
 	}
 	@keyframes progress {
-		from {
-			background-position: -50% 0;
+		0% {
+			transform: scaleX(0);
 		}
-		to {
-			background-position: 150% 0;
+		60% {
+			transform: scaleX(1);
+			opacity: 1;
+		}
+		100% {
+			transform: scaleX(1);
+			opacity: 0;
 		}
 	}
 	.notice,
 	.alert,
 	.empty {
-		border-radius: 12px;
 		padding: 0.75rem 1rem;
+		border: 1.5px solid var(--rule);
+		border-radius: var(--radius);
 	}
 	.notice {
 		background: var(--notice);
-		color: var(--text);
 		font-size: 0.9rem;
 	}
 	.alert {
@@ -324,7 +366,6 @@
 	}
 	.empty {
 		background: var(--surface);
-		border: 1px solid var(--border);
 	}
 	.empty p {
 		margin: 0.25rem 0;
@@ -338,201 +379,313 @@
 
 	/* ---------- home: hero ---------- */
 	.hero {
-		/* A dark island whatever the colour scheme: tokens are redefined for its contents. */
-		--bg: #0b1523;
-		--surface: #13223a;
-		--surface-2: #1a2c47;
-		--text: var(--snow);
-		--muted: #b7c0cc;
-		--accent: #5fd0c2;
-		--border: rgb(255 255 255 / 0.16);
-		--accent-soft: rgb(43 179 163 / 0.18);
-		--notice: rgb(255 154 98 / 0.16);
-		--focus: var(--apricot);
-		position: relative;
-		isolation: isolate;
-		min-height: 100svh;
-		display: flex;
-		flex-direction: column;
-		color: var(--text);
-		background: var(--night);
-		overflow: hidden;
-		color-scheme: dark;
-	}
-	.hero-grid {
-		position: relative;
-		flex: 1;
 		display: grid;
 		grid-template-columns: 1fr;
-		grid-template-areas: 'pitch' 'stage' 'caption' 'panel';
-		gap: 0.75rem;
-		padding: 0.5rem 1rem 1rem;
+		gap: 1.25rem;
+		padding: clamp(1.25rem, 4vw, 3.5rem) clamp(1rem, 3vw, 2.5rem) clamp(2rem, 5vw, 4rem);
 	}
-	.pitch {
-		grid-area: pitch;
-		position: relative;
-		z-index: 2;
-		animation: rise 700ms 80ms var(--ease) both;
-	}
-	.eyebrow {
-		margin: 0 0 0.6rem;
-		font-size: 0.8rem;
+	.kicker {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.6rem;
+		margin: 0;
+		font-family: var(--font-mono);
+		font-size: 0.78rem;
 		font-weight: 600;
-		letter-spacing: 0.12em;
+		letter-spacing: 0.1em;
 		text-transform: uppercase;
-		color: #ffd0a8;
+	}
+	.pulse {
+		width: 10px;
+		height: 10px;
+		border-radius: 50%;
+		background: var(--signal);
+		box-shadow: 0 0 0 1.5px var(--ink);
+		animation: blink 2.4s steps(1) infinite;
+	}
+	@keyframes blink {
+		50% {
+			background: transparent;
+		}
 	}
 	h1 {
 		margin: 0;
-		font-size: clamp(2.1rem, 8.4vw, 4.6rem);
-		font-weight: 560;
-		line-height: 1.02;
-		letter-spacing: -0.025em;
-		text-wrap: balance;
-		background: linear-gradient(100deg, #fff 30%, #ffd9bd 70%, #ff9a62);
-		-webkit-background-clip: text;
-		background-clip: text;
-		color: transparent;
+		font-size: clamp(3rem, 8.6vw, 9.5rem);
+		font-weight: 850;
+		font-stretch: 100%;
+		letter-spacing: -0.045em;
+		line-height: 0.86;
+	}
+	@supports (animation-timeline: scroll()) {
+		/* Scrolling squeezes the headline as it leaves. */
+		h1 {
+			animation: squeeze linear both;
+			animation-timeline: scroll(root);
+			animation-range: 0 70vh;
+		}
+		@keyframes squeeze {
+			to {
+				transform: translateY(-6vh) scale(0.94);
+				transform-origin: left bottom;
+				opacity: 0.25;
+			}
+		}
+	}
+	.line {
+		display: block;
+		overflow: hidden;
+		padding: 0.04em 0 0.16em;
+		margin-bottom: -0.16em;
+	}
+	.inner {
+		position: relative;
+		display: inline-block;
+	}
+	.mark .inner {
+		color: #111;
+		padding: 0 0.12em;
+		margin-left: -0.12em;
+	}
+	.mark .inner::before {
+		content: '';
+		position: absolute;
+		inset: 0.1em 0 -0.14em;
+		z-index: -1;
+		background: var(--signal);
+		transform-origin: left;
+		animation: wipe 700ms 900ms var(--ease-in-out) backwards;
+	}
+	.lines {
+		position: relative;
+		z-index: 0;
+		display: block;
+	}
+	.word {
+		display: inline-block;
+		white-space: nowrap;
+	}
+	.ch {
+		display: inline-block;
+		transform-origin: left bottom;
+		animation: rise 1000ms calc(var(--i) * 32ms + 80ms) var(--ease) backwards;
+	}
+	/* Transforms only: the headline never changes the layout while it animates. */
+	@keyframes rise {
+		from {
+			transform: translateY(105%) rotate(6deg) scaleX(0.6);
+		}
+	}
+	@keyframes wipe {
+		from {
+			transform: scaleX(0);
+		}
+	}
+	.side {
+		display: grid;
+		gap: 1.25rem;
+		align-content: end;
 	}
 	.lead {
-		margin: 0.9rem 0 0;
+		margin: 0;
 		max-width: 34rem;
-		font-size: clamp(0.98rem, 2.6vw, 1.18rem);
-		color: #dde3ea;
-	}
-	.stage {
-		grid-area: stage;
-		min-height: 22svh;
-	}
-	/* Not positioned: the bloom canvas inside must cover the whole grid, not this box. */
-	.bloom-caption {
-		grid-area: caption;
-	}
-	.bloom-caption :global(.caption) {
-		padding: 0.6rem 0.85rem;
-		border-radius: 14px;
-		background: rgb(11 21 35 / 0.6);
-		font-size: 0.8rem;
-	}
-	.bloom-caption :global(.clock-value) {
-		font-size: 1.3rem;
-	}
-	.bloom-caption :global(.note),
-	.bloom-caption :global(.clock-label) {
-		display: none;
+		font-size: clamp(1.05rem, 1.6vw, 1.25rem);
+		line-height: 1.45;
+		animation: fade 800ms 700ms var(--ease) backwards;
 	}
 	.panel {
-		grid-area: panel;
-		position: relative;
-		z-index: 3;
 		display: grid;
-		gap: 0.75rem;
-		padding: 1rem;
-		margin: 0 -1rem -1rem;
-		border-radius: 24px 24px 0 0;
-		background: rgb(11 21 35 / 0.78);
-		border: 1px solid var(--border);
-		border-bottom: 0;
-		box-shadow: 0 -20px 60px rgb(0 0 0 / 0.35);
-		backdrop-filter: blur(18px) saturate(1.2);
-		-webkit-backdrop-filter: blur(18px) saturate(1.2);
-		animation: sheet 700ms 250ms var(--ease) both;
+		gap: 0.9rem;
+		padding: 1.1rem;
+		border: 1.5px solid var(--rule);
+		border-radius: var(--radius);
+		background: var(--surface);
+		box-shadow: 8px 8px 0 var(--ink);
+		animation: drop 700ms 200ms var(--ease) backwards;
 	}
 	.panel .notice {
 		margin: 0;
 	}
-	@media (min-width: 960px) {
-		.hero-grid {
-			grid-template-columns: minmax(26rem, 36rem) 1fr;
-			grid-template-rows: auto 1fr auto;
-			grid-template-areas:
-				'pitch stage'
-				'panel stage'
-				'panel caption';
-			column-gap: clamp(2rem, 5vw, 5rem);
-			row-gap: 1.75rem;
-			padding: clamp(1.5rem, 5vh, 4rem) clamp(1.5rem, 4vw, 4rem) 2.5rem;
+	@keyframes fade {
+		from {
+			opacity: 0;
+			transform: translateY(10px);
 		}
-		.stage {
-			min-height: 0;
-			margin: 1rem 0;
+	}
+	/* The form does not move while it appears: it stays clickable from the first frame. */
+	@keyframes drop {
+		from {
+			box-shadow: 0 0 0 var(--ink);
 		}
-		.panel {
+	}
+	@media (min-width: 1000px) {
+		.hero {
+			grid-template-columns: minmax(0, 1fr) minmax(22rem, 27rem);
+			grid-template-areas: 'kicker kicker' 'title side';
+			column-gap: clamp(2rem, 4vw, 4rem);
+			align-items: end;
+			min-height: calc(100svh - 12rem);
+		}
+		.kicker {
+			grid-area: kicker;
 			align-self: start;
-			margin: 0;
-			padding: 1.25rem;
-			border-radius: 24px;
-			border-bottom: 1px solid var(--border);
-			box-shadow: 0 30px 80px -20px rgb(0 0 0 / 0.55);
 		}
-		.bloom-caption {
-			justify-self: end;
-			max-width: 26rem;
+		h1 {
+			grid-area: title;
 		}
-		.bloom-caption :global(.caption) {
-			padding: 0;
-			background: none;
-			font-size: 0.85rem;
-		}
-		.bloom-caption :global(.clock-value) {
-			font-size: 1.6rem;
-		}
-		.bloom-caption :global(.note) {
-			display: inline;
-		}
-		.bloom-caption :global(.clock-label) {
-			display: block;
+		.side {
+			grid-area: side;
 		}
 	}
 
-	/* ---------- home: how it works ---------- */
+	/* ---------- ticker ---------- */
+	.ticker {
+		overflow: hidden;
+		border-block: 1.5px solid var(--rule);
+		background: var(--signal);
+		color: #111;
+	}
+	.track {
+		display: flex;
+		width: max-content;
+		animation: ticker 60s linear infinite;
+	}
+	.ticker:hover .track {
+		animation-play-state: paused;
+	}
+	.run {
+		display: flex;
+	}
+	.stop {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.6rem;
+		padding: 0.7rem 1.6rem 0.7rem 0;
+		font-size: 1.15rem;
+		font-weight: 750;
+		font-stretch: 85%;
+		white-space: nowrap;
+	}
+	.stop::after {
+		content: '';
+		width: 6px;
+		height: 6px;
+		margin-left: 1.6rem;
+		border-radius: 50%;
+		background: #111;
+	}
+	@keyframes ticker {
+		to {
+			transform: translateX(-50%);
+		}
+	}
+
+	/* ---------- board ---------- */
+	.board-section {
+		padding: clamp(2rem, 6vw, 5rem) clamp(0.75rem, 3vw, 2.5rem);
+	}
+
+	/* ---------- how it works ---------- */
 	.how {
-		max-width: 72rem;
-		margin: 0 auto;
-		padding: clamp(2.5rem, 7vw, 5rem) 1rem 0;
+		padding: clamp(2.5rem, 7vw, 6rem) clamp(1rem, 3vw, 2.5rem);
+		border-top: 1.5px solid var(--rule);
 	}
 	.how h2 {
-		margin: 0 0 1.5rem;
-		font-size: clamp(1.6rem, 4vw, 2.3rem);
+		margin: 0 0 2rem;
+		font-size: clamp(2.4rem, 6vw, 5rem);
 	}
 	.how ol {
 		list-style: none;
 		margin: 0;
 		padding: 0;
 		display: grid;
-		gap: 1rem;
-		grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+		grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+		border-top: 1.5px solid var(--rule);
 	}
 	.how li {
-		padding: 1.25rem;
-		border-radius: var(--radius);
-		background: var(--surface);
-		border: 1px solid var(--border);
-		box-shadow: var(--shadow);
+		padding: 1.25rem 1.25rem 1.5rem 0;
 	}
-	.step {
-		font-family: var(--font-display);
-		font-size: 1.9rem;
-		font-weight: 600;
-		color: var(--back);
+	.how li + li {
+		border-top: 1px solid var(--hair);
+	}
+	@media (min-width: 800px) {
+		.how li + li {
+			border-top: 0;
+			border-left: 1px solid var(--hair);
+			padding-left: 1.25rem;
+		}
+	}
+	.num {
+		display: block;
+		font-family: var(--font-mono);
+		font-size: clamp(2.6rem, 5vw, 4rem);
+		font-weight: 700;
+		letter-spacing: -0.06em;
 		line-height: 1;
 	}
 	.how h3 {
-		margin: 0.6rem 0 0.35rem;
-		font-size: 1.2rem;
+		margin: 1rem 0 0.5rem;
+		font-size: 1.6rem;
 	}
 	.how li p {
 		margin: 0;
 		color: var(--muted);
+		max-width: 26rem;
 	}
 	.data-line {
-		margin: 1.5rem 0;
+		margin: 2rem 0 0;
+		font-family: var(--font-mono);
+		font-size: 0.82rem;
 		color: var(--muted);
 	}
-	.data-line a {
-		display: inline-flex;
-		align-items: center;
-		min-height: 44px;
+	@supports (animation-timeline: view()) {
+		.how li {
+			animation: reveal linear both;
+			animation-timeline: view();
+			animation-range: entry 0% entry 60%;
+		}
+		@keyframes reveal {
+			from {
+				opacity: 0;
+				transform: translateY(40px);
+			}
+		}
+	}
+
+	/* ---------- outro ---------- */
+	.outro {
+		border-top: 1.5px solid var(--rule);
+		padding: 2rem clamp(1rem, 3vw, 2.5rem) 0;
+		overflow: hidden;
+	}
+	.wordmark {
+		display: flex;
+		margin: 0;
+		font-size: clamp(4rem, 19vw, 22rem);
+		font-weight: 850;
+		font-stretch: 72%;
+		letter-spacing: -0.025em;
+		line-height: 0.8;
+	}
+	/* Same split-flap hinge as the header wordmark. */
+	.wordmark span {
+		display: inline-block;
+		background: linear-gradient(var(--ink) 0 55%, transparent 55% 58.5%, var(--ink) 58.5%);
+		-webkit-background-clip: text;
+		background-clip: text;
+		color: transparent;
+	}
+	@supports (animation-timeline: view()) {
+		.wordmark span {
+			animation: letter linear both;
+			animation-timeline: view();
+			animation-range: entry calc(var(--i) * 3%) cover 45%;
+		}
+		@keyframes letter {
+			from {
+				transform: translateY(70%) scaleX(1.5);
+				opacity: 0;
+			}
+		}
 	}
 
 	/* ---------- results ---------- */
@@ -543,8 +696,8 @@
 	.list-col {
 		position: relative;
 		z-index: 2;
-		padding: 0.5rem 1rem 0;
-		background: var(--bg);
+		padding: 0.75rem 1rem 0;
+		background: var(--paper);
 	}
 	.map-col {
 		order: -1;
@@ -552,11 +705,12 @@
 		top: 0;
 		z-index: 1;
 		height: 46svh;
+		border-bottom: 1.5px solid var(--rule);
 	}
 	.with-map .list-col {
-		margin-top: -1.5rem;
-		border-radius: 24px 24px 0 0;
-		box-shadow: 0 -12px 40px rgb(15 27 45 / 0.18);
+		margin-top: -1.25rem;
+		border-top: 1.5px solid var(--rule);
+		border-radius: 16px 16px 0 0;
 		min-height: 60svh;
 	}
 	.handle {
@@ -565,49 +719,52 @@
 		align-items: center;
 		width: 100%;
 		min-height: 32px;
-		margin: -0.25rem 0 0.25rem;
+		margin: -0.5rem 0 0.25rem;
 		border: 0;
 		background: none;
 		cursor: pointer;
 	}
 	.grip {
-		width: 2.75rem;
+		width: 3rem;
 		height: 5px;
 		border-radius: 999px;
-		background: var(--border);
+		background: var(--ink);
 	}
 	@media (min-width: 960px) {
 		.split {
 			display: grid;
-			grid-template-columns: minmax(26rem, 36rem) 1fr;
+			grid-template-columns: minmax(26rem, 38rem) 1fr;
 			align-items: start;
 		}
 		.list-col,
 		.with-map .list-col {
 			margin: 0;
 			border-radius: 0;
-			box-shadow: none;
+			border-top: 0;
 			min-height: 0;
-			padding: 0.5rem clamp(1rem, 2.5vw, 2rem) 0;
+			padding: 1rem clamp(1rem, 2.5vw, 2rem) 0;
+		}
+		.with-map .list-col {
+			border-right: 1.5px solid var(--rule);
 		}
 		.map-col {
 			order: 0;
 			height: 100vh;
 			height: 100svh;
+			border-bottom: 0;
 		}
 		.handle {
 			display: none;
 		}
 		.results-page:not(.with-map) .split {
-			grid-template-columns: minmax(0, 44rem);
+			grid-template-columns: minmax(0, 46rem);
 			justify-content: center;
 		}
 	}
 	.edit {
-		border: 1px solid var(--border);
+		border: 1.5px solid var(--rule);
 		border-radius: var(--radius);
 		background: var(--surface);
-		box-shadow: var(--shadow);
 	}
 	.edit > summary {
 		display: grid;
@@ -625,39 +782,51 @@
 	}
 	.edit-what {
 		grid-area: what;
-		font-weight: 650;
+		font-weight: 800;
+		font-stretch: 85%;
+		font-size: 1.15rem;
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
 	}
 	.edit-when {
 		grid-area: when;
+		font-family: var(--font-mono);
+		font-size: 0.8rem;
 		color: var(--muted);
-		font-size: 0.88rem;
 	}
 	.edit-action {
 		grid-area: action;
-		color: var(--accent);
+		padding: 0.35rem 0.7rem;
+		border: 1.5px solid var(--rule);
+		border-radius: 999px;
+		font-family: var(--font-mono);
+		font-size: 0.72rem;
 		font-weight: 600;
-		font-size: 0.9rem;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+	}
+	.edit[open] .edit-action {
+		background: var(--ink);
+		color: var(--paper);
 	}
 	.edit-body {
 		padding: 0 1rem 1rem;
 	}
 	.results h2 {
 		margin: 0;
-		font-size: 1.7rem;
+		font-size: clamp(2.2rem, 4vw, 3.2rem);
 	}
 	.results-head {
 		display: flex;
 		justify-content: space-between;
-		align-items: center;
+		align-items: end;
 		gap: 0.75rem;
 		flex-wrap: wrap;
-		margin-top: 1.25rem;
+		margin-top: 1.75rem;
 	}
 	.results > h2 {
-		margin-top: 1.25rem;
+		margin-top: 1.5rem;
 	}
 	.share {
 		display: inline-flex;
@@ -665,23 +834,28 @@
 		gap: 0.4rem;
 		min-height: 44px;
 		padding: 0 1rem;
+		border: 1.5px solid var(--rule);
 		border-radius: 999px;
 		background: transparent;
-		color: var(--accent);
-		border: 1px solid var(--accent);
+		color: var(--ink);
 		font: inherit;
-		font-weight: 600;
+		font-weight: 650;
 		cursor: pointer;
 	}
+	.share:hover {
+		background: var(--signal);
+		color: #111;
+		border-color: #111;
+	}
 	.found {
-		margin: 0 0 0.5rem;
-		font-size: 0.92rem;
+		margin: 0 0 0.75rem;
+		font-size: 0.95rem;
 	}
 	.filters {
 		display: flex;
 		gap: 0.4rem;
 		overflow-x: auto;
-		padding: 0.25rem 0 0.5rem;
+		padding: 0.25rem 0 0.75rem;
 		scrollbar-width: none;
 	}
 	.chip {
@@ -692,50 +866,44 @@
 		min-height: 44px;
 		padding: 0 0.9rem;
 		border-radius: 999px;
-		border: 1px solid var(--border);
-		background: var(--surface);
-		color: var(--text);
+		border: 1.5px solid var(--rule);
+		background: transparent;
+		color: var(--ink);
 		font: inherit;
-		font-size: 0.9rem;
+		font-size: 0.92rem;
+		font-weight: 600;
 		cursor: pointer;
 	}
 	.chip[aria-pressed='true'] {
-		background: var(--text);
-		color: var(--bg);
-		border-color: var(--text);
+		background: var(--ink);
+		color: var(--paper);
 	}
 	.count {
-		font-variant-numeric: tabular-nums;
+		font-family: var(--font-mono);
+		font-size: 0.8em;
 		opacity: 0.75;
 	}
 	.cards {
 		list-style: none;
 		padding: 0;
-		margin: 0.5rem 0 1rem;
+		margin: 0.5rem 0 1.5rem;
 		display: grid;
-		gap: 1rem;
+		gap: 1.25rem;
 	}
 	.cards li {
-		animation: rise 420ms calc(var(--i) * 60ms) var(--ease) both;
+		animation: card 600ms calc(var(--i) * 80ms) var(--ease) backwards;
 		scroll-margin: 1rem;
+	}
+	@keyframes card {
+		from {
+			opacity: 0;
+			transform: translateY(30px) rotate(-1.5deg);
+		}
 	}
 	.choices {
 		padding-left: 1.2rem;
 	}
 	.choices li {
 		min-height: 44px;
-	}
-
-	@keyframes rise {
-		from {
-			opacity: 0;
-			transform: translateY(14px);
-		}
-	}
-	@keyframes sheet {
-		from {
-			opacity: 0;
-			transform: translateY(40px);
-		}
 	}
 </style>

@@ -3,7 +3,7 @@
 import { env } from '$env/dynamic/private';
 import { json } from '@sveltejs/kit';
 import { backend } from '$lib/server/backend';
-import { BLOOM_MINUTES, bloomDeparture, bloomOf, TRENTO, type Bloom, type BloomOrigin } from '$lib/server/bloom';
+import { BLOOM_MINUTES, bloomDeparture, bloomOf, showcaseOrigin, type Bloom } from '$lib/server/bloom';
 import { LruCache } from '$lib/server/cache';
 import { ApiError } from '$lib/server/errors';
 import type { RequestHandler } from './$types';
@@ -11,11 +11,7 @@ import type { RequestHandler } from './$types';
 const cache = new LruCache<Bloom>(4_000_000, 30 * 60_000);
 const pending = new Map<string, Promise<Bloom | null>>();
 
-// The mock backend only knows its synthetic stop A.
-const origin = (): BloomOrigin =>
-	(env.DOVEARRIVO_BACKEND ?? 'mock') === 'motis'
-		? TRENTO
-		: { from: 'syn_A', name: 'Origine sintetica A', point: { lat: 46.0, lon: 11.0 } };
+const origin = () => showcaseOrigin(env.DOVEARRIVO_BACKEND);
 
 async function compute(departAfter: string): Promise<Bloom | null> {
 	const o = origin();

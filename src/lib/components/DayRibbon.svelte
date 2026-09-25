@@ -21,7 +21,7 @@
 </script>
 
 <div class="ribbon" role="img" aria-label={label} data-testid="day-ribbon">
-	<div class="track">
+	<div class="track" style="--hours:{(ribbon.to - ribbon.from) / 60}">
 		<span class="window" style="left:{ribbon.windowStart}%;width:{ribbon.windowEnd - ribbon.windowStart}%"></span>
 		{#each ribbon.segments as s, i (s.kind)}
 			<span class="seg {s.kind}" style="left:{s.left}%;width:{s.width}%;--i:{i}"></span>
@@ -51,22 +51,23 @@
 	}
 	.track {
 		position: relative;
-		height: 12px;
-		border-radius: 999px;
-		background: var(--surface-2);
+		height: 14px;
+		border-radius: 2px;
+		background: repeating-linear-gradient(90deg, var(--hair) 0 1px, transparent 1px calc(100% / var(--hours, 10)));
+		border-bottom: 1.5px solid var(--rule);
 	}
 	.window {
 		position: absolute;
 		top: -4px;
 		bottom: -4px;
-		border-radius: 999px;
-		border: 1px dashed color-mix(in srgb, var(--muted) 55%, transparent);
+		border-radius: 2px;
+		background: color-mix(in srgb, var(--signal) 14%, transparent);
 	}
 	.seg {
 		position: absolute;
 		top: 0;
 		bottom: 0;
-		border-radius: 999px;
+		border-radius: 2px;
 		transform-origin: left center;
 		animation: grow 420ms calc(var(--i) * 110ms + 80ms) var(--ease) both;
 	}
@@ -75,17 +76,19 @@
 		z-index: 2;
 	}
 	.stay {
-		background: repeating-linear-gradient(135deg, var(--stay) 0 5px, color-mix(in srgb, var(--stay) 60%, transparent) 5px 10px);
+		background: repeating-linear-gradient(135deg, var(--ink) 0 1.5px, transparent 1.5px 6px);
+		opacity: 0.45;
 		top: 3px;
 		bottom: 3px;
 	}
 	.inbound {
 		background: var(--back);
+		box-shadow: inset 0 0 0 1.5px var(--back-edge);
 		z-index: 2;
 	}
 	.backup {
 		background: transparent;
-		border: 2px dashed var(--back);
+		border: 2px dashed var(--ink);
 		top: -3px;
 		bottom: -3px;
 		opacity: 0.85;
@@ -103,7 +106,8 @@
 	.ticks {
 		position: relative;
 		height: 1.1rem;
-		font-size: 0.72rem;
+		font-family: var(--font-mono);
+		font-size: 0.68rem;
 		font-variant-numeric: tabular-nums;
 	}
 	.marks {
@@ -122,7 +126,7 @@
 		color: var(--out);
 	}
 	.mark.back {
-		color: var(--back);
+		color: var(--ink);
 		transform: translateX(-100%);
 	}
 	.mark.mid {
