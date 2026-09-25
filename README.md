@@ -1,11 +1,13 @@
 # DoveArrivo
 
+[![CI](https://github.com/riccardopontalti/dovearrivo/actions/workflows/ci.yml/badge.svg)](https://github.com/riccardopontalti/dovearrivo/actions/workflows/ci.yml)
+
 **Car-free day trips with a guaranteed way home.**
 Tell it where you start, when you are free and when you must be back: DoveArrivo proposes destinations reachable by public transport, with a complete outbound and return journey — and, when one exists, a later backup return.
 
 🇮🇹 [Leggi in italiano](README.it.md)
 
-> **Status:** pre-development. This repository currently contains specifications, decisions and initial configuration. The application is not implemented yet. Pilot region: Trentino, Italy.
+> **Status:** early development. The engine proof is done and the app skeleton runs on a mock backend with synthetic data; real journey search comes with the MOTIS adapter (D04). Pilot region: Trentino, Italy.
 
 ## Why
 
@@ -57,7 +59,23 @@ Details in [DELIVERY](docs/DELIVERY.md).
 ## Progress
 
 - **D01 — engine proof: done.** MOTIS v2.11.3 imports Trentino Trasporti, Trenitalia and OpenStreetMap together in 14 s and answers journey queries in under 100 ms, including bus–train transfers. Details: [D01-engine-proof.md](research/D01-engine-proof.md).
-- **Next: D02** — SvelteKit project, API contract types, CI.
+- **D02 — project and contracts: done.** SvelteKit app, types and runtime validation generated from the OpenAPI contract, mock API over the synthetic fixture, Italian/English skeleton, CI.
+- **Next: D03** — routing domain: pairing, backup return and ranking.
+
+## Local development
+
+Requires Node.js 24 (see `.nvmrc`).
+
+```bash
+npm ci
+npm run dev        # http://localhost:5173, mock backend with synthetic data
+npm test           # unit and contract tests
+npm run check      # type checking
+npm run build      # production build (adapter-node)
+npm run gen:api    # regenerate types and schemas after editing spec/api.openapi.yaml
+```
+
+The mock backend serves only the synthetic stops "Origine sintetica A" (`syn_A`) and "Destinazione sintetica B". It never returns real timetables.
 
 ## License
 

@@ -9,3 +9,5 @@ build/
 data/
 *.osm.pbf
 *.pmtiles
+.output
+vite.config.ts.timestamp-*

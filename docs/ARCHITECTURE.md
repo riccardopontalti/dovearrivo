@@ -15,7 +15,7 @@
 | Operations | Docker Compose and Caddy | One server, HTTPS and understandable updates |
 | Verification | Vitest, Playwright, accessibility checks | Logic, integration and desktop/mobile flows |
 
-Pinned versions at the time of writing: SvelteKit 2.70.3, Svelte 5.57.1, MapLibre GL JS 6.11.2, MOTIS 2.11.3. Record exact versions in the first commit; no automatic engine updates in production.
+Pinned versions at the time of writing: SvelteKit 2.70.3, Svelte 5.57.1, Vite 8.3.1, TypeScript 5.9.3 (openapi-typescript 7.13 does not support TypeScript 6 yet), Ajv 8.20 for runtime validation, MapLibre GL JS 6.11.2, MOTIS 2.11.3. `npm audit` reports a low-severity advisory in `cookie` < 0.7 pulled by SvelteKit; the suggested fix downgrades SvelteKit, so it is accepted until SvelteKit updates it. Record exact versions in the first commit; no automatic engine updates in production.
 
 MOTIS publishes `linux-amd64` and `linux-arm64` builds, so both x86 and ARM servers are viable.
 

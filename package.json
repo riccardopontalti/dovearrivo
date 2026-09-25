@@ -1,0 +1,39 @@
+{
+	"name": "dovearrivo",
+	"private": true,
+	"version": "0.0.0",
+	"description": "Car-free day trips with a guaranteed way home",
+	"license": "MIT",
+	"type": "module",
+	"engines": {
+		"node": ">=24 <25"
+	},
+	"scripts": {
+		"dev": "vite dev",
+		"build": "vite build",
+		"preview": "vite preview",
+		"prepare": "svelte-kit sync || echo ''",
+		"gen:api": "openapi-typescript spec/api.openapi.yaml -o src/lib/api/types.gen.ts && node scripts/gen-schemas.ts",
+		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+		"test:unit": "vitest",
+		"test": "npm run test:unit -- --run"
+	},
+	"dependencies": {
+		"ajv": "8.20.0",
+		"ajv-formats": "3.0.1"
+	},
+	"devDependencies": {
+		"@sveltejs/adapter-node": "5.5.7",
+		"@sveltejs/kit": "2.70.3",
+		"@sveltejs/vite-plugin-svelte": "7.3.1",
+		"@types/node": "24.13.6",
+		"openapi-typescript": "7.13.0",
+		"svelte": "5.57.1",
+		"svelte-check": "4.7.6",
+		"typescript": "5.9.3",
+		"vite": "8.3.1",
+		"vitest": "4.1.11",
+		"yaml": "2.9.1"
+	}
+}

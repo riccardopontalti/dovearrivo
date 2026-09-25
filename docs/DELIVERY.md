@@ -11,6 +11,8 @@ Four phases, about 6 weeks for one person with coding agents and human review. A
 
 **D01 status (25/09/2026): done** — see [D01-engine-proof.md](../research/D01-engine-proof.md). Trenitalia is included; its licence is not stated by the publisher and the maintainer accepted that risk on 25/09/2026 (see [DATA](DATA.md)).
 
+**D02 status (25/09/2026): done** — SvelteKit app with pinned dependencies; `npm run gen:api` generates TypeScript types (openapi-typescript) and runtime JSON schemas (Ajv) from the contract; the four endpoints answer from a mock backend over the synthetic fixture; Italian/English message catalogues; CI runs generation drift check, type check, tests and build. The ROUTING constraints and window rules already exist as pure functions with tests for C01, C02, C05, C06 and C08.
+
 D01 decides whether Trenitalia enters the pilot. If the feed is stale, its licence is unclear or memory exceeds the server, record the reason and apply the partial-rail rule in [PRODUCT](PRODUCT.md).
 
 ## Phase 2 — Walking skeleton online (weeks 2–3)
@@ -62,7 +64,7 @@ Unit tests for the logic on fixtures; contract tests on the pinned engine; manua
 
 ## Commands to implement
 
-The first code must provide: `npm run dev`, `check`, `test`, `test:e2e` and `build`; a documented command to import data; `docker compose up` for the full environment. Today these are the development contract, not commands available in this repository.
+Available since D02: `npm run dev`, `check`, `test`, `build` and `gen:api`. Still to implement: `test:e2e` (D05), a documented data import command (D06) and `docker compose up` for the full environment (D06).
 
 ## Release criteria
 

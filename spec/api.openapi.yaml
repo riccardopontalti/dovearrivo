@@ -7,6 +7,8 @@ info:
     declared catalogue; no guarantee that every possible route is enumerated.
     Examples are illustrative. Seconds in responses, minutes in filters.
     Phase 3 (D08) will extend SearchRequest with a coordinate origin from geocoding.
+    Status codes: 400 for malformed requests and window rules, 422 for UNKNOWN_ORIGIN
+    and DATE_NOT_COVERED, 413 for bodies over 16 KiB.
   license:
     name: MIT
     identifier: MIT
