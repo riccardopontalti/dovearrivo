@@ -9,6 +9,7 @@
 	import SearchForm from '$lib/components/SearchForm.svelte';
 	import SiteFooter from '$lib/components/SiteFooter.svelte';
 	import SiteHeader from '$lib/components/SiteHeader.svelte';
+	import Wordmark from '$lib/components/Wordmark.svelte';
 	import { longDate, placeLabel } from '$lib/format';
 	import { fill, messages, type Messages } from '$lib/i18n';
 	import { coordinateFrom, toParams } from '$lib/search-form';
@@ -198,9 +199,7 @@
 			<ReachScroll {t} locale={data.locale} destinations={destinationList} />
 
 			<footer class="outro">
-				<p class="wordmark" aria-hidden="true">
-					{#each [...t.appName] as ch, i (i)}<span style="--i:{i}">{ch}</span>{/each}
-				</p>
+				<p class="wordmark" aria-hidden="true"><Wordmark text={t.appName} /></p>
 				<div class="outro-links">
 					<SiteFooter {t} locale={data.locale} />
 				</div>
@@ -658,31 +657,20 @@
 		overflow: hidden;
 	}
 	.wordmark {
-		display: flex;
 		margin: 0;
-		font-size: clamp(4rem, 19vw, 22rem);
-		font-weight: 850;
-		font-stretch: 72%;
-		letter-spacing: -0.025em;
-		line-height: 0.8;
-	}
-	/* Same split-flap hinge as the header wordmark. */
-	.wordmark span {
-		display: inline-block;
-		background: linear-gradient(var(--ink) 0 55%, transparent 55% 58.5%, var(--ink) 58.5%);
-		-webkit-background-clip: text;
-		background-clip: text;
-		color: transparent;
+		font-size: clamp(3.4rem, 15.5vw, 18rem);
+		line-height: 1;
+		padding-bottom: 0.1em;
 	}
 	@supports (animation-timeline: view()) {
-		.wordmark span {
-			animation: letter linear both;
+		.wordmark {
+			animation: outro linear both;
 			animation-timeline: view();
-			animation-range: entry calc(var(--i) * 3%) cover 45%;
+			animation-range: entry 0% cover 40%;
 		}
-		@keyframes letter {
+		@keyframes outro {
 			from {
-				transform: translateY(70%) scaleX(1.5);
+				transform: translateY(35%) scale(0.92);
 				opacity: 0;
 			}
 		}

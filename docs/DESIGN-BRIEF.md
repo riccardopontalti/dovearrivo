@@ -11,7 +11,7 @@ The product answers *"where can I go with the time I have, and still get home?"*
 - **Palette**: paper `#ede9df`, ink `#111111`, signal yellow `#ffc700`; board `#0e0e0e` with flaps `#1c1c1c`. Yellow is used only as a background under ink or outlined in ink (1.3:1 on paper otherwise). Muted text `#56544e` (6.2:1). Dark theme: paper and ink swap, the board stays black.
 - **Theme**: light by default, dark following the system, and a visible switch in the header. The choice is a cookie read by the server, so the page is rendered in the right theme from the first byte; the new theme grows as a circle from the button (View Transitions).
 - **Type**: Archivo (variable weight and width, OFL) for everything, heavy and condensed for headlines; JetBrains Mono (OFL) for times, labels and data. Self-hosted, Archivo preloaded.
-- **Brand**: the mark is one split-flap card, the upper flap with the way there (yellow arrow), the lower with the way back. The wordmark is Archivo black condensed with the flap hinge cut through the letters and a yellow arrow under "Arrivo". The mark flips on hover.
+- **Brand**: the mark is a "D" drawn as a transit-map route on a yellow tile: the stem is the start, the bowl runs out to a stop (a ring) and comes back with an arrow — a day trip with a way home. The wordmark sets "Dove" light and "Arrivo" heavy, with the final "o" drawn as the same yellow stop. (A split-flap version with a hinge cut through the letters read as struck-through text and was dropped.)
 - **Rules**: 1.5 px ink rules, hard offset shadows in ink, small radii. No gradients as decoration, no glass, no stock photos.
 
 ## Screens

@@ -1,50 +1,57 @@
 <script lang="ts">
-	// Wordmark: heavy condensed grotesque, "Dove" in ink and "Arrivo" underlined by the way
-	// there, both cut at mid-height by the hinge of a split-flap card. Real text: it reads and
-	// scales like text.
+	// Wordmark: "Dove" light, "Arrivo" heavy, and the last "o" drawn as a stop on a line map,
+	// the place you arrive at. The letter stays in the text for copy and assistive technology.
 	let { text = 'DoveArrivo' }: { text?: string } = $props();
-	const split = $derived(text.startsWith('Dove') ? ['Dove', text.slice(4)] : [text, '']);
+	const light = $derived(text.startsWith('Dove') ? 'Dove' : '');
+	const heavy = $derived(text.slice(light.length, -1));
+	const last = $derived(text.slice(-1));
 </script>
 
-<span class="wordmark"><span class="a">{split[0]}</span><span class="b">{split[1]}</span></span>
+<span class="wordmark"><span class="light">{light}</span><span class="heavy">{heavy}<span class="stop">{last}</span></span></span>
 
 <style>
 	.wordmark {
 		display: inline-flex;
 		align-items: baseline;
-		font-weight: 900;
-		font-stretch: 70%;
-		letter-spacing: -0.035em;
+		letter-spacing: -0.03em;
 		line-height: 1;
+		white-space: nowrap;
 	}
-	.a,
-	.b {
-		/* The hinge: a thin gap across the letters at mid x-height. */
-		background: linear-gradient(var(--ink) 0 47%, transparent 47% 52%, var(--ink) 52%);
-		-webkit-background-clip: text;
-		background-clip: text;
-		color: transparent;
+	.light {
+		font-weight: 350;
+		font-stretch: 88%;
 	}
-	.b {
+	.heavy {
+		font-weight: 850;
+		font-stretch: 78%;
+	}
+	.stop {
 		position: relative;
+		display: inline-block;
+		color: transparent;
 		margin-left: 0.04em;
 	}
-	/* The way there: a short signal-yellow bar under "Arrivo", with its arrow head. */
-	.b::after {
+	/* The stop: a signal-yellow ring the size of the "o". */
+	.stop::before {
 		content: '';
 		position: absolute;
-		left: 0.04em;
-		right: 0.1em;
-		bottom: -0.1em;
-		height: 0.14em;
+		left: 50%;
+		/* Sits on the baseline, as tall as the lowercase letters. */
+		bottom: 0.2em;
+		width: 0.5em;
+		height: 0.5em;
+		transform: translateX(-50%);
+		border: 0.1em solid var(--ink);
+		border-radius: 50%;
 		background: var(--signal);
-		clip-path: polygon(0 0, calc(100% - 0.2em) 0, 100% 50%, calc(100% - 0.2em) 100%, 0 100%);
+		box-sizing: border-box;
 	}
 	@media (forced-colors: active) {
-		.a,
-		.b {
+		.stop {
 			color: CanvasText;
-			background: none;
+		}
+		.stop::before {
+			display: none;
 		}
 	}
 </style>
