@@ -49,9 +49,11 @@
 
 	const slots = $derived(Array.from({ length: ROWS }, (_, i) => (live ? (board?.rows[i] ?? null) : null)));
 	const isTomorrow = $derived(!!board && board.date > new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Rome' }).format(new Date()));
-	const title = $derived(
-		`${fill(size.mode === 'narrow' ? t.boardTitleShort : t.boardTitle, { origin: board?.origin.name ?? 'Trento' })}${isTomorrow ? ` · ${t.boardTomorrow}` : ''}`
-	);
+	const day = $derived(isTomorrow ? ` · ${t.boardTomorrow}` : '');
+	const origin = $derived(board?.origin.name ?? 'Trento');
+	// The accessible title is always complete; only the flaps shorten it on phones.
+	const title = $derived(`${fill(t.boardTitle, { origin })}${day}`);
+	const flapTitle = $derived(size.mode === 'narrow' ? `${fill(t.boardTitleShort, { origin })}${day}` : title);
 	const message = $derived(
 		status === 'loading' ? t.boardLoading : status === 'unavailable' ? t.boardUnavailable : board && board.rows.length === 0 ? t.boardEmpty : ''
 	);
@@ -143,7 +145,7 @@
 	<header class="head">
 		<h2 id="board-title">
 			<span class="visually-hidden">{title}</span>
-			{#if mounted}<FlapText text={title} length={size.title} still />{:else}<BlankFlaps length={size.title} />{/if}
+			{#if mounted}<FlapText text={flapTitle} length={size.title} still />{:else}<BlankFlaps length={size.title} />{/if}
 		</h2>
 		<p class="clock">
 			<span class="visually-hidden">{t.boardClock} {now}</span>
