@@ -9,6 +9,8 @@ export const it = {
 	dataVersion: 'Versione dei dati',
 	coverage: 'Copertura',
 	sources: 'Fonti',
+	licence: 'licenza',
+	lastCheck: 'ultimo controllo',
 	statusCurrent: 'Aggiornati',
 	statusWarning: 'Controllo in ritardo',
 	statusUnavailable: 'Non disponibili',

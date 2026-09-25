@@ -11,6 +11,8 @@ export const en: Messages = {
 	dataVersion: 'Data version',
 	coverage: 'Coverage',
 	sources: 'Sources',
+	licence: 'licence',
+	lastCheck: 'last check',
 	statusCurrent: 'Up to date',
 	statusWarning: 'Check overdue',
 	statusUnavailable: 'Unavailable',

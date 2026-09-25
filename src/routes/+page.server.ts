@@ -13,11 +13,12 @@ export type SearchOutcome =
 	| { kind: 'error'; error: string };
 
 export const load: PageServerLoad = async ({ url }) => {
-	const [status, destinations] = await Promise.all([backend().dataStatus(), backend().listDestinations()]);
+	const locale = localeFromUrl(url);
+	const [status, destinations] = await Promise.all([backend().dataStatus(locale), backend().listDestinations(locale)]);
 	const defaults = defaultForm(localDate(Date.now()), status.availableFrom, status.availableTo);
 	const form = readForm(url.searchParams, defaults);
 	const base = {
-		locale: localeFromUrl(url),
+		locale,
 		status,
 		destinations: Object.fromEntries(destinations.map((d) => [d.id, d])),
 		mock: status.dataVersion?.startsWith('mock') ?? false,

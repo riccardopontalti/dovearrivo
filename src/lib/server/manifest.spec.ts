@@ -27,6 +27,12 @@ describe('deriveDataStatus', () => {
 		expect(validate('DataStatus', s)).toEqual({ ok: true });
 	});
 
+	it('serves limitations in the requested language, accepting plain strings too', () => {
+		const m = { ...base, limitations: [{ it: 'Solo orari programmati.', en: 'Scheduled only.' }, 'Plain'] };
+		expect(deriveDataStatus(m, hours(1), 'it').limitations).toEqual(['Solo orari programmati.', 'Plain']);
+		expect(deriveDataStatus(m, hours(1), 'en').limitations).toEqual(['Scheduled only.', 'Plain']);
+	});
+
 	it('warns after 72 hours without a successful check and suspends after 7 days', () => {
 		expect(deriveDataStatus(base, hours(73)).status).toBe('warning');
 		expect(deriveDataStatus(base, hours(7 * 24 + 1)).status).toBe('unavailable');

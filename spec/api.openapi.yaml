@@ -63,6 +63,8 @@ paths:
     get:
       operationId: listDestinations
       summary: Published catalogue, at most 24 destinations in v0.1
+      parameters:
+        - $ref: '#/components/parameters/Lang'
       responses:
         '200':
           description: Draft destinations are excluded
@@ -116,6 +118,8 @@ paths:
     get:
       operationId: getDataStatus
       summary: Public coverage and provenance
+      parameters:
+        - $ref: '#/components/parameters/Lang'
       responses:
         '200':
           description: Data status, also when routing is suspended
@@ -123,6 +127,13 @@ paths:
             application/json:
               schema: {$ref: '#/components/schemas/DataStatus'}
 components:
+  parameters:
+    Lang:
+      name: lang
+      in: query
+      required: false
+      description: Language of names, descriptions and limitations (default it)
+      schema: {type: string, enum: [it, en], default: it}
   responses:
     Problem:
       description: Readable error; no engine internals

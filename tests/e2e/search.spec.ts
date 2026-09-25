@@ -39,6 +39,7 @@ test('language switch keeps the search', async ({ page }) => {
 	await page.goto('/?from=syn_A&fromQuery=Origine+sintetica+A');
 	await page.getByRole('link', { name: 'English' }).click();
 	await expect(page.getByRole('heading', { name: 'Recommended destinations' })).toBeVisible();
+	await expect(page.getByRole('article', { name: 'Synthetic destination B' })).toBeVisible();
 	await expect(page.locator('html')).toHaveAttribute('lang', 'en');
 });
 

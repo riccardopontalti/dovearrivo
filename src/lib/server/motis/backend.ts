@@ -75,9 +75,9 @@ export function createMotisBackend(options: MotisBackendOptions): Backend {
 			return matches.slice(0, 20).map((m) => toPlaceMatch(m));
 		},
 
-		async listDestinations() {
+		async listDestinations(locale = 'it') {
 			const { entries } = await destinations();
-			return entries.map((e) => toDestination(e));
+			return entries.map((e) => toDestination(e, locale));
 		},
 
 		async search(request: NormalizedSearchRequest): Promise<SearchResponse> {
@@ -146,8 +146,8 @@ export function createMotisBackend(options: MotisBackendOptions): Backend {
 			return response;
 		},
 
-		async dataStatus() {
-			return deriveDataStatus(await options.manifest(), now());
+		async dataStatus(locale = 'it') {
+			return deriveDataStatus(await options.manifest(), now(), locale);
 		}
 	};
 }

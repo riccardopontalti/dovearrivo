@@ -20,10 +20,10 @@ export interface Backend {
 	findStops(query: string): Promise<Stop[]>;
 	/** Stops, addresses and places to start from, best first. */
 	findPlaces(query: string): Promise<PlaceMatch[]>;
-	listDestinations(): Promise<Destination[]>;
+	listDestinations(locale?: 'it' | 'en'): Promise<Destination[]>;
 	/** Throws ApiError for unknown or uncovered origins, uncovered dates or unavailable data. */
 	search(request: NormalizedSearchRequest): Promise<SearchResponse>;
-	dataStatus(): Promise<DataStatus>;
+	dataStatus(locale?: 'it' | 'en'): Promise<DataStatus>;
 }
 
 let current: Backend | undefined;

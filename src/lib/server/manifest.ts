@@ -18,7 +18,8 @@ export interface Manifest {
 	availableFrom: string;
 	availableTo: string;
 	sources: ManifestSource[];
-	limitations: string[];
+	/** Localised by the pipeline; plain strings are accepted from older manifests. */
+	limitations: Array<string | { it: string; en: string }>;
 	/** Walking network coverage [minLon, minLat, maxLon, maxLat]; points outside cannot be routed. */
 	coverageBbox?: [number, number, number, number];
 }
@@ -44,7 +45,7 @@ function oldestCheckAge(manifest: Manifest, nowMs: number): number {
 	return age;
 }
 
-export function deriveDataStatus(manifest: Manifest | null, nowMs: number): DataStatus {
+export function deriveDataStatus(manifest: Manifest | null, nowMs: number, locale: 'it' | 'en' = 'it'): DataStatus {
 	if (!manifest) {
 		return {
 			status: 'unavailable',
@@ -53,7 +54,7 @@ export function deriveDataStatus(manifest: Manifest | null, nowMs: number): Data
 			availableFrom: null,
 			availableTo: null,
 			sources: [],
-			limitations: ['No data snapshot is active.']
+			limitations: [locale === 'it' ? 'Nessuna versione dei dati è attiva.' : 'No data snapshot is active.']
 		};
 	}
 	const age = oldestCheckAge(manifest, nowMs);
@@ -67,6 +68,6 @@ export function deriveDataStatus(manifest: Manifest | null, nowMs: number): Data
 		availableFrom: manifest.availableFrom,
 		availableTo: manifest.availableTo,
 		sources: manifest.sources,
-		limitations: manifest.limitations
+		limitations: manifest.limitations.map((l) => (typeof l === 'string' ? l : l[locale]))
 	};
 }

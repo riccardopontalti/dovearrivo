@@ -71,10 +71,11 @@ describe('snapshotLimitations', () => {
 			w,
 			'2026-10-10'
 		);
-		expect(l).toEqual([
+		expect(l.map((x) => x.en)).toEqual([
 			'Scheduled timetables only; no real-time data.',
 			'Trenitalia: licence not stated by the publisher; see NOTICE.',
 			'Coverage ends on 2026-10-10 because trenitalia data end then.'
 		]);
+		expect(l[2].it).toBe('Copertura fino al 2026-10-10: i dati trenitalia terminano in quella data.');
 	});
 });

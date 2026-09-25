@@ -65,7 +65,8 @@ Details in [DELIVERY](docs/DELIVERY.md).
 - **D06a — data pipeline: done.** Downloads, checks, imports, verifies and promotes timetable snapshots with rollback; a corrupted feed never replaces valid data.
 - **D05 — search UI: done.** Stop autocomplete, time window and filters, result cards with the backup return; works on phone and desktop, in Italian and English, even without JavaScript; end-to-end and accessibility tests in CI.
 - **D08 — start from an address or place: done.** Self-hosted geocoding; the walk to the first stop counts toward the limits; points outside the covered area get a clear message.
-- **Next:** D09 (English catalogue), D10/D07 (maps); D06b, the public deployment, waits for the server.
+- **D09 — English everywhere: done.** Destinations, data status and limitations follow the chosen language.
+- **Next:** D07/D10 (maps); D06b, the public deployment, waits for the server.
 
 ## Local development
 

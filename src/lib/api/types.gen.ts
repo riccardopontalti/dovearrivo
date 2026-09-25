@@ -268,7 +268,10 @@ export interface components {
             };
         };
     };
-    parameters: never;
+    parameters: {
+        /** @description Language of names, descriptions and limitations (default it) */
+        Lang: "it" | "en";
+    };
     requestBodies: never;
     headers: never;
     pathItems: never;
@@ -327,7 +330,10 @@ export interface operations {
     };
     listDestinations: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Language of names, descriptions and limitations (default it) */
+                lang?: components["parameters"]["Lang"];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -396,7 +402,10 @@ export interface operations {
     };
     getDataStatus: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Language of names, descriptions and limitations (default it) */
+                lang?: components["parameters"]["Lang"];
+            };
             header?: never;
             path?: never;
             cookie?: never;

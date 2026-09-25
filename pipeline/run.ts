@@ -19,7 +19,7 @@ import { activeTransit, downloadLimit, loadConfig, type TransitSource } from './
 import { fetchSource, type FetchState } from './lib/fetch.ts';
 import { inspectGtfs, inspectNetex, type FeedReport } from './lib/feeds.ts';
 import { motisConfig, readMetrics, run, runSamples, withServer, type SampleResult } from './lib/motis.ts';
-import { availableTo, decideRebuild, metricDrift, snapshotLimitations, timetableWindow, type DatasetMetrics } from './lib/plan.ts';
+import { availableTo, decideRebuild, metricDrift, snapshotLimitations, timetableWindow, type DatasetMetrics, type Localized } from './lib/plan.ts';
 import { Store, writeJsonAtomic, type PipelineState } from './lib/store.ts';
 
 const NOTICE_URL = 'https://github.com/riccardopontalti/dovearrivo/blob/main/NOTICE.md';
@@ -39,7 +39,7 @@ interface SnapshotManifest {
 	availableFrom: string;
 	availableTo: string;
 	sources: ManifestSource[];
-	limitations: string[];
+	limitations: Localized[];
 	coverageBbox: [number, number, number, number];
 	window: { firstDay: string; lastDay: string };
 	sourceHashes: Record<string, string>;

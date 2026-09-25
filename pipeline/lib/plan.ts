@@ -84,21 +84,34 @@ export function metricDrift(
 	return findings;
 }
 
+export interface Localized {
+	it: string;
+	en: string;
+}
+
 /** Public limitations of a snapshot: scheduled data, unstated licences, early coverage end. */
 export function snapshotLimitations(
 	sources: Array<{ id: string; publisher: string; license: string | null; serviceTo: string | null }>,
 	window: TimetableWindow,
 	end: string
-): string[] {
-	const limitations = ['Scheduled timetables only; no real-time data.'];
+): Localized[] {
+	const limitations: Localized[] = [
+		{ it: 'Solo orari programmati; nessun dato in tempo reale.', en: 'Scheduled timetables only; no real-time data.' }
+	];
 	for (const s of sources) {
 		if (!s.license || s.license === 'unstated') {
-			limitations.push(`${s.publisher}: licence not stated by the publisher; see NOTICE.`);
+			limitations.push({
+				it: `${s.publisher}: licenza non dichiarata dall'editore; vedi NOTICE.`,
+				en: `${s.publisher}: licence not stated by the publisher; see NOTICE.`
+			});
 		}
 	}
 	if (end < window.lastDay) {
-		const short = sources.filter((s) => s.serviceTo === end).map((s) => s.id);
-		limitations.push(`Coverage ends on ${end} because ${short.join(', ')} data end then.`);
+		const short = sources.filter((s) => s.serviceTo === end).map((s) => s.id).join(', ');
+		limitations.push({
+			it: `Copertura fino al ${end}: i dati ${short} terminano in quella data.`,
+			en: `Coverage ends on ${end} because ${short} data end then.`
+		});
 	}
 	return limitations;
 }

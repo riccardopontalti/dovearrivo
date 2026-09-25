@@ -30,8 +30,8 @@
 			<li>
 				<a href={source.sourceUrl}>{source.publisher}</a>
 				{#if source.feedVersion}· {source.feedVersion}{/if}
-				· <a href={source.licenseUrl}>licence</a>
-				{#if source.checkedAt}· {source.checkedAt.slice(0, 16).replace('T', ' ')} UTC{/if}
+				· <a href={source.licenseUrl}>{t.licence}</a>
+				{#if source.checkedAt}· {t.lastCheck} {source.checkedAt.slice(0, 16).replace('T', ' ')} UTC{/if}
 			</li>
 		{/each}
 	</ul>

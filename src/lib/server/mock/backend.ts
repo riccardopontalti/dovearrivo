@@ -36,7 +36,7 @@ const DESTINATIONS: Destination[] = [
 		name: 'Destinazione sintetica B',
 		category: 'test',
 		entrance: { lat: 46.2, lon: 11.2 },
-		description: 'Synthetic destination from the test fixture. It is not a real place.',
+		description: 'Meta sintetica della fixture di test: non è un luogo reale.',
 		infoUrl: `${REPO}/blob/main/research/routing-cases.json`,
 		checkedAt: '2026-09-25'
 	}
@@ -114,8 +114,14 @@ export function createMockBackend(now: () => number = Date.now): Backend {
 			);
 		},
 
-		async listDestinations() {
-			return DESTINATIONS;
+		async listDestinations(locale = 'it') {
+			return locale === 'it'
+				? DESTINATIONS
+				: DESTINATIONS.map((d) => ({
+						...d,
+						name: 'Synthetic destination B',
+						description: 'Synthetic destination from the test fixture. It is not a real place.'
+					}));
 		},
 
 		async search(request: NormalizedSearchRequest): Promise<SearchResponse> {
@@ -161,7 +167,7 @@ export function createMockBackend(now: () => number = Date.now): Backend {
 			};
 		},
 
-		async dataStatus(): Promise<DataStatus> {
+		async dataStatus(locale = 'it'): Promise<DataStatus> {
 			const { from, to } = coverage();
 			return {
 				status: 'warning',
@@ -178,10 +184,16 @@ export function createMockBackend(now: () => number = Date.now): Backend {
 						licenseUrl: `${REPO}/blob/main/LICENSE`
 					}
 				],
-				limitations: [
-					'Mock backend: synthetic fixture only, no real timetables.',
-					'The synthetic daily pattern is repeated on every covered date.'
-				]
+				limitations:
+					locale === 'it'
+						? [
+								'Backend di prova: solo dati sintetici, nessun orario reale.',
+								'Lo schema giornaliero sintetico si ripete in ogni data coperta.'
+							]
+						: [
+								'Mock backend: synthetic fixture only, no real timetables.',
+								'The synthetic daily pattern is repeated on every covered date.'
+							]
 			};
 		}
 	};
