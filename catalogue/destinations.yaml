@@ -1,22 +1,367 @@
 # Destination catalogue. Schema: destinations.schema.json. See CONTRIBUTING.md.
 # Only `published` entries reach users. Drafts are visible only with
 # DOVEARRIVO_INCLUDE_DRAFTS=true on a local development server.
+# D11 preparation (25/09/2026): every entry below is a DRAFT. Points come from the local
+# OpenStreetMap extract; entrances, access and descriptions must be verified before
+# `status: published` (checklist in research/D11-candidates.md).
 
-- id: levico-lungolago-test
+- id: levico-parco-asburgico
   status: draft
   name:
-    it: Levico Terme – lungolago (prova)
-    en: Levico Terme – lakeside (test)
-  category: test
+    it: "Levico Terme – Parco Asburgico"
+    en: "Levico Terme – Habsburg Park"
+  category: park
   description:
-    it: Punto di prova usato in D01. È un indirizzo OpenStreetMap, non un ingresso verificato.
-    en: Test point used in D01. It is an OpenStreetMap address point, not a verified entrance.
+    it: "Parco storico accanto al centro di Levico Terme."
+    en: "Historic park next to the centre of Levico Terme."
+  entrance:
+    lat: 46.0110748
+    lon: 11.3091593
+  infoUrl: https://www.openstreetmap.org/node/3052279040
+  check:
+    checkedAt: 2026-09-25
+    checkedBy: D11 preparation from OpenStreetMap, not verified
+    coordinateSource: "OSM node 3052279040: barrier=gate, access=permissive, wheelchair=yes"
+    exclusionReason: Entrance, access and description not yet verified.
+
+- id: levico-lungolago
+  status: draft
+  name:
+    it: "Levico Terme – lungolago"
+    en: "Levico Terme – lakeside"
+  category: lake
+  description:
+    it: "Lungolago del Lago di Levico, a ovest del centro."
+    en: "Lakeside of Lake Levico, west of the town centre."
   entrance:
     lat: 46.0103715
     lon: 11.2896984
   infoUrl: https://www.openstreetmap.org/?mlat=46.0103715&mlon=11.2896984#map=18/46.0103715/11.2896984
   check:
     checkedAt: 2026-09-25
-    checkedBy: D01 engine proof
-    coordinateSource: OpenStreetMap address point "Viale Lido", Levico Terme (MOTIS geocoding)
-    exclusionReason: Not a verified entrance; for development only.
+    checkedBy: D11 preparation from OpenStreetMap, not verified
+    coordinateSource: "OSM address point \"Viale Lido\", Levico Terme (MOTIS geocoding); used in D01"
+    exclusionReason: Entrance, access and description not yet verified.
+
+- id: caldonazzo-lido
+  status: draft
+  name:
+    it: "Lago di Caldonazzo – lido"
+    en: "Lake Caldonazzo – lido"
+  category: lake
+  description:
+    it: "Lido sulla riva del Lago di Caldonazzo."
+    en: "Lido on the shore of Lake Caldonazzo."
+  entrance:
+    lat: 46.0056305
+    lon: 11.2639718
+  infoUrl: https://www.openstreetmap.org/node/4285306011
+  check:
+    checkedAt: 2026-09-25
+    checkedBy: D11 preparation from OpenStreetMap, not verified
+    coordinateSource: "OSM node 4285306011: barrier=gate near the Lido di Caldonazzo area (way 390202400)"
+    exclusionReason: Entrance, access and description not yet verified.
+
+- id: pergine-centro
+  status: draft
+  name:
+    it: "Pergine Valsugana – centro storico"
+    en: "Pergine Valsugana – old town"
+  category: town
+  description:
+    it: "Centro storico di Pergine Valsugana, Piazza del Municipio."
+    en: "Old town of Pergine Valsugana, Piazza del Municipio."
+  entrance:
+    lat: 46.060417
+    lon: 11.240755
+  infoUrl: https://www.openstreetmap.org/?mlat=46.060417&mlon=11.240755#map=18/46.060417/11.240755
+  check:
+    checkedAt: 2026-09-25
+    checkedBy: D11 preparation from OpenStreetMap, not verified
+    coordinateSource: "OSM address point Piazza del Municipio, Pergine Valsugana (MOTIS geocoding)"
+    exclusionReason: Entrance, access and description not yet verified.
+
+- id: borgo-valsugana-centro
+  status: draft
+  name:
+    it: "Borgo Valsugana – centro storico"
+    en: "Borgo Valsugana – old town"
+  category: town
+  description:
+    it: "Centro storico di Borgo Valsugana, lungo il Brenta."
+    en: "Old town of Borgo Valsugana, along the Brenta river."
+  entrance:
+    lat: 46.053446
+    lon: 11.45728
+  infoUrl: https://www.openstreetmap.org/?mlat=46.053446&mlon=11.45728#map=18/46.053446/11.45728
+  check:
+    checkedAt: 2026-09-25
+    checkedBy: D11 preparation from OpenStreetMap, not verified
+    coordinateSource: "OSM address point Piazza Martiri della Resistenza, Borgo Valsugana (MOTIS geocoding)"
+    exclusionReason: Entrance, access and description not yet verified.
+
+- id: riva-rocca
+  status: draft
+  name:
+    it: "Riva del Garda – Rocca e lungolago"
+    en: "Riva del Garda – Rocca and lakefront"
+  category: town
+  description:
+    it: "La Rocca sul lungolago di Riva del Garda."
+    en: "The Rocca on the lakefront of Riva del Garda."
+  entrance:
+    lat: 45.8846946
+    lon: 10.8413427
+  infoUrl: https://www.openstreetmap.org/node/12197333385
+  check:
+    checkedAt: 2026-09-25
+    checkedBy: D11 preparation from OpenStreetMap, not verified
+    coordinateSource: "OSM node 12197333385: entrance=yes, 45 m from the Rocca (way 1879831)"
+    exclusionReason: Entrance, access and description not yet verified.
+
+- id: arco-castello
+  status: draft
+  name:
+    it: "Arco – castello"
+    en: "Arco – castle"
+  category: castle
+  description:
+    it: "Castello medievale sulla rupe sopra Arco."
+    en: "Medieval castle on the rock above Arco."
+  entrance:
+    lat: 45.9194773
+    lon: 10.8862692
+  infoUrl: https://www.openstreetmap.org/node/5117584205
+  check:
+    checkedAt: 2026-09-25
+    checkedBy: D11 preparation from OpenStreetMap, not verified
+    coordinateSource: "OSM node 5117584205: entrance=main, 208 m from the castle (way 36734717); may be the start of the path"
+    exclusionReason: Entrance, access and description not yet verified.
+
+- id: torbole-lungolago
+  status: draft
+  name:
+    it: "Torbole – lungolago"
+    en: "Torbole – lakefront"
+  category: lake
+  description:
+    it: "Lungolago di Torbole sul Lago di Garda."
+    en: "Lakefront of Torbole on Lake Garda."
+  entrance:
+    lat: 45.856647
+    lon: 10.870488
+  infoUrl: https://www.openstreetmap.org/?mlat=45.856647&mlon=10.870488#map=18/45.856647/10.870488
+  check:
+    checkedAt: 2026-09-25
+    checkedBy: D11 preparation from OpenStreetMap, not verified
+    coordinateSource: "OSM address point Lungolago Conca d'Oro, Nago-Torbole (MOTIS geocoding)"
+    exclusionReason: Entrance, access and description not yet verified.
+
+- id: molveno-lido
+  status: draft
+  name:
+    it: "Lago di Molveno – lido"
+    en: "Lake Molveno – lido"
+  category: lake
+  description:
+    it: "Lido sulla riva del Lago di Molveno."
+    en: "Lido on the shore of Lake Molveno."
+  entrance:
+    lat: 46.1392972
+    lon: 10.9626906
+  infoUrl: https://www.openstreetmap.org/node/10935065240
+  check:
+    checkedAt: 2026-09-25
+    checkedBy: D11 preparation from OpenStreetMap, not verified
+    coordinateSource: "OSM node 10935065240: entrance=main, 82 m from the Lido di Molveno node 13918161939"
+    exclusionReason: Entrance, access and description not yet verified.
+
+- id: toblino-castello
+  status: draft
+  name:
+    it: "Castel Toblino"
+    en: "Castel Toblino"
+  category: castle
+  description:
+    it: "Castello sulla riva del Lago di Toblino."
+    en: "Castle on the shore of Lake Toblino."
+  entrance:
+    lat: 46.0564729
+    lon: 10.9655628
+  infoUrl: https://www.openstreetmap.org/node/11080005511
+  check:
+    checkedAt: 2026-09-25
+    checkedBy: D11 preparation from OpenStreetMap, not verified
+    coordinateSource: "OSM node 11080005511: barrier=gate, 214 m from the castle (way 71331801), near the bus stop"
+    exclusionReason: Entrance, access and description not yet verified.
+
+- id: rovereto-campana-caduti
+  status: draft
+  name:
+    it: "Rovereto – Campana dei Caduti"
+    en: "Rovereto – Bell of the Fallen"
+  category: viewpoint
+  description:
+    it: "La Campana dei Caduti sul colle di Miravalle."
+    en: "The Bell of the Fallen on the Miravalle hill."
+  entrance:
+    lat: 45.8739507
+    lon: 11.0398207
+  infoUrl: https://www.openstreetmap.org/node/13197930316
+  check:
+    checkedAt: 2026-09-25
+    checkedBy: D11 preparation from OpenStreetMap, not verified
+    coordinateSource: "OSM node 13197930316: entrance=main, access=customers (visitors), wheelchair=yes"
+    exclusionReason: Entrance, access and description not yet verified.
+
+- id: varone-cascate
+  status: draft
+  name:
+    it: "Cascate del Varone"
+    en: "Varone waterfalls"
+  category: nature
+  description:
+    it: "Cascate in una gola vicino a Riva del Garda, a Tenno."
+    en: "Waterfalls in a gorge near Riva del Garda, in Tenno."
+  entrance:
+    lat: 45.9115414
+    lon: 10.8347701
+  infoUrl: https://www.openstreetmap.org/node/1708718937
+  check:
+    checkedAt: 2026-09-25
+    checkedBy: D11 preparation from OpenStreetMap, not verified
+    coordinateSource: "OSM node 1708718937: barrier=gate, 34 m from the Cascata del Varone node 2476364774"
+    exclusionReason: Entrance, access and description not yet verified.
+
+- id: ledro-palafitte
+  status: draft
+  name:
+    it: "Lago di Ledro – palafitte"
+    en: "Lake Ledro – pile dwellings"
+  category: museum
+  description:
+    it: "Museo delle palafitte sulla riva del Lago di Ledro."
+    en: "Pile-dwelling museum on the shore of Lake Ledro."
+  entrance:
+    lat: 45.8739285
+    lon: 10.7654715
+  infoUrl: https://www.openstreetmap.org/node/8838226468
+  check:
+    checkedAt: 2026-09-25
+    checkedBy: D11 preparation from OpenStreetMap, not verified
+    coordinateSource: "OSM node 8838226468: entrance=yes at the Museo delle Palafitte (way 66764505)"
+    exclusionReason: Entrance, access and description not yet verified.
+
+- id: beseno-castello
+  status: draft
+  name:
+    it: "Castel Beseno"
+    en: "Castel Beseno"
+  category: castle
+  description:
+    it: "Grande castello che domina la Val Lagarina, a Besenello."
+    en: "Large castle overlooking the Vallagarina, in Besenello."
+  entrance:
+    lat: 45.9306655
+    lon: 11.1102316
+  infoUrl: https://www.openstreetmap.org/node/534758003
+  check:
+    checkedAt: 2026-09-25
+    checkedBy: D11 preparation from OpenStreetMap, not verified
+    coordinateSource: "OSM node 534758003: barrier=entrance, access=customers (visitors)"
+    exclusionReason: Entrance, access and description not yet verified.
+
+- id: mezzano-borgo
+  status: draft
+  name:
+    it: "Mezzano – borgo"
+    en: "Mezzano – village"
+  category: town
+  description:
+    it: "Il borgo di Mezzano, nel Primiero."
+    en: "The village of Mezzano, in Primiero."
+  entrance:
+    lat: 46.154712
+    lon: 11.807993
+  infoUrl: https://www.openstreetmap.org/node/64776620
+  check:
+    checkedAt: 2026-09-25
+    checkedBy: D11 preparation from OpenStreetMap, not verified
+    coordinateSource: "OSM node 64776620: place node of Mezzano (village centre)"
+    exclusionReason: Entrance, access and description not yet verified.
+
+- id: cles-centro
+  status: draft
+  name:
+    it: "Cles – Piazza Granda"
+    en: "Cles – Piazza Granda"
+  category: town
+  description:
+    it: "Centro di Cles, in Val di Non."
+    en: "Centre of Cles, in the Val di Non."
+  entrance:
+    lat: 46.365187
+    lon: 11.0333991
+  infoUrl: https://www.openstreetmap.org/?mlat=46.365187&mlon=11.0333991#map=18/46.365187/11.0333991
+  check:
+    checkedAt: 2026-09-25
+    checkedBy: D11 preparation from OpenStreetMap, not verified
+    coordinateSource: "OSM address point Piazza Granda, Cles (MOTIS geocoding)"
+    exclusionReason: Entrance, access and description not yet verified.
+
+- id: cavalese-centro
+  status: draft
+  name:
+    it: "Cavalese – centro"
+    en: "Cavalese – centre"
+  category: town
+  description:
+    it: "Centro di Cavalese, in Val di Fiemme."
+    en: "Centre of Cavalese, in the Val di Fiemme."
+  entrance:
+    lat: 46.290518
+    lon: 11.45883
+  infoUrl: https://www.openstreetmap.org/way/25163586
+  check:
+    checkedAt: 2026-09-25
+    checkedBy: D11 preparation from OpenStreetMap, not verified
+    coordinateSource: "OSM way 25163586: Piazza Ress (centroid of a public square)"
+    exclusionReason: Entrance, access and description not yet verified.
+
+- id: canazei-centro
+  status: draft
+  name:
+    it: "Canazei – centro"
+    en: "Canazei – centre"
+  category: town
+  description:
+    it: "Centro di Canazei, in Val di Fassa."
+    en: "Centre of Canazei, in the Val di Fassa."
+  entrance:
+    lat: 46.476963
+    lon: 11.770416
+  infoUrl: https://www.openstreetmap.org/?mlat=46.476963&mlon=11.770416#map=18/46.476963/11.770416
+  check:
+    checkedAt: 2026-09-25
+    checkedBy: D11 preparation from OpenStreetMap, not verified
+    coordinateSource: "OSM address point Piazza Guglielmo Marconi, Canazei (MOTIS geocoding)"
+    exclusionReason: Entrance, access and description not yet verified.
+
+- id: bondone-vason
+  status: draft
+  name:
+    it: "Monte Bondone – Vason"
+    en: "Monte Bondone – Vason"
+  category: nature
+  description:
+    it: "Località Vason sul Monte Bondone, sopra Trento."
+    en: "Vason, on Monte Bondone above Trento."
+  entrance:
+    lat: 46.0394574
+    lon: 11.0574779
+  infoUrl: https://www.openstreetmap.org/node/277765536
+  check:
+    checkedAt: 2026-09-25
+    checkedBy: D11 preparation from OpenStreetMap, not verified
+    coordinateSource: "OSM node 277765536: place node Vason"
+    exclusionReason: Entrance, access and description not yet verified.

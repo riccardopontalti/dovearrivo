@@ -21,7 +21,7 @@
 			"id": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$", "maxLength": 60 },
 			"status": { "enum": ["draft", "published"] },
 			"name": { "$ref": "#/$defs/localized" },
-			"category": { "enum": ["town", "lake", "park", "viewpoint", "test"] },
+			"category": { "enum": ["town", "lake", "park", "castle", "museum", "nature", "viewpoint", "test"] },
 			"description": { "$ref": "#/$defs/localizedLong" },
 			"entrance": {
 				"type": "object",

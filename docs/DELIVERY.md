@@ -31,6 +31,8 @@ Four phases, about 6 weeks for one person with coding agents and human review. A
 
 **D06b preparation (25/09/2026): ready, not deployed** — `deploy/`: pinned app and data images (MOTIS, pipeline, osmium, GTFS validator 8.0.1, pmtiles, all checksum-verified), Compose with Caddy (HTTPS, basemap served with byte ranges, no access log), a systemd timer every 6 hours that restarts MOTIS only after a promotion, and the runbook in [DEPLOY](DEPLOY.md). CI builds both images. The MobilityData validator now runs in the pipeline: ERROR notices block unless waived with scope and reason in `config/sources.yaml`; on 25/09 the TT feeds had 0 errors, 36 and 196 warnings. Waiting for: the VPS.
 
+**D11 preparation (25/09/2026): drafts ready, verification pending** — 19 draft destinations with points from the local OSM extract and provenance (see [D11-candidates.md](../research/D11-candidates.md)); 12 have proposals from Trento with default filters on a weekday. Evaluating them exposed a crash: MOTIS sends close-delimited HTTP/1.1 bodies and Node's fetch (undici) can abort the process on them under load; the MOTIS client now uses `node:http`. After the fix, 5 concurrent cold searches over 19 destinations: p95 1.8 s; warm 3 ms. Waiting for: human verification of entrances.
+
 D01 decides whether Trenitalia enters the pilot. If the feed is stale, its licence is unclear or memory exceeds the server, record the reason and apply the partial-rail rule in [PRODUCT](PRODUCT.md).
 
 ## Phase 2 — Walking skeleton online (weeks 2–3)
