@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { defaultForm, readForm, toParams, toRequest } from './search-form';
+import { defaultForm, quickDays, readForm, toParams, toRequest } from './search-form';
 
 const defaults = defaultForm('2026-09-25', '2026-09-25', '2026-10-25');
 
@@ -39,5 +39,25 @@ describe('search form in the URL', () => {
 		const winter = toRequest({ ...defaults, date: '2026-10-26' }, 'tte_1');
 		expect(summer.departAfter).toBe('2026-09-26T09:00:00+02:00');
 		expect(winter.returnBy).toBe('2026-10-26T19:00:00+01:00');
+	});
+});
+
+describe('quickDays', () => {
+	const days = (today: string, from: string | null = null, to: string | null = null) =>
+		quickDays(today, from, to).map((d) => `${d.kind}:${d.date}`);
+
+	it('offers today, tomorrow and the coming weekend', () => {
+		// 2026-09-23 is a Wednesday.
+		expect(days('2026-09-23')).toEqual(['today:2026-09-23', 'tomorrow:2026-09-24', 'weekend:2026-09-26', 'weekend:2026-09-27']);
+	});
+
+	it('does not repeat weekend days that are already today or tomorrow', () => {
+		expect(days('2026-09-25')).toEqual(['today:2026-09-25', 'tomorrow:2026-09-26', 'weekend:2026-09-27']);
+		expect(days('2026-09-26')).toEqual(['today:2026-09-26', 'tomorrow:2026-09-27']);
+		expect(days('2026-09-27')).toEqual(['today:2026-09-27', 'tomorrow:2026-09-28', 'weekend:2026-10-03', 'weekend:2026-10-04']);
+	});
+
+	it('keeps only days covered by the timetables', () => {
+		expect(days('2026-09-23', '2026-09-24', '2026-09-26')).toEqual(['tomorrow:2026-09-24', 'weekend:2026-09-26']);
 	});
 });

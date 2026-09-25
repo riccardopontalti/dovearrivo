@@ -50,3 +50,19 @@ export function feedLabel(feedId: string, t: Messages): string {
 }
 
 export { localDate };
+
+/** Compact date for a YYYY-MM-DD local date, e.g. "sab 26 set". */
+export function shortDate(date: string, locale: 'it' | 'en'): string {
+	const [y, m, d] = date.split('-').map(Number);
+	return new Intl.DateTimeFormat(locale === 'it' ? 'it-IT' : 'en-GB', {
+		weekday: 'short',
+		day: 'numeric',
+		month: 'short',
+		timeZone: 'UTC'
+	}).format(Date.UTC(y, m - 1, d));
+}
+
+/** "45 min", "2 h", "1 h 30" for option lists. */
+export function minutesLabel(n: number): string {
+	return n < 60 ? `${n} min` : n % 60 === 0 ? `${n / 60} h` : `${Math.floor(n / 60)} h ${n % 60}`;
+}

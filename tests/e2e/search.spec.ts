@@ -1,5 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
+import { settle } from './helpers';
 
 test('complete search flow with the stop picker', async ({ page }) => {
 	await page.goto('/');
@@ -10,7 +11,7 @@ test('complete search flow with the stop picker', async ({ page }) => {
 	await from.press('Enter');
 	await expect(from).toHaveValue('Origine sintetica A');
 
-	await page.getByRole('button', { name: 'Cerca mete' }).click();
+	await page.getByRole('button', { name: 'Parti' }).click();
 	const card = page.getByRole('article', { name: 'Destinazione sintetica B' });
 	await expect(card).toBeVisible();
 	await expect(card).toContainText('5 h 30 min');
@@ -45,9 +46,11 @@ test('language switch keeps the search', async ({ page }) => {
 
 test('search page and results pass automated accessibility checks', async ({ page }) => {
 	await page.goto('/');
+	await settle(page);
 	expect((await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag22aa']).analyze()).violations).toEqual([]);
 	await page.goto('/?from=syn_A&fromQuery=Origine+sintetica+A');
 	await page.getByText('Dettagli degli itinerari').click();
+	await settle(page);
 	expect((await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag22aa']).analyze()).violations).toEqual([]);
 	await page.goto('/data-status');
 	expect((await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag22aa']).analyze()).violations).toEqual([]);
@@ -59,14 +62,14 @@ test.describe('without JavaScript', () => {
 	test('a typed stop name is resolved on the server', async ({ page }) => {
 		await page.goto('/');
 		await page.getByRole('combobox', { name: 'Parto da' }).fill('Origine sintetica');
-		await page.getByRole('button', { name: 'Cerca mete' }).click();
+		await page.getByRole('button', { name: 'Parti' }).click();
 		await expect(page.getByRole('article', { name: 'Destinazione sintetica B' })).toBeVisible();
 	});
 
 	test('an ambiguous name offers a choice of stops', async ({ page }) => {
 		await page.goto('/');
 		await page.getByRole('combobox', { name: 'Parto da' }).fill('sintetica');
-		await page.getByRole('button', { name: 'Cerca mete' }).click();
+		await page.getByRole('button', { name: 'Parti' }).click();
 		await expect(page.getByRole('heading', { name: 'Scegli il punto di partenza' })).toBeVisible();
 		await page.getByRole('link', { name: 'Origine sintetica A' }).click();
 		await expect(page.getByRole('article', { name: 'Destinazione sintetica B' })).toBeVisible();
@@ -80,9 +83,9 @@ test('itinerary details work without a basemap and never call external hosts', a
 	});
 	await page.goto('/?from=syn_A&fromQuery=Origine+sintetica+A');
 	const card = page.getByRole('article', { name: 'Destinazione sintetica B' });
+	// CI has no basemap files: the results map says so and the text itinerary stays complete.
+	await expect(page.getByText('La mappa non è disponibile')).toBeVisible();
 	await card.getByText('Dettagli degli itinerari').click();
-	// CI has no basemap files: the map says so and the text itinerary stays complete.
-	await expect(card.getByText('La mappa non è disponibile')).toBeVisible();
 	await expect(card.getByText('Origine sintetica A → Destinazione sintetica B')).toBeVisible();
 	expect(external).toEqual([]);
 });

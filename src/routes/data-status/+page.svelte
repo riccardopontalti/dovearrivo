@@ -1,8 +1,10 @@
 <script lang="ts">
+	import SiteHeader from '$lib/components/SiteHeader.svelte';
 	import { messages } from '$lib/i18n';
 
 	let { data } = $props();
 	const t = $derived(messages(data.locale));
+	const otherLocaleHref = $derived(`/data-status?lang=${data.locale === 'it' ? 'en' : 'it'}`);
 	const status = $derived(data.status);
 	const statusLabel = $derived(
 		status.status === 'current' ? t.statusCurrent : status.status === 'warning' ? t.statusWarning : t.statusUnavailable
@@ -13,7 +15,8 @@
 	<title>{t.dataStatusTitle} · {t.appName}</title>
 </svelte:head>
 
-<main class="page">
+<SiteHeader {t} locale={data.locale} {otherLocaleHref} current="data" />
+<main class="page" id="content">
 	<p><a href="/?lang={data.locale}">← {t.backToSearch}</a></p>
 	<h1>{t.dataStatusTitle}</h1>
 	<dl>
@@ -47,7 +50,7 @@
 	.page {
 		max-width: 44rem;
 		margin: 0 auto;
-		padding: 1.5rem 1rem 3rem;
+		padding: 0.5rem 1rem 3rem;
 	}
 	dl {
 		display: grid;

@@ -40,7 +40,8 @@ The proxy exposes only the application and static assets. MOTIS stays on the pri
 - `src/lib/server/catalogue`: stops, destinations and manifest of the active snapshot.
 - `src/lib/i18n`: Italian and English message catalogues.
 - `src/routes/api/v1`: controlled public contract.
-- `src/lib/components`: form, results, detail and lazily loaded map.
+- `src/routes/bloom`: data for the home page bloom (one-to-all from Trento within 90 minutes, rounded and cached per departure hour). Serves the page only; not part of the public contract.
+- `src/lib/components`: search form, hero bloom (canvas, no map library), result cards with the day ribbon, lazily loaded maps.
 - `pipeline`: acquisition, validation and snapshot build (TypeScript).
 - `catalogue`: destination YAML files and their schema.
 - `config`: sources and reproducible settings.

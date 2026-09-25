@@ -5,7 +5,7 @@ Indichi da dove parti, quando sei libero e quando vuoi rientrare: DoveArrivo pro
 
 🇬🇧 [English version](README.md)
 
-> **Stato:** fase precedente allo sviluppo. Il repository contiene specifiche, decisioni e configurazioni iniziali; l'applicazione non è ancora implementata. Territorio pilota: Trentino.
+> **Stato:** anteprima. La ricerca con orari reali è online su [dovearrivo.it](https://dovearrivo.it) in modalità anteprima: le mete sono bozze ancora in verifica. Territorio pilota: Trentino.
 
 ## Perché
 

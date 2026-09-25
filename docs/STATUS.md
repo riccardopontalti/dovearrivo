@@ -18,18 +18,20 @@ Last updated: 25/09/2026. Read this after README and AGENTS.md when picking up t
 | D09 | Italian/English everywhere, including catalogue and data status |
 | D10 | Reachability preview map (`/reachability`) |
 | D11 prep | 19 draft destinations from OSM with provenance ([D11-candidates.md](../research/D11-candidates.md)) |
+| D06b | Server online in preview mode at https://dovearrivo.it; deploy from `main` after green CI |
+| D12a v1 | "Alpenglow" design: hero bloom from `/bloom`, search sheet, day ribbon, results map with fly-to, phone sheet, fonts; see the notes in [DESIGN-BRIEF.md](DESIGN-BRIEF.md) |
 
 ## Waiting for the maintainer
 
-- **Server**: OVHcloud VPS-1, Ubuntu 24.04. Deployment is automatic through GitHub Actions once the maintainer adds the `DEPLOY_HOST` and `DEPLOY_SSH_KEY` repository secrets and points the DNS A records to the server ([DEPLOY.md](DEPLOY.md)). It runs in preview mode (drafts visible, banner, noindex) so the maintainer can browse every change. Never ask for a private key in a chat or commit one.
+- **Server**: OVHcloud VPS-1, Ubuntu 24.04, online. Every push to `main` with green CI deploys automatically ([DEPLOY.md](DEPLOY.md)) in preview mode (drafts visible, banner, noindex). Never ask for a private key in a chat or commit one.
+- **D12a feedback**: the maintainer tries each version on desktop and phone; iterate on what they report.
 - **Destination verification**: entrances and access of the drafts (checklist in D11-candidates.md). Only then `status: published`.
 
 ## Next
 
-1. **D12a — visual design** from [DESIGN-BRIEF.md](DESIGN-BRIEF.md). Work against the mock backend (`npm run dev`) and, for real data, the engine fixtures; keep every existing test green and extend E2E/axe to the new screens.
-2. **D06b — deploy** once the server exists.
-3. **D11 — publish** verified destinations.
-4. **D12 — beta** with about 10 people, then launch (README GIF, live link, article).
+1. **D12a — iterate** on the maintainer's feedback; measure Lighthouse on the live home page (target ≥ 90 on mobile).
+2. **D11 — publish** verified destinations.
+3. **D12 — beta** with about 10 people, then launch (README GIF, live link, article).
 
 ## Things that bit us (keep them in mind)
 

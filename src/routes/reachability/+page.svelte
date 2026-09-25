@@ -2,6 +2,7 @@
 	import { navigating, page } from '$app/state';
 	import PlacePicker from '$lib/components/PlacePicker.svelte';
 	import ReachabilityMap from '$lib/components/ReachabilityMap.svelte';
+	import SiteHeader from '$lib/components/SiteHeader.svelte';
 	import { clock, placeLabel } from '$lib/format';
 	import { fill, messages } from '$lib/i18n';
 	import { BAND_LIMITS, countByBand } from '$lib/reach-bands';
@@ -46,12 +47,9 @@
 </svelte:head>
 
 <div class="shell">
-	<header class="top">
-		<a class="brand" href="/?lang={data.locale}">{t.appName}</a>
-		<nav aria-label="Language"><a href={otherLocaleHref} hreflang={otherLocale}>{t.otherLanguage}</a></nav>
-	</header>
+	<SiteHeader {t} locale={data.locale} {otherLocaleHref} current="reach" />
 
-	<main>
+	<main id="content">
 		<h1>{t.reachTitle}</h1>
 		<p class="note">{t.reachNote}</p>
 
@@ -149,19 +147,9 @@
 		margin: 0 auto;
 		padding: 0 1rem 3rem;
 	}
-	.top {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		min-height: 3.5rem;
+	.shell :global(.top) {
+		padding: 0;
 	}
-	.brand {
-		font-weight: 700;
-		font-size: 1.15rem;
-		text-decoration: none;
-		color: var(--text);
-	}
-	.top nav a,
 	p > a {
 		display: inline-flex;
 		align-items: center;
@@ -181,7 +169,8 @@
 		align-items: end;
 		background: var(--surface);
 		border: 1px solid var(--border);
-		border-radius: 14px;
+		border-radius: var(--radius);
+		box-shadow: var(--shadow);
 		padding: 1rem;
 	}
 	.picker {
@@ -190,9 +179,9 @@
 	button {
 		min-height: 44px;
 		border: 0;
-		border-radius: 10px;
-		background: var(--accent);
-		color: var(--on-accent);
+		border-radius: 12px;
+		background: var(--glow);
+		color: var(--on-glow);
 		font: inherit;
 		font-weight: 600;
 		cursor: pointer;

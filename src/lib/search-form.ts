@@ -101,3 +101,24 @@ export function toParams(form: SearchForm, lang?: string): URLSearchParams {
 	if (lang) p.set('lang', lang);
 	return p;
 }
+
+/**
+ * Days offered as one-tap choices: today, tomorrow and the coming weekend, limited to the
+ * dates the timetables cover.
+ */
+export function quickDays(today: string, availableFrom: string | null, availableTo: string | null): Array<{ date: string; kind: 'today' | 'tomorrow' | 'weekend' }> {
+	const weekday = new Date(`${today}T12:00:00Z`).getUTCDay();
+	const toSaturday = (6 - weekday + 7) % 7;
+	const days: Array<{ date: string; kind: 'today' | 'tomorrow' | 'weekend' }> = [
+		{ date: today, kind: 'today' },
+		{ date: addDays(today, 1), kind: 'tomorrow' }
+	];
+	// Saturday and Sunday of this weekend, or of the next one when today is Sunday.
+	for (const offset of [toSaturday, toSaturday + 1]) {
+		const date = addDays(today, offset);
+		if (!days.some((d) => d.date === date)) days.push({ date, kind: 'weekend' });
+	}
+	return days
+		.filter((d) => (!availableFrom || d.date >= availableFrom) && (!availableTo || d.date <= availableTo))
+		.slice(0, 4);
+}

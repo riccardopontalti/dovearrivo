@@ -33,3 +33,19 @@ The product answers *"where can I go with the time I have, and still get home?"*
 - Lighthouse performance on mobile ≥ 90 on the home page; the map and animation code load lazily.
 - Every text in Italian and English.
 - Existing unit, E2E and axe tests stay green; add E2E for the ribbon and the phone sheet.
+
+## Implementation notes (first version, 25/09/2026)
+
+What was built and the decisions taken while building it:
+
+- **The hero bloom is a canvas, not MapLibre.** Stops reachable from Trento station within 90 minutes (real one-to-all, `/bloom`) are drawn as glowing points in arrival order over an SVG dusk illustration. The stops trace the valleys, so no basemap is needed on the first screen: the home page loads no map library and stays light on phones. MapLibre is loaded only on the results map and the reachability page.
+- **Data-true caption.** The caption states origin, departure, number of stops and time limit, with a colour legend; the ticking clock is decorative. Departure: the next whole hour between 07:00 and 19:00, otherwise 08:00 of the next day. The endpoint caches one result per departure hour. Catalogue destinations appear as diamonds; drafts only in preview, as elsewhere.
+- **Bloom colours**: one-hue apricot ramp on the night surface, nearest brightest (`#ffe0b8`, `#ff9a62`, `#d0603c`), validated with the dataviz ordinal checks.
+- **Search**: one field and "Parti"; day, window and filters sit in a disclosure whose summary reflects the values. Quick day chips (today, tomorrow, the weekend within coverage) need JavaScript; the plain form works without it.
+- **Results**: desktop split view (list + sticky map); on phones the map stays behind and the list is a sheet that scrolls over it (native scrolling, with a handle button). "Show on map" flies to the destination and draws both legs from the engine geometry; legs without geometry are not drawn.
+- **Day ribbon** on every card, computed by `src/lib/ribbon.ts` from local clock times (correct on DST days), with the user's deadline marked.
+- **Category icons** are line drawings made for the project; category chips filter the list when more than one category is present.
+- **Fonts**: Fraunces (display) and Inter (text), OFL, bundled and preloaded; no font CDN.
+- **Motion**: entrance fades, ribbon draw, map fly-to, page cross-fade (View Transitions where supported). Nothing loops except the loading bar during a search; `prefers-reduced-motion` removes all of it.
+
+Not done yet: Lighthouse measurement on the live server, photos (none are used), dark/light variants of the category tint validated beyond AA text contrast.

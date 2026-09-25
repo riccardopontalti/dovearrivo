@@ -7,7 +7,7 @@ Tell it where you start, when you are free and when you must be back: DoveArrivo
 
 🇮🇹 [Leggi in italiano](README.it.md)
 
-> **Status:** early development. The engine proof is done and the app skeleton runs on a mock backend with synthetic data; real journey search comes with the MOTIS adapter (D04). Pilot region: Trentino, Italy.
+> **Status:** preview. Real journey search runs on [dovearrivo.it](https://dovearrivo.it) in preview mode: the destinations are drafts still being verified. Pilot region: Trentino, Italy.
 
 ## Why
 
@@ -71,7 +71,9 @@ Details in [DELIVERY](docs/DELIVERY.md).
 - **D09 — English everywhere: done.** Destinations, data status and limitations follow the chosen language.
 - **D07 — maps: done.** Self-hosted regional basemap (Protomaps PMTiles, local fonts), itinerary map with both legs, share link; no request leaves our server.
 - **D10 — reachability preview: done.** Map of every stop you can reach by a given time, coloured by arrival band, with a table alternative.
-- **Next:** D06b, the public deployment (needs the server), then D11 catalogue and D12a visual design.
+- **D06b — deployment: preview online.** Automatic deploy from `main` to the server, in preview mode (draft destinations, banner, `noindex`).
+- **D12a — visual design: first version.** "Alpenglow" home page with a bloom of the stops really reachable from Trento, day ribbon on every proposal, results map with fly-to, phone sheet, self-hosted fonts.
+- **Next:** iterate D12a with the maintainer, then D11 (publish verified destinations) and D12 (beta).
 
 ## Local development
 

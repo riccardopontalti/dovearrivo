@@ -3,10 +3,10 @@
 	import { clock, duration, modeLabel } from '$lib/format';
 	import { fill, type Messages } from '$lib/i18n';
 
-	let { journey, t }: { journey: Journey; t: Messages } = $props();
+	let { journey, t, direction = 'out' }: { journey: Journey; t: Messages; direction?: 'out' | 'back' } = $props();
 </script>
 
-<ol class="legs">
+<ol class="legs" class:back={direction === 'back'}>
 	{#each journey.legs as leg, i (i)}
 		<li class:walk={leg.mode === 'WALK'}>
 			<span class="time">{clock(leg.startTime)}</span>
@@ -35,8 +35,11 @@
 		grid-template-columns: 3.25rem 1fr;
 		gap: 0.5rem;
 		padding: 0.35rem 0;
-		border-left: 3px solid var(--accent);
+		border-left: 3px solid var(--out);
 		padding-left: 0.6rem;
+	}
+	.back li {
+		border-left-color: var(--back);
 	}
 	li.walk {
 		border-left-style: dotted;
